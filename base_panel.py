@@ -1,6 +1,6 @@
 from registry import panel_registry
 
-class BasePanel:
+class BaseView:
     def __init__(self):
         panel_registry.append(self)
 

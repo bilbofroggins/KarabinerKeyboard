@@ -1,8 +1,8 @@
 from raylib import *
-from base_panel import BasePanel
+from base_panel import BaseView
 from config import Config
 
-class ListPanel(BasePanel):
+class ListPanel(BaseView):
     def __init__(self, options):
         super().__init__()
         self.options = options
@@ -23,7 +23,7 @@ class ListPanel(BasePanel):
             mouse_position = GetMousePosition()
             # Check if a list item is clicked
             for i, option in enumerate(self.options):
-                if 10 <= mouse_position.y <= 30 + i*20:
+                if 10 <= mouse_position.y <= 30 + i*20 and mouse_position.x <= self.panel_width:
                     self.selected_option = option
                     break
 
