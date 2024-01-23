@@ -1,8 +1,8 @@
-from overrides import Overrides
+from karabiner_config import KarabinerConfig
 from window import MyApp
 
 def main():
-    Overrides()
+    KarabinerConfig()
     game = MyApp()
     game.run()
 

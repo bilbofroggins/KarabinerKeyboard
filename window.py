@@ -9,7 +9,7 @@ class MyApp:
         title = "Karabiner Keyboard"
         InitWindow(Config.window_width, Config.window_height, title.encode('utf-8'))
         SetTargetFPS(60)
-        self.list_panel = ListPanel([b"Keyboard", b"Overrides"])
+        self.list_panel = ListPanel()
         self.content_panel = ContentPanel(self.list_panel)
 
     def run(self):

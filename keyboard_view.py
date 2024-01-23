@@ -1,12 +1,13 @@
 from raylib import *
 from base_panel import BaseView
+from config import Config
 from key_mappings import *
 
 class KeyboardView(BaseView):
     def __init__(self):
         super().__init__()
         # Define the Mac keyboard layout
-        self.keys = [
+        self.key_positions = [
             [(KEY_ESCAPE, 1.5), (KEY_F1, 1), (KEY_F2, 1), (KEY_F3, 1), (KEY_F4, 1),
              (KEY_F5, 1), (KEY_F6, 1), (KEY_F7, 1), (KEY_F8, 1), (KEY_F9, 1),
              (KEY_F10, 1), (KEY_F11, 1), (KEY_F12, 1), (None, 1)],
@@ -48,14 +49,14 @@ class KeyboardView(BaseView):
 
     def draw_keyboard(self, start_x, start_y):
         y = start_y
-        for row in self.keys:
+        for keyboard_row in self.key_positions:
             x = start_x
-            for key_id, size in row:
-                key_width = int(self.base_key_width * size + self.key_padding * (size - 1))
-                key_str = key_map[key_id][0] if key_id is not None else ''
+            for key_id, width in keyboard_row:
+                key_width = int(self.base_key_width * width + self.key_padding * (width - 1))
+                key_str = rl_to_kb_key_map[key_id] if key_id is not None else ''
                 key_text = key_str.encode('utf-8')
 
-                if key_text in (b'left', b'down', b'right'):
+                if key_text in (b'left_arrow', b'down_arrow', b'right_arrow'):
                     self.key_height //= 2
                     y += self.key_height
 
@@ -63,11 +64,11 @@ class KeyboardView(BaseView):
                     DrawRectangle(x, y, key_width, self.key_height, YELLOW)
                 else:
                     DrawRectangle(x, y, key_width, self.key_height, self.key_color)
-                text_x = int(x + key_width / 2 - MeasureText(key_text, 20) / 2)
+                text_x = int(x + key_width / 2 - MeasureText(key_text, Config.font_size) / 2)
                 text_y = int(y + self.key_height / 2 - 10)
-                DrawText(key_text, text_x, text_y, 20, BLACK)
+                DrawText(key_text, text_x, text_y, Config.font_size, BLACK)
 
-                if key_text in (b'left', b'down', b'right'):
+                if key_text in (b'left_arrow', b'down_arrow', b'right_arrow'):
                     y -= self.key_height
                     self.key_height *= 2
 
@@ -77,11 +78,11 @@ class KeyboardView(BaseView):
         # Calculate the total width of keys before the 'left' key in the last row
         total_width_before_left = sum(
             self.base_key_width * size + self.key_padding * (size - 1) for key, size in
-            self.keys[-1][:8]) + self.key_padding * 8 - (self.key_padding//4)
+            self.key_positions[-1][:8]) + self.key_padding * 8 - (self.key_padding//4)
 
         # Calculate the total height of rows above the last row
         total_height_above_last_row = sum(
-            self.key_height + self.key_padding for _ in range(len(self.keys[:-1])))
+            self.key_height + self.key_padding for _ in range(len(self.key_positions[:-1])))
 
         # Position for the 'up' arrow key
         up_key_x = int(start_x + total_width_before_left)
@@ -93,7 +94,7 @@ class KeyboardView(BaseView):
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, YELLOW)
         else:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
-        up_text_x = int(up_key_x + up_key_width / 2 - MeasureText(b'up', 20) / 2)
+        up_text_x = int(up_key_x + up_key_width / 2 - MeasureText(b'up_arrow', Config.font_size) / 2)
         up_text_y = int(up_key_y + self.key_height / 4 - 10)
-        DrawText(b'up', up_text_x, up_text_y, 20, BLACK)
+        DrawText(b'up_arrow', up_text_x, up_text_y, Config.font_size, BLACK)
 
