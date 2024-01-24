@@ -23,4 +23,8 @@ class HelpView(BaseView):
                  start_x, start_y, Config.font_size, BLACK)
         start_y += Config.font_size * 2
 
-        DrawingHelper.clickable_link("Reset", start_x, start_y, Config.font_size, BLACK, KarabinerConfig().help_blow_away_config)
+        if KarabinerConfig().backup_exists():
+            DrawingHelper.clickable_link("Reset", start_x, start_y, Config.font_size, BLACK, KarabinerConfig().help_blow_away_config)
+        else:
+            DrawText(b"(No changes have been made to your keybindings so far)",
+                 start_x, start_y, Config.font_size, BLACK)

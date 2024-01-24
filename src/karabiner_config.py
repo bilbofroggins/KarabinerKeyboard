@@ -7,42 +7,6 @@ import os
 from modification import Modification
 from modification_pair import ModificationPair
 
-"""
-Simple Modification structure:
-{
-    "from": {
-        "key_code": "caps_lock"
-    },
-    "to": [
-        {
-            "key_code": "left_control"
-        }
-    ]
-}
-
-Complex Modification structure:
-{
-    "description": "Change option+;",
-    "manipulators": [
-        {
-            "from": {
-                "key_code": "semicolon",
-                "modifiers": {
-                    "mandatory": [
-                        "option"
-                    ]
-                }
-            },
-            "to": [
-                {
-                    "key_code": "hyphen"
-                }
-            ],
-            "type": "basic"
-        }
-    ]
-}
-"""
 class KarabinerConfig:
     _instance = None
 
@@ -102,8 +66,11 @@ class KarabinerConfig:
 
         threading.Thread(target=watch_file, daemon=True).start()
 
+    def backup_exists(self):
+        return os.path.exists(self.backup_config_file_path)
+
     def help_blow_away_config(self):
-        if os.path.exists(self.backup_config_file_path):
+        if self.backup_exists():
             shutil.copyfile(self.backup_config_file_path, self.config_file_path)
             os.remove(self.backup_config_file_path)
 
