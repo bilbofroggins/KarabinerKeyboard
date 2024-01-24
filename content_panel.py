@@ -34,6 +34,6 @@ class ContentPanel(BaseView):
                          Config.font_size, BLACK)
             elif self.list_panel.selected_option.decode('utf-8') == "Overrides":
                 self.overrides_view.draw_overrides(left_panel_width + Config.generic_padding, Config.generic_padding)
-            elif self.list_panel.selected_option.decode('utf-8') == "Overrides":
+            elif self.list_panel.selected_option.decode('utf-8') == "Help":
                 self.help_view.draw_help(left_panel_width + Config.generic_padding,
                                                Config.generic_padding)
