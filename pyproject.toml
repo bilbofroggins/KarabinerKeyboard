@@ -6,9 +6,18 @@ authors = ["Patrick Cunniff <pjcfifa@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11, <3.13"
 raylib = "^5.0.0.0"
+
+[tool.poetry.dev-dependencies]
+pyinstaller = "^6.3.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.packages]]
+include = "karabinerkeyboard"
+
+[tool.poetry.scripts]
+bundle-app = "karabinerkeyboard.builder:bundle_app"
