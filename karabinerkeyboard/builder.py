@@ -1,40 +1,36 @@
+import re
 import subprocess
 
-def add_bundle_to_spec(spec_file_path, bundle_section):
-    # Read the existing content of the .spec file
-    with open(spec_file_path, 'r') as file:
-        lines = file.readlines()
+def modify_bundle_spec(spec_file, icon_path, bundle_id):
+    with open(spec_file, 'r') as file:
+        content = file.read()
 
-    # Check if the BUNDLE section already exists
-    if any('BUNDLE(' in line for line in lines):
-        print("BUNDLE section already exists in the .spec file.")
-        return
+    # Regular expression pattern to match the BUNDLE section
+    pattern = r"(app\s*=\s*BUNDLE\([^)]*name\s*=\s*['\"]KarabinerKeyboard.app['\"][^)]*\))"
 
-    # Append the BUNDLE section to the file
-    with open(spec_file_path, 'a') as file:
-        file.write("\n" + bundle_section)
-        print("BUNDLE section added to the .spec file.")
+    # Replacement string with the new icon and bundle_identifier
+    replacement = f"app = BUNDLE(\n    coll,\n    name='KarabinerKeyboard.app',\n    icon='{icon_path}',\n    bundle_identifier='{bundle_id}'\n)"
+
+    # Replace the matched text with the new BUNDLE section
+    modified_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+    with open(spec_file, 'w') as file:
+        file.write(modified_content)
 
 def bundle_app():
     subprocess.run([
         "pyinstaller",
         "src/main.py",
         "--collect-submodules", "application",
-        "--onefile",
+        "--windowed",
+        "--onedir",
         "--name", "KarabinerKeyboard"
     ])
 
     spec_file = 'KarabinerKeyboard.spec'
-    # BUNDLE section to add
-    bundle_section = """
-app = BUNDLE(exe,
-    name='KarabinerKeyboard.app',
-    icon='images/icon.icns',
-    bundle_identifier='com.patcunniff.karabinerkeyboard')
-    """
-
-    # Run the function
-    add_bundle_to_spec(spec_file, bundle_section)
+    icon_path = 'images/icon.icns'
+    bundle_identifier = 'com.patcunniff.karabinerkeyboard'
+    modify_bundle_spec(spec_file, icon_path, bundle_identifier)
 
     # Run PyInstaller
     subprocess.run(["pyinstaller", spec_file])
