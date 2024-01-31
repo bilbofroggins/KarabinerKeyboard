@@ -4,6 +4,8 @@ from content_panel import ContentPanel
 from mouse_controller import MouseController
 from registry import panel_registry
 from config import Config
+from src.keyboard_controller import KeyboardController
+
 
 class MyApp:
     def __init__(self):
@@ -15,6 +17,8 @@ class MyApp:
 
     def run(self):
         while not WindowShouldClose():
+            KeyboardController.update()
+
             for panel in panel_registry:
                 panel.update()
 

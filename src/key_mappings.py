@@ -84,5 +84,7 @@ rl_to_kb_key_map = {
 kb_to_rl_key_map = {v: k for k, v in rl_to_kb_key_map.items()}
 
 # Set of modification keys
-non_alpha_chars = {'left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt', 'right_alt', 'left_super', 'right_super', 'caps_lock', 'tab', 'enter', 'backspace'}
-modification_keys = {'left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt', 'right_alt', 'left_super', 'right_super'}
+non_alpha_chars = {'left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt',
+                   'right_alt', 'left_super', 'right_super', 'caps_lock', 'tab', 'enter', 'backspace'}
+modification_keys = {'left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt',
+                     'right_alt', 'left_super', 'right_super'}

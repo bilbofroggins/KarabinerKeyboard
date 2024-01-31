@@ -1,10 +1,34 @@
+from src.key_mappings import rl_to_kb_key_map, modification_keys
+
 class Modification:
-    # Takes in keys in karabiner form and converts them to raylib ids
     def __init__(self, modifiers=None, key=''):
         if modifiers is None:
             modifiers = []
         self.modifiers = modifiers
         self.key = key
+        self.edit_object = None
+
+    def update_dirty(self, rl_keys_set):
+        if not self.edit_object:
+            self.edit_object = Modification()
+        self.edit_object.modifiers = []
+        self.edit_object.key = ''
+        for key in rl_keys_set:
+            kb_key = rl_to_kb_key_map[key]
+            if kb_key in modification_keys:
+                self.edit_object.modifiers.append(kb_key)
+            else:
+                self.edit_object.key = kb_key
+
+        if self.edit_object.key == '' and len(self.edit_object.modifiers):
+            self.edit_object.key = self.edit_object.modifiers[0]
+            self.edit_object.modifiers = []
+        return self.edit_object
+
+    def save(self):
+        self.modifiers = self.edit_object.modifiers[:]
+        self.key = self.edit_object.key
+        self.edit_object = Modification()
 
     def to_json(self, *, is_to_field):
         obj = {
@@ -24,3 +48,6 @@ class Modification:
             return self.key
 
         return ' + '.join(self.modifiers) + ' + ' + self.key
+
+    def being_edited(self):
+        return bool(self.key) or bool(self.modifiers)

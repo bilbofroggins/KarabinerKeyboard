@@ -2,6 +2,8 @@ from raylib import *
 from base_panel import BaseView
 from config import Config
 from key_mappings import *
+from src.keyboard_controller import KeyboardController
+
 
 class KeyboardView(BaseView):
     def __init__(self):
@@ -31,21 +33,6 @@ class KeyboardView(BaseView):
         self.key_height = 40
         self.key_padding = 5
         self.key_color = LIGHTGRAY
-        self.pressed_keys = set()
-
-    def update(self):
-        # Check for all key presses since the last frame
-        pressed_key = GetKeyPressed()
-        while pressed_key != 0:  # Loop until the queue is empty
-            self.pressed_keys.add(pressed_key)
-            pressed_key = GetKeyPressed()
-
-        to_remove = []
-        for key in self.pressed_keys:
-            if IsKeyUp(key):
-                to_remove.append(key)
-        for key in to_remove:
-            self.pressed_keys.remove(key)
 
     def draw_keyboard(self, start_x, start_y):
         y = start_y
@@ -60,7 +47,7 @@ class KeyboardView(BaseView):
                     self.key_height //= 2
                     y += self.key_height
 
-                if key_id in self.pressed_keys:
+                if key_id in KeyboardController.pressed_keys:
                     DrawRectangle(x, y, key_width, self.key_height, YELLOW)
                 else:
                     DrawRectangle(x, y, key_width, self.key_height, self.key_color)
@@ -90,7 +77,7 @@ class KeyboardView(BaseView):
 
         # Draw the 'up' arrow key
         up_key_width = int(self.base_key_width)
-        if KEY_UP in self.pressed_keys:
+        if KEY_UP in KeyboardController.pressed_keys:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, YELLOW)
         else:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
