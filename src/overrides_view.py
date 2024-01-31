@@ -13,6 +13,7 @@ class OverridesView(BaseView):
         self.karabiner_config = KarabinerConfig()
         self.from_modification_being_edited: Modification = None
         self.to_modification_being_edited: Modification = None
+        self.to_delete = None
 
     def update(self):
         # Reset
@@ -51,8 +52,8 @@ class OverridesView(BaseView):
                     DrawText(str(self.from_modification_being_edited.edit_object).encode('utf-8'), start_x, row_pixels, Config.font_size, RED)
                     width = MeasureText(str(self.from_modification_being_edited.edit_object).encode('utf-8'), Config.font_size)
                 else:
-                    DrawText(b"editing...", start_x, row_pixels, Config.font_size, RED)
-                    width = MeasureText(b"editing...", Config.font_size)
+                    DrawText(b"press keys...", start_x, row_pixels, Config.font_size, RED)
+                    width = MeasureText(b"press keys...", Config.font_size)
             else:
                 width = DrawingHelper.clickable_link(from_text, start_x, row_pixels, Config.font_size, BLACK, edit)
 
@@ -82,10 +83,13 @@ class OverridesView(BaseView):
 
         row_pixels = start_y
 
-        for _ in self.karabiner_config.modification_pairs:
-            def edit():
-                assert(False, "Not implemented")
-                return
+        self.to_delete = None
+        for i, _ in enumerate(self.karabiner_config.modification_pairs):
+            def edit(to_del):
+                self.to_delete = to_del
 
-            DrawingHelper.clickable_link("x", max_to_end, row_pixels, Config.font_size, RED, edit)
+            DrawingHelper.clickable_link("x", max_to_end, row_pixels, Config.font_size, RED, edit, [i])
             row_pixels += Config.font_size
+
+        if self.to_delete is not None:
+            del self.karabiner_config.modification_pairs[self.to_delete]

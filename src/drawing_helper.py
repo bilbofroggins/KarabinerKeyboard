@@ -7,7 +7,7 @@ class DrawingHelper:
         return x <= mouse_x <= x + width and y <= mouse_y <= y + height
 
     @staticmethod
-    def clickable_link(text, posX, posY, fontSize, color, callback):
+    def clickable_link(text, posX, posY, fontSize, color, callback, args=[]):
         mouse_position = GetMousePosition()
         text = text.encode('utf-8')
 
@@ -20,6 +20,6 @@ class DrawingHelper:
             DrawLine(posX, posY + fontSize, posX + width,
                      posY + fontSize, BLACK)
             if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-                callback()
+                callback(*args) if len(args) else callback()
 
         return width
