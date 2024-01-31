@@ -5,9 +5,8 @@ class ModificationPair:
         self.modification_to = modification_to
 
     def to_json(self):
-        description = "change stuff"
         return {
-            "description": description,
+            "description": str(self.modification_from) + " -> " + str(self.modification_to),
             "manipulators": [
                 {
                     "from": self.modification_from.to_json(is_to_field=False),

@@ -93,3 +93,4 @@ class OverridesView(BaseView):
 
         if self.to_delete is not None:
             del self.karabiner_config.modification_pairs[self.to_delete]
+            KarabinerConfig().write_overrides()
