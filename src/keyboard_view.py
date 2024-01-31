@@ -40,10 +40,9 @@ class KeyboardView(BaseView):
             x = start_x
             for key_id, width in keyboard_row:
                 key_width = int(self.base_key_width * width + self.key_padding * (width - 1))
-                key_str = rl_to_kb_key_map[key_id] if key_id is not None else ''
-                key_text = key_str.encode('utf-8')
+                key_text = rl_to_display_key_map[key_id].encode('utf-8') if key_id in rl_to_display_key_map else b""
 
-                if key_text in (b'left_arrow', b'down_arrow', b'right_arrow'):
+                if key_id in (KEY_LEFT, KEY_DOWN, KEY_RIGHT):
                     self.key_height //= 2
                     y += self.key_height
 
@@ -55,7 +54,7 @@ class KeyboardView(BaseView):
                 text_y = int(y + self.key_height / 2 - 10)
                 DrawText(key_text, text_x, text_y, Config.font_size, BLACK)
 
-                if key_text in (b'left_arrow', b'down_arrow', b'right_arrow'):
+                if key_id in (KEY_LEFT, KEY_DOWN, KEY_RIGHT):
                     y -= self.key_height
                     self.key_height *= 2
 
@@ -81,7 +80,7 @@ class KeyboardView(BaseView):
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, YELLOW)
         else:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
-        up_text_x = int(up_key_x + up_key_width / 2 - MeasureText(b'up_arrow', Config.font_size) / 2)
+        up_text_x = int(up_key_x + up_key_width / 2 - MeasureText(b'', Config.font_size) / 2)
         up_text_y = int(up_key_y + self.key_height / 4 - 10)
-        DrawText(b'up_arrow', up_text_x, up_text_y, Config.font_size, BLACK)
+        DrawText(b'', up_text_x, up_text_y, Config.font_size, BLACK)
 
