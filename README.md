@@ -1,4 +1,4 @@
-### Building
+### Building for distribution
 ```
 pip3 install poetry
 poetry shell

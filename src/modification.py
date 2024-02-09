@@ -49,5 +49,5 @@ class Modification:
 
         return ' + '.join(self.modifiers) + ' + ' + self.key
 
-    def being_edited(self):
+    def currently_changing(self):
         return bool(self.key) or bool(self.modifiers)

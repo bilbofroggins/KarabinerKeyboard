@@ -4,6 +4,7 @@ from config import Config
 from help_view import HelpView
 from keyboard_view import KeyboardView
 from overrides_view import OverridesView
+from src.keyboard_search_section import KeyboardSearchSection
 
 class ContentPanel(BaseView):
     def __init__(self, list_panel):
@@ -13,6 +14,7 @@ class ContentPanel(BaseView):
         self.keyboard_view = KeyboardView()
         self.overrides_view = OverridesView()
         self.help_view = HelpView()
+        self.keyboard_override_section = KeyboardSearchSection()
 
     def draw(self):
         left_panel_width = self.list_panel.panel_width
@@ -27,11 +29,11 @@ class ContentPanel(BaseView):
                 self.keyboard_view.draw_keyboard(left_panel_width + Config.generic_padding, Config.generic_padding)
 
                 # Draw two lines of text at the bottom
-                bottom_text_y = 360  # Adjusted Y position of the bottom text section
-                DrawText(b"Line 1 of bottom text", left_panel_width + Config.generic_padding, bottom_text_y, Config.font_size,
-                         BLACK)
-                DrawText(b"Line 2 of bottom text", left_panel_width + Config.generic_padding, bottom_text_y + 30,
-                         Config.font_size, BLACK)
+                bottom_text_row = 360  # Adjusted Y position of the bottom text section
+                self.keyboard_override_section.draw_overrides(
+                    bottom_text_row + Config.generic_padding,
+                    left_panel_width + Config.generic_padding
+                )
             elif self.list_panel.selected_option.decode('utf-8') == "Overrides":
                 self.overrides_view.draw_overrides(left_panel_width + Config.generic_padding, Config.generic_padding)
             elif self.list_panel.selected_option.decode('utf-8') == "Help":

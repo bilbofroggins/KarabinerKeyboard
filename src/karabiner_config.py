@@ -13,10 +13,10 @@ class KarabinerConfig:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(KarabinerConfig, cls).__new__(cls)
-            cls._instance.config_file_path = os.path.expanduser('~/.config/karabiner/karabiner.json')
+            cls._instance.config_file_path = os.path.expanduser('~/.config/karabiner/karabiner_debug.json')
             cls._instance.backup_config_file_path = os.path.expanduser('~/.config/karabiner/karabiner_back.json')
 
-            cls._instance.modification_pairs = []
+            cls._instance.modification_pairs = {}
             cls._instance.config = None
 
             cls._instance.load_overrides()
@@ -26,8 +26,9 @@ class KarabinerConfig:
     def load_overrides(self):
         """Load the overrides from the Karabiner configuration file."""
         try:
+            i = 0
             with open(self.config_file_path, 'r') as file:
-                self.modification_pairs = []
+                self.modification_pairs = {} # {id: mod_pair}
                 self.config = json.load(file)
                 # Assuming the overrides are in a specific structure in the config
                 complex_modifications = self.config['profiles'][0]['complex_modifications']['rules']
@@ -37,14 +38,16 @@ class KarabinerConfig:
                         Modification([], mod['from']['key_code']),
                         Modification([], mod['to'][0]['key_code'])
                     )
-                    self.modification_pairs.append(mod_pair)
+                    self.modification_pairs[i] = mod_pair
+                    i += 1
                 for mod in complex_modifications:
                     transform = mod['manipulators'][0] # TODO: take more than just one
                     mod_pair = ModificationPair(
                         Modification(transform['from'].get('modifiers', {}).get('mandatory', {}), transform['from']['key_code']),
                         Modification(transform['to'][0].get('modifiers', {}), transform['to'][0]['key_code'])
                     )
-                    self.modification_pairs.append(mod_pair)
+                    self.modification_pairs[i] = mod_pair
+                    i += 1
         except FileNotFoundError:
             print(f"Config file not found: {self.config_file_path}")
         except json.JSONDecodeError:
@@ -74,13 +77,22 @@ class KarabinerConfig:
             shutil.copyfile(self.backup_config_file_path, self.config_file_path)
             os.remove(self.backup_config_file_path)
 
-    def write_overrides(self):
+    def write_overrides(self, modification_pairs):
+        for i, modification_pair in modification_pairs.items():
+            self.modification_pairs[i] = modification_pair
+
         """Write back to the config file."""
         if not os.path.exists(self.backup_config_file_path):
             shutil.copyfile(self.config_file_path, self.backup_config_file_path)
 
         self.config['profiles'][0]['simple_modifications'] = []
-        self.config['profiles'][0]['complex_modifications']['rules'] = [mod.to_json() for mod in self.modification_pairs]
+        self.config['profiles'][0]['complex_modifications']['rules'] = [mod.to_json() for _, mod in self.modification_pairs.items()]
 
         with open(self.config_file_path, 'w') as file:
             json.dump(self.config, file, indent=4)
+
+    def remove_override(self, id):
+        del self.modification_pairs[id]
+
+        """Write back to the config file."""
+        self.write_overrides(self.modification_pairs)
