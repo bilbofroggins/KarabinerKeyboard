@@ -25,3 +25,9 @@ class KeyboardController():
         if len(cls.pressed_keys) < len(cls.last_frame_pressed_keys):
             return True
         return False
+
+    @classmethod
+    def added_keys(cls):
+        if len(cls.pressed_keys) > len(cls.last_frame_pressed_keys):
+            return True
+        return False

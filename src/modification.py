@@ -1,5 +1,7 @@
 from src.key_mappings import rl_to_kb_key_map, modification_keys
 
+DELIMITER = ' + '
+
 class Modification:
     def __init__(self, modifiers=None, key=''):
         if modifiers is None:
@@ -47,7 +49,7 @@ class Modification:
         if not len(self.modifiers):
             return self.key
 
-        return ' + '.join(self.modifiers) + ' + ' + self.key
+        return DELIMITER.join(self.modifiers) + DELIMITER + self.key
 
     def currently_changing(self):
         return bool(self.key) or bool(self.modifiers)

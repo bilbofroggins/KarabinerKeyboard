@@ -5,16 +5,19 @@ from help_view import HelpView
 from keyboard_view import KeyboardView
 from overrides_view import OverridesView
 from src.keyboard_search_section import KeyboardSearchSection
+from src.keyboard_state_controller import KeyboardStateController
+
 
 class ContentPanel(BaseView):
     def __init__(self, list_panel):
         super().__init__()
+        self.kb_state_controller = KeyboardStateController()
         self.list_panel = list_panel
         self.background_color = GRAY
-        self.keyboard_view = KeyboardView()
-        self.overrides_view = OverridesView()
+        self.keyboard_view = KeyboardView(self.kb_state_controller)
+        self.overrides_view = OverridesView(self.kb_state_controller)
         self.help_view = HelpView()
-        self.keyboard_override_section = KeyboardSearchSection()
+        self.keyboard_search_section = KeyboardSearchSection(self.kb_state_controller)
 
     def draw(self):
         left_panel_width = self.list_panel.panel_width
@@ -29,8 +32,9 @@ class ContentPanel(BaseView):
                 self.keyboard_view.draw_keyboard(left_panel_width + Config.generic_padding, Config.generic_padding)
 
                 # Draw two lines of text at the bottom
-                bottom_text_row = 360  # Adjusted Y position of the bottom text section
-                self.keyboard_override_section.draw_overrides(
+                bottom_text_row = 280  # Adjusted Y position of the bottom text section
+                self.keyboard_search_section.draw_overrides(
+                    self.keyboard_view.search_keys,
                     bottom_text_row + Config.generic_padding,
                     left_panel_width + Config.generic_padding
                 )

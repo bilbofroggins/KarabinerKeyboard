@@ -2,10 +2,12 @@ from raylib import *
 from base_panel import BaseView
 from config import Config
 from key_mappings import *
-from src.keyboard_controller import KeyboardController
+from src.keyboard_controller import *
+from src.keyboard_state_controller import *
+
 
 class KeyboardView(BaseView):
-    def __init__(self):
+    def __init__(self, keyboard_state_controller):
         super().__init__()
         # Define the Mac keyboard layout
         self.key_positions = [
@@ -32,7 +34,34 @@ class KeyboardView(BaseView):
         self.key_height = 40
         self.key_padding = 5
         self.key_color = LIGHTGRAY
-        self.watch_keystrokes = True
+        self.search_keys = set()
+        self.keyboard_state_controller = keyboard_state_controller
+        self.keyboard_state_controller.register(self)
+        self.keyboard_state = STATE_EMPTY
+        self.pressed_key_color = {
+            STATE_EMPTY: ORANGE,
+            STATE_IS_PRESSING: ORANGE,
+            STATE_LOCKED: YELLOW,
+            STATE_OVERRIDING: self.key_color
+        }
+        self.pressed_keys = set()
+
+    def change_keyboard_state(self, state):
+        self.keyboard_state = state
+
+    def update(self):
+        if self.keyboard_state == STATE_EMPTY:
+            self.pressed_keys = KeyboardController.pressed_keys
+            self.search_keys = set()
+        elif self.keyboard_state == STATE_IS_PRESSING:
+            self.pressed_keys = KeyboardController.pressed_keys
+            self.search_keys = self.pressed_keys.copy()
+        elif self.keyboard_state == STATE_LOCKED:
+            self.pressed_keys = self.pressed_keys.copy()
+            self.search_keys = self.pressed_keys.copy()
+        elif self.keyboard_state == STATE_OVERRIDING:
+            self.pressed_keys = self.pressed_keys.copy()
+            self.search_keys = self.pressed_keys.copy()
 
     def draw_keyboard(self, start_x, start_y):
         y = start_y
@@ -46,8 +75,8 @@ class KeyboardView(BaseView):
                     self.key_height //= 2
                     y += self.key_height
 
-                if key_id in KeyboardController.pressed_keys and self.watch_keystrokes:
-                    DrawRectangle(x, y, key_width, self.key_height, YELLOW)
+                if key_id in self.pressed_keys and self.keyboard_state != STATE_OVERRIDING:
+                    DrawRectangle(x, y, key_width, self.key_height, self.pressed_key_color[self.keyboard_state])
                 else:
                     DrawRectangle(x, y, key_width, self.key_height, self.key_color)
                 text_x = int(x + key_width / 2 - MeasureText(key_text, Config.font_size) / 2)
@@ -76,8 +105,9 @@ class KeyboardView(BaseView):
 
         # Draw the 'up' arrow key
         up_key_width = int(self.base_key_width)
-        if KEY_UP in KeyboardController.pressed_keys and self.watch_keystrokes:
-            DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, YELLOW)
+
+        if KEY_UP in self.pressed_keys and self.keyboard_state != STATE_OVERRIDING:
+            DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.pressed_key_color[self.keyboard_state])
         else:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
         up_text_x = int(up_key_x + up_key_width / 2 - MeasureText(b'', Config.font_size) / 2)
