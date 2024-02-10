@@ -4,7 +4,6 @@ from config import Config
 from key_mappings import *
 from src.keyboard_controller import KeyboardController
 
-
 class KeyboardView(BaseView):
     def __init__(self):
         super().__init__()
@@ -33,6 +32,7 @@ class KeyboardView(BaseView):
         self.key_height = 40
         self.key_padding = 5
         self.key_color = LIGHTGRAY
+        self.watch_keystrokes = True
 
     def draw_keyboard(self, start_x, start_y):
         y = start_y
@@ -46,7 +46,7 @@ class KeyboardView(BaseView):
                     self.key_height //= 2
                     y += self.key_height
 
-                if key_id in KeyboardController.pressed_keys:
+                if key_id in KeyboardController.pressed_keys and self.watch_keystrokes:
                     DrawRectangle(x, y, key_width, self.key_height, YELLOW)
                 else:
                     DrawRectangle(x, y, key_width, self.key_height, self.key_color)
@@ -76,7 +76,7 @@ class KeyboardView(BaseView):
 
         # Draw the 'up' arrow key
         up_key_width = int(self.base_key_width)
-        if KEY_UP in KeyboardController.pressed_keys:
+        if KEY_UP in KeyboardController.pressed_keys and self.watch_keystrokes:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, YELLOW)
         else:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
