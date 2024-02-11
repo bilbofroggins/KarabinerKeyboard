@@ -21,7 +21,7 @@ class DrawingHelper:
                                    posY, width, fontSize):
             MouseController.set_hand_mouse(True)
             DrawLine(posX, posY + fontSize, posX + width,
-                     posY + fontSize, BLACK)
+                     posY + fontSize, Config.default_text_color)
             if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
                 callback(*args) if len(args) else callback()
 
@@ -43,7 +43,7 @@ class DrawingHelper:
                 width = MeasureText(b"press keys...", Config.font_size)
         else:
             width = DrawingHelper.clickable_link(from_text, col, row,
-                                                 Config.font_size, BLACK, click_callback)
+                                                 Config.font_size, Config.default_text_color, click_callback)
 
         row += Config.font_size
         return (row, width)

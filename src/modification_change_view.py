@@ -60,7 +60,7 @@ class ModificationChangeView():
         width = 0
         col = max_from_end
         for override_pair in self.modification_pairs.values():
-            DrawText("->".encode('utf-8'), col, row, Config.font_size, BLACK)
+            DrawText("->".encode('utf-8'), col, row, Config.font_size, Config.default_text_color)
             width = MeasureText(
                     "->".encode('utf-8'),
                     Config.font_size)

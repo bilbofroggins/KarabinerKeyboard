@@ -33,4 +33,4 @@ class ListPanel(BaseView):
             if option == self.selected_option:
                 DrawText(option, 10, 10 + i * Config.font_size, Config.font_size, RED)
             else:
-                DrawText(option, 10, 10 + i * Config.font_size, Config.font_size, BLACK)
+                DrawText(option, 10, 10 + i * Config.font_size, Config.font_size, Config.default_text_color)

@@ -1,4 +1,5 @@
 import sys
+from raylib import *
 
 
 class Config:
@@ -7,6 +8,7 @@ class Config:
     font_size = 20
     generic_padding = 20
     karabiner_file = '~/.config/karabiner/karabiner.json'
+    default_text_color = BLACK
 
 class Config_Debug:
     karabiner_file = '~/.config/karabiner/karabiner_debug.json'
