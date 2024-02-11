@@ -49,31 +49,29 @@ def check_up_to_date():
     current_version = Version(__version__)
 
     if latest_version > current_version:
-        return (False, latest_version)
+        return (False, str(latest_version))
     else:
         return (True, None)
 
-def update_app(new_version):
+def background_updates(new_version, done_flag):
+    # Just give up in dev environment
+    if not getattr(sys, 'frozen', False):
+        done_flag[0] = True
+        return False
+
     zip_file_path = '/tmp/KarabinerKeyboard.zip'
     extract_to_path = '/tmp'
 
     download_update(f"https://github.com/{repo}/releases/download/{new_version}/KarabinerKeyboard.zip", zip_file_path)
     os.system("unzip -q -o %s -d %s" % (zip_file_path, extract_to_path))
 
-    # Prepare the update script for execution
-    if getattr(sys, 'frozen', False):
-        # Running in a PyInstaller bundle
-        base_path = Path(sys.executable).parent.parent  # Reach the Contents directory
-        script_path = str(base_path / 'Resources' / 'Scripts' / 'update.sh')
-        app_directory = str(base_path.parent.parent)
-    else:
-        # TODO: make this work for dev
-        # The application is not frozen (running in interpreter)
-        current_app_directory = Path(os.path.abspath(__file__))
-        current_app_directory = current_app_directory.parents[2]
+    # Running in a PyInstaller bundle
+    base_path = Path(sys.executable).parent.parent  # Reach the Contents directory
+    script_path = str(base_path / 'Resources' / 'Scripts' / 'update.sh')
+    app_directory = str(base_path.parent.parent)
 
     subprocess.run(["chmod", "+x", script_path])
 
     # Execute the script and exit the application
     subprocess.Popen(["/bin/bash", script_path, app_directory])
-    sys.exit()
+    done_flag[0] = True
