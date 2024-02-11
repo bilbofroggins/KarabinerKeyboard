@@ -24,7 +24,8 @@ def bundle_app():
         "--collect-submodules", "application",
         "--windowed",
         "--onedir",
-        "--name", "KarabinerKeyboard"
+        "--name", "KarabinerKeyboard",
+        "--add-data", "src/versions/update.sh:Scripts"
     ])
 
     spec_file = 'KarabinerKeyboard.spec'
