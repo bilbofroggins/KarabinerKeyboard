@@ -11,22 +11,18 @@ class Config:
     default_text_color = BLACK
 
 class Config_Debug:
-    karabiner_file = '~/.config/karabiner/karabiner_debug.json'
+    karabiner_file = '~/.config/karabiner/karabiner.json'
 
 
 
 
 def merge_configs_if_debug(debug_mode):
     if debug_mode:
-        # Iterate through each attribute in Config_Debug
         for attribute_name in dir(Config_Debug):
-            if not attribute_name.startswith("__"):  # Ignore magic methods and attributes
-                # Get attribute value from Config_Debug
+            if not attribute_name.startswith("__"):
                 attribute_value = getattr(Config_Debug, attribute_name)
-                # Set/Update this attribute in Config
                 setattr(Config, attribute_name, attribute_value)
 
-# Example usage
 if not getattr(sys, 'frozen', False):
     debug_mode = True
 else:
