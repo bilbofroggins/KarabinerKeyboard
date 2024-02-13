@@ -19,6 +19,7 @@ The Overrides panel is very similar, but just shows a larger view of all the ove
 - **Number of modifications**: There is no scroll bar at the moment so it's hard to see every modification - searching is necessary.
 - **Language**: Limited to English language configurations.
 - **Macros**: Only supports a single "to" field for key mappings, affecting the ability to create macros (e.g., mapping `alt-d` to the string "diapers").
+- **External Keyboard**: Currently not showing keys that don't exist on mac keyboard (e.g. PageUp) in the display but they should still bind correctly.
 
 ## Prerequisites
 Before using Better Keyboard UI, ensure that [Karabiner-Elements](https://github.com/pqrs-org/Karabiner-Elements) is installed on your machine.
