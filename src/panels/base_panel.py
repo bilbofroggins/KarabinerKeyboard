@@ -1,4 +1,5 @@
-from registry import panel_registry
+from src.panels.panel_registry import panel_registry
+
 
 class BaseView:
     def __init__(self):

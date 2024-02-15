@@ -1,6 +1,8 @@
 from raylib import *
-from base_panel import BaseView
-from config import Config
+
+from src.config import Config
+from src.panels.base_panel import BaseView
+
 
 class ListPanel(BaseView):
     def __init__(self):

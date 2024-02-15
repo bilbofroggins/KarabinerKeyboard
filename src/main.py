@@ -1,4 +1,4 @@
-from karabiner_config import KarabinerConfig
+from src.logic.karabiner_config import KarabinerConfig
 from window import MyApp
 
 def main():

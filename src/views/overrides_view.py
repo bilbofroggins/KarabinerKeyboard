@@ -1,5 +1,6 @@
-from karabiner_config import KarabinerConfig
-from src.modification_change_view import ModificationChangeView
+from src.components.modification_change_view import ModificationChangeView
+from src.logic.karabiner_config import KarabinerConfig
+
 
 class OverridesView():
     def __init__(self, keyboard_state_controller):
@@ -10,4 +11,4 @@ class OverridesView():
 
     def draw_overrides(self, start_col, start_row):
         self.modification_change_view.update_fn()
-        self.modification_change_view.draw_overrides(start_col, start_row)
+        self.modification_change_view.draw_overrides(start_row, start_col)

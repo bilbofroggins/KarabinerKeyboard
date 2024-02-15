@@ -1,4 +1,4 @@
-from src.key_mappings import rl_to_kb_key_map, modification_keys
+from src.logic.key_mappings import rl_to_kb_key_map, modification_keys
 
 DELIMITER = ' + '
 

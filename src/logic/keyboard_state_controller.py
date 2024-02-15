@@ -1,7 +1,7 @@
 from raylib import GetFPS
 
-from src.base_panel import BaseView
-from src.keyboard_controller import KeyboardController
+from src.devices.keyboard_controller import KeyboardController
+from src.panels.base_panel import BaseView
 
 STATE_EMPTY = 0
 STATE_IS_PRESSING = 1
@@ -43,6 +43,8 @@ class KeyboardStateController(BaseView):
                 self.state = STATE_IS_PRESSING
             self.timer_reset()
         elif self.state == STATE_IS_PRESSING:
+            if len(KeyboardController.pressed_keys) == 0:
+                self.state = STATE_EMPTY
             self.timer -= 1 / fps
             if KeyboardController.added_keys():
                 self.timer_reset()

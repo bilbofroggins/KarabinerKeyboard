@@ -1,11 +1,11 @@
 from raylib import *
-from base_panel import BaseView
-from config import Config
-from help_view import HelpView
-from keyboard_view import KeyboardView
-from overrides_view import OverridesView
-from src.keyboard_search_section import KeyboardSearchSection
-from src.keyboard_state_controller import KeyboardStateController
+from src.config import Config
+from src.panels.base_panel import BaseView
+from src.views.help_view import HelpView
+from src.views.keyboard_search_section import KeyboardSearchSection
+from src.logic.keyboard_state_controller import KeyboardStateController
+from src.views.keyboard_view import KeyboardView
+from src.views.overrides_view import OverridesView
 
 
 class ContentPanel(BaseView):

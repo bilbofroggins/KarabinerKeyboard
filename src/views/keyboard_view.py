@@ -1,9 +1,8 @@
 from raylib import *
-from base_panel import BaseView
-from config import Config
-from key_mappings import *
-from src.keyboard_controller import *
-from src.keyboard_state_controller import *
+
+from src.config import Config
+from src.logic.key_mappings import rl_to_display_key_map
+from src.logic.keyboard_state_controller import *
 
 
 class KeyboardView(BaseView):

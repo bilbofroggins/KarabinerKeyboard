@@ -1,13 +1,13 @@
 import threading
 
 from raylib import *
-from versions.version import __version__
 
-from base_panel import BaseView
-from config import Config
-from drawing_helper import DrawingHelper
-from karabiner_config import KarabinerConfig
+from src.config import Config
+from src.logic.karabiner_config import KarabinerConfig
+from src.panels.base_panel import BaseView
+from src.components.drawing_helper import DrawingHelper
 from src.versions.updates import *
+from src.versions.version import __version__
 
 
 class HelpView(BaseView):
@@ -45,7 +45,7 @@ class HelpView(BaseView):
         start_y += Config.font_size * 2
 
         if KarabinerConfig().backup_exists():
-            DrawingHelper.clickable_link("Reset", start_x, start_y, Config.font_size, Config.default_text_color, KarabinerConfig().help_blow_away_config)
+            DrawingHelper.clickable_link("Reset", start_y, start_x, Config.font_size, Config.default_text_color, KarabinerConfig().help_blow_away_config)
         else:
             DrawText(b"(No changes have been made to your keybindings so far)",
                  start_x, start_y, Config.font_size, Config.default_text_color)
@@ -55,7 +55,7 @@ class HelpView(BaseView):
             DrawText(f"Update available: {self.latest_version}".encode('utf-8'),
                      start_x, start_y, Config.font_size, Config.default_text_color)
             start_y += Config.font_size * 2
-            DrawingHelper.clickable_link("Update", start_x, start_y, Config.font_size, Config.default_text_color, self.update_app, [self.latest_version])
+            DrawingHelper.clickable_link("Update", start_y, start_x, Config.font_size, Config.default_text_color, self.update_app, [self.latest_version])
 
     def update_app(self, new_version):
         threading.Thread(target=background_updates, args=(new_version, self.quitting_done_flag,)).start()

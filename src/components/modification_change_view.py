@@ -1,9 +1,11 @@
 from raylib import *
-from config import Config
-from drawing_helper import DrawingHelper
-from karabiner_config import KarabinerConfig
-from src.keyboard_state_controller import *
-from src.modification import Modification
+from src.components.drawing_helper import DrawingHelper
+from src.config import Config
+from src.logic.karabiner_config import KarabinerConfig
+from src.logic.keyboard_state_controller import *
+from src.logic.modification import Modification
+from src.logic.modification_pair import ModificationPair
+
 
 class ModificationChangeView():
     def __init__(self, modification_pairs, keyboard_state_controller: KeyboardStateController):
@@ -40,7 +42,23 @@ class ModificationChangeView():
         elif self.to_modification_being_edited:
             self.to_modification_being_edited.update_dirty(KeyboardController.last_frame_pressed_keys)
 
-    def draw_overrides(self, start_col, start_row):
+    def draw_instructions(self, row, col):
+        text = b"Press keys and hold to rebind..."
+        DrawText(text, col, row, Config.font_size, Config.default_text_color)
+
+    def draw_add_button(self, row, col):
+        def edit_callback():
+            mod_from = Modification([], None)
+            mod_to = Modification([], None)
+            mod_pair = ModificationPair(mod_from, mod_to)
+            self.modification_pairs.append(mod_pair)
+
+        DrawingHelper.clickable_link("Add new binding...", row, col, Config.font_size, RED, edit_callback)
+
+    def draw_overrides(self, start_row, start_col):
+        if not len(self.modification_pairs) and self.keyboard_state_controller.state not in (STATE_IS_PRESSING, STATE_LOCKED):
+            self.draw_instructions(start_row, start_col)
+            return
         max_from_end = 0
 
         # FROM modifications
@@ -86,8 +104,10 @@ class ModificationChangeView():
             def edit_callback(to_del):
                 self.to_delete = to_del
 
-            DrawingHelper.clickable_link("x", col, row, Config.font_size, RED, edit_callback, [i])
+            DrawingHelper.clickable_link("x", row, col, Config.font_size, RED, edit_callback, [i])
             row += Config.font_size
 
         if self.to_delete is not None:
             KarabinerConfig().remove_override(self.to_delete)
+
+        return row

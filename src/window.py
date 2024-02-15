@@ -1,10 +1,11 @@
 from raylib import *
-from list_panel import ListPanel
-from content_panel import ContentPanel
-from mouse_controller import MouseController
-from registry import panel_registry
+
+from src.devices.keyboard_controller import KeyboardController
+from src.devices.mouse_controller import MouseController
+from src.panels.list_panel import ListPanel
+from src.panels.content_panel import ContentPanel
+from src.panels.panel_registry import panel_registry
 from config import Config
-from src.keyboard_controller import KeyboardController
 
 
 class MyApp:

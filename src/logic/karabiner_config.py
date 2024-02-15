@@ -4,8 +4,8 @@ import threading
 import time
 import os
 
-from modification import Modification
-from modification_pair import ModificationPair
+from src.logic.modification import Modification
+from src.logic.modification_pair import ModificationPair
 from src.config import Config
 
 
