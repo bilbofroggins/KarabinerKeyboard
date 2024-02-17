@@ -53,7 +53,7 @@ class ModificationChangeView():
             mod_pair = ModificationPair(mod_from, mod_to)
             self.modification_pairs.append(mod_pair)
 
-        DrawingHelper.clickable_link("Add new binding...", row, col, Config.font_size, RED, edit_callback)
+        DrawingHelper.clickable_link("Add new binding...", row, col, Config.font_size, PURPLE, edit_callback)
 
     def draw_overrides(self, start_row, start_col):
         if not len(self.modification_pairs) and self.keyboard_state_controller.state not in (STATE_IS_PRESSING, STATE_LOCKED):
