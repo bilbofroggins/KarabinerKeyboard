@@ -15,12 +15,12 @@ class KeyboardSearchSection():
     def change_keyboard_state(self, state):
         self.keyboard_state = state
 
-    def draw_overrides(self, search_keys, row, col):
+    def draw_overrides(self, row, col):
         self.modification_change_view.update_fn()
 
         # Search for relevant modifications based on key presses and set modifications
         pairs_to_show = {}
-        pressed_keys = set([rl_to_kb_key_map[key] for key in search_keys])
+        pressed_keys = set([rl_to_kb_key_map[key] for key in self.keyboard_state_controller.locked_keys])
         if len(pressed_keys):
             for i, modification_pair in self.karabiner_config.modification_pairs.items():
                 if pressed_keys <= set(str(modification_pair.modification_from).split(DELIMITER)):
@@ -35,4 +35,4 @@ class KeyboardSearchSection():
         # Draw
         row = self.modification_change_view.draw_overrides(row, col)
         if row:
-            self.modification_change_view.draw_add_button(row, col)
+            self.modification_change_view.draw_add_row(row, col)

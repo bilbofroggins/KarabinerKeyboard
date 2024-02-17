@@ -10,12 +10,12 @@ from src.logic.modification_pair import ModificationPair
 class ModificationChangeView():
     def __init__(self, modification_pairs, keyboard_state_controller: KeyboardStateController):
         super().__init__()
-        self.karabiner_config = KarabinerConfig()
         self.modification_pairs = modification_pairs # Dict
         self.from_modification_being_edited: Modification = None
         self.to_modification_being_edited: Modification = None
         self.to_delete = None
         self.keyboard_state_controller = keyboard_state_controller
+        self.new_modification = Modification()
 
     def update_fn(self):
         if self.keyboard_state_controller.state != STATE_OVERRIDING:
@@ -32,7 +32,11 @@ class ModificationChangeView():
             elif self.to_modification_being_edited:
                 self.to_modification_being_edited.save()
             if self.from_modification_being_edited or self.to_modification_being_edited:
+                if self.to_modification_being_edited == self.new_modification:
+                    new_pair = ModificationPair(self.keyboard_state_controller.locked_Modification, self.new_modification)
+                    self.modification_pairs['new_obj'] = new_pair
                 KarabinerConfig().write_overrides(self.modification_pairs)
+                self.new_modification.reset()
                 self.from_modification_being_edited = None
                 self.to_modification_being_edited = None
             self.keyboard_state_controller.overrides_have_stopped()
@@ -46,14 +50,28 @@ class ModificationChangeView():
         text = b"Press keys and hold to rebind..."
         DrawText(text, col, row, Config.font_size, Config.default_text_color)
 
-    def draw_add_button(self, row, col):
-        def edit_callback():
-            mod_from = Modification([], None)
-            mod_to = Modification([], None)
-            mod_pair = ModificationPair(mod_from, mod_to)
-            self.modification_pairs.append(mod_pair)
+    def draw_add_row(self, row, col):
+        being_edited = self.to_modification_being_edited is self.new_modification
 
-        DrawingHelper.clickable_link("Add new binding...", row, col, Config.font_size, PURPLE, edit_callback)
+        def edit_callback():
+            self.to_modification_being_edited = self.new_modification
+            self.keyboard_state_controller.something_is_doing_overrides()
+
+        DrawText(str(self.keyboard_state_controller.locked_Modification).encode('utf-8'), col, row, Config.font_size, YELLOW)
+        width = MeasureText(
+            str(self.keyboard_state_controller.locked_Modification).encode('utf-8'),
+            Config.font_size) + Config.generic_padding
+        DrawText("->".encode('utf-8'), col + width, row, Config.font_size,
+                 Config.default_text_color)
+        width += MeasureText(
+            "->".encode('utf-8'),
+            Config.font_size) + Config.generic_padding
+
+        if self.to_modification_being_edited == self.new_modification:
+            DrawingHelper.modification_view(self.new_modification, being_edited,
+                                            edit_callback, row, col + width)
+        else:
+            DrawingHelper.clickable_link("Add new binding...", row, col + width, Config.font_size, PURPLE, edit_callback)
 
     def draw_overrides(self, start_row, start_col):
         if not len(self.modification_pairs) and self.keyboard_state_controller.state not in (STATE_IS_PRESSING, STATE_LOCKED):

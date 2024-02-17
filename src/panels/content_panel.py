@@ -34,7 +34,6 @@ class ContentPanel(BaseView):
                 # Draw two lines of text at the bottom
                 bottom_text_row = 280  # Adjusted Y position of the bottom text section
                 self.keyboard_search_section.draw_overrides(
-                    self.keyboard_view.search_keys,
                     bottom_text_row + Config.generic_padding,
                     left_panel_width + Config.generic_padding
                 )

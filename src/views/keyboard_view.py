@@ -43,24 +43,9 @@ class KeyboardView(BaseView):
             STATE_LOCKED: YELLOW,
             STATE_OVERRIDING: self.key_color
         }
-        self.pressed_keys = set()
 
     def change_keyboard_state(self, state):
         self.keyboard_state = state
-
-    def update(self):
-        if self.keyboard_state == STATE_EMPTY:
-            self.pressed_keys = KeyboardController.pressed_keys
-            self.search_keys = set()
-        elif self.keyboard_state == STATE_IS_PRESSING:
-            self.pressed_keys = KeyboardController.pressed_keys
-            self.search_keys = self.pressed_keys.copy()
-        elif self.keyboard_state == STATE_LOCKED:
-            self.pressed_keys = self.pressed_keys.copy()
-            self.search_keys = self.pressed_keys.copy()
-        elif self.keyboard_state == STATE_OVERRIDING:
-            self.pressed_keys = self.pressed_keys.copy()
-            self.search_keys = self.pressed_keys.copy()
 
     def draw_keyboard(self, start_x, start_y):
         y = start_y
@@ -74,7 +59,7 @@ class KeyboardView(BaseView):
                     self.key_height //= 2
                     y += self.key_height
 
-                if key_id in self.pressed_keys and self.keyboard_state != STATE_OVERRIDING:
+                if key_id in self.keyboard_state_controller.locked_keys and self.keyboard_state != STATE_OVERRIDING:
                     DrawRectangle(x, y, key_width, self.key_height, self.pressed_key_color[self.keyboard_state])
                 else:
                     DrawRectangle(x, y, key_width, self.key_height, self.key_color)
@@ -105,7 +90,7 @@ class KeyboardView(BaseView):
         # Draw the 'up' arrow key
         up_key_width = int(self.base_key_width)
 
-        if KEY_UP in self.pressed_keys and self.keyboard_state != STATE_OVERRIDING:
+        if KEY_UP in self.keyboard_state_controller.locked_keys and self.keyboard_state != STATE_OVERRIDING:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.pressed_key_color[self.keyboard_state])
         else:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
