@@ -43,10 +43,15 @@ def download_update(download_url, save_path):
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
 
+latest_version = None
+current_version = None
 def check_up_to_date():
-    latest_release = get_latest_release_info(repo)
-    latest_version = Version(latest_release['tag_name'])
-    current_version = Version(__version__)
+    global latest_version
+    global current_version
+    if latest_version is None:
+        latest_release = get_latest_release_info(repo)
+        latest_version = Version(latest_release['tag_name'])
+        current_version = Version(__version__)
 
     if latest_version > current_version:
         return (False, str(latest_version))

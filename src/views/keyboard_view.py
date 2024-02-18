@@ -1,6 +1,6 @@
 from raylib import *
 
-from src.config import Config
+from src.config import config
 from src.logic.key_mappings import rl_to_display_key_map
 from src.logic.keyboard_state_controller import *
 
@@ -63,9 +63,9 @@ class KeyboardView(BaseView):
                     DrawRectangle(x, y, key_width, self.key_height, self.pressed_key_color[self.keyboard_state])
                 else:
                     DrawRectangle(x, y, key_width, self.key_height, self.key_color)
-                text_x = int(x + key_width / 2 - MeasureText(key_text, Config.font_size) / 2)
+                text_x = int(x + key_width / 2 - MeasureText(key_text, config.font_size) / 2)
                 text_y = int(y + self.key_height / 2 - 10)
-                DrawText(key_text, text_x, text_y, Config.font_size, Config.default_text_color)
+                DrawText(key_text, text_x, text_y, config.font_size, config.default_text_color)
 
                 if key_id in (KEY_LEFT, KEY_DOWN, KEY_RIGHT):
                     y -= self.key_height
@@ -94,7 +94,7 @@ class KeyboardView(BaseView):
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.pressed_key_color[self.keyboard_state])
         else:
             DrawRectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
-        up_text_x = int(up_key_x + up_key_width / 2 - MeasureText(b'', Config.font_size) / 2)
+        up_text_x = int(up_key_x + up_key_width / 2 - MeasureText(b'', config.font_size) / 2)
         up_text_y = int(up_key_y + self.key_height / 4 - 10)
-        DrawText(b'', up_text_x, up_text_y, Config.font_size, Config.default_text_color)
+        DrawText(b'', up_text_x, up_text_y, config.font_size, config.default_text_color)
 

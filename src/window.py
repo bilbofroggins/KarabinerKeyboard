@@ -5,13 +5,13 @@ from src.devices.mouse_controller import MouseController
 from src.panels.list_panel import ListPanel
 from src.panels.content_panel import ContentPanel
 from src.panels.panel_registry import panel_registry
-from config import Config
+from config import config
 
 
 class MyApp:
     def __init__(self):
         title = "Karabiner Keyboard"
-        InitWindow(Config.window_width, Config.window_height, title.encode('utf-8'))
+        InitWindow(config.window_width, config.window_height, title.encode('utf-8'))
         SetTargetFPS(60)
         self.list_panel = ListPanel()
         self.content_panel = ContentPanel(self.list_panel)

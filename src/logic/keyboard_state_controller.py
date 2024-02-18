@@ -1,4 +1,4 @@
-from raylib import GetFPS
+from raylib import GetFPS, YELLOW, ORANGE, BLACK
 
 from src.devices.keyboard_controller import KeyboardController
 from src.logic.modification import Modification
@@ -35,6 +35,14 @@ class KeyboardStateController(BaseView):
 
     def overrides_have_stopped(self):
         self.state = STATE_EMPTY
+
+    def color(self):
+        if self.state == STATE_IS_PRESSING:
+            return ORANGE
+        elif self.state == STATE_LOCKED:
+            return YELLOW
+        else:
+            return BLACK
 
     def update(self):
         if self.state == STATE_OVERRIDING:

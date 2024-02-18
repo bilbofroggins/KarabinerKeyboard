@@ -1,5 +1,5 @@
 from raylib import *
-from src.config import Config
+from src.config import config
 from src.devices.mouse_controller import MouseController
 from src.logic.modification import Modification
 
@@ -21,7 +21,7 @@ class DrawingHelper:
                                    row, width, fontSize):
             MouseController.set_hand_mouse(True)
             DrawLine(col, row + fontSize, col + width,
-                     row + fontSize, Config.default_text_color)
+                     row + fontSize, config.default_text_color)
             if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
                 callback(*args) if len(args) else callback()
 
@@ -34,16 +34,16 @@ class DrawingHelper:
             if modification.edit_object.eo_currently_changing():
                 DrawText(
                     str(modification.edit_object).encode('utf-8'),
-                    col, row, Config.font_size, RED)
+                    col, row, config.font_size, RED)
                 width = MeasureText(
                     str(modification.edit_object).encode('utf-8'),
-                    Config.font_size)
+                    config.font_size)
             else:
-                DrawText(b"press keys...", col, row, Config.font_size, RED)
-                width = MeasureText(b"press keys...", Config.font_size)
+                DrawText(b"press keys...", col, row, config.font_size, RED)
+                width = MeasureText(b"press keys...", config.font_size)
         else:
             width = DrawingHelper.clickable_link(from_text, row, col,
-                                                 Config.font_size, Config.default_text_color, click_callback)
+                                                 config.font_size, config.default_text_color, click_callback)
 
-        row += Config.font_size
+        row += config.font_size
         return (row, width)

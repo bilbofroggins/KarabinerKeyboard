@@ -6,7 +6,7 @@ import os
 
 from src.logic.modification import Modification
 from src.logic.modification_pair import ModificationPair
-from src.config import Config
+from src.config import config
 
 
 class KarabinerConfig:
@@ -15,7 +15,7 @@ class KarabinerConfig:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(KarabinerConfig, cls).__new__(cls)
-            cls._instance.config_file_path = os.path.expanduser(Config.karabiner_file)
+            cls._instance.config_file_path = os.path.expanduser(config.karabiner_file)
             cls._instance.backup_config_file_path = os.path.expanduser('~/.config/karabiner/karabiner_back.json')
 
             cls._instance.modification_pairs = {}

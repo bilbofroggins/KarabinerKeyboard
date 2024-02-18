@@ -1,6 +1,6 @@
 from raylib import *
 from src.components.drawing_helper import DrawingHelper
-from src.config import Config
+from src.config import config
 from src.logic.karabiner_config import KarabinerConfig
 from src.logic.keyboard_state_controller import *
 from src.logic.modification import Modification
@@ -48,7 +48,7 @@ class ModificationChangeView():
 
     def draw_instructions(self, row, col):
         text = b"Press keys and hold to rebind..."
-        DrawText(text, col, row, Config.font_size, Config.default_text_color)
+        DrawText(text, col, row, config.font_size, config.default_text_color)
 
     def draw_add_row(self, row, col):
         being_edited = self.to_modification_being_edited is self.new_modification
@@ -57,21 +57,21 @@ class ModificationChangeView():
             self.to_modification_being_edited = self.new_modification
             self.keyboard_state_controller.something_is_doing_overrides()
 
-        DrawText(str(self.keyboard_state_controller.locked_Modification).encode('utf-8'), col, row, Config.font_size, YELLOW)
+        DrawText(str(self.keyboard_state_controller.locked_Modification).encode('utf-8'), col, row, config.font_size, self.keyboard_state_controller.color())
         width = MeasureText(
             str(self.keyboard_state_controller.locked_Modification).encode('utf-8'),
-            Config.font_size) + Config.generic_padding
-        DrawText("->".encode('utf-8'), col + width, row, Config.font_size,
-                 Config.default_text_color)
+            config.font_size) + config.generic_padding
+        DrawText("->".encode('utf-8'), col + width, row, config.font_size,
+                 config.default_text_color)
         width += MeasureText(
             "->".encode('utf-8'),
-            Config.font_size) + Config.generic_padding
+            config.font_size) + config.generic_padding
 
         if self.to_modification_being_edited == self.new_modification:
             DrawingHelper.modification_view(self.new_modification, being_edited,
                                             edit_callback, row, col + width)
         else:
-            DrawingHelper.clickable_link("Add new binding...", row, col + width, Config.font_size, PURPLE, edit_callback)
+            DrawingHelper.clickable_link("Add new binding...", row, col + width, config.font_size, PURPLE, edit_callback)
 
     def draw_overrides(self, start_row, start_col):
         if not len(self.modification_pairs) and self.keyboard_state_controller.state not in (STATE_IS_PRESSING, STATE_LOCKED):
@@ -90,21 +90,21 @@ class ModificationChangeView():
                 self.keyboard_state_controller.something_is_doing_overrides()
 
             row, width = DrawingHelper.modification_view(current_modification, being_edited, edit_callback, row, col)
-            max_from_end = max(col + width + Config.generic_padding, max_from_end)
+            max_from_end = max(col + width + config.generic_padding, max_from_end)
 
         row = start_row
         width = 0
         col = max_from_end
         for override_pair in self.modification_pairs.values():
-            DrawText("->".encode('utf-8'), col, row, Config.font_size, Config.default_text_color)
+            DrawText("->".encode('utf-8'), col, row, config.font_size, config.default_text_color)
             width = MeasureText(
                     "->".encode('utf-8'),
-                    Config.font_size)
-            row += Config.font_size
+                    config.font_size)
+            row += config.font_size
 
         # TO modifications
         row = start_row
-        col += width + Config.generic_padding
+        col += width + config.generic_padding
         for override_pair in self.modification_pairs.values():
             current_modification = override_pair.modification_to
             being_edited = self.to_modification_being_edited is current_modification
@@ -113,7 +113,7 @@ class ModificationChangeView():
                 self.keyboard_state_controller.something_is_doing_overrides()
 
             row, width = DrawingHelper.modification_view(current_modification, being_edited, edit_callback, row, col)
-            max_from_end = max(col + width + Config.generic_padding, max_from_end)
+            max_from_end = max(col + width + config.generic_padding, max_from_end)
 
         row = start_row
         col = max_from_end
@@ -122,8 +122,8 @@ class ModificationChangeView():
             def edit_callback(to_del):
                 self.to_delete = to_del
 
-            DrawingHelper.clickable_link("x", row, col, Config.font_size, RED, edit_callback, [i])
-            row += Config.font_size
+            DrawingHelper.clickable_link("x", row, col, config.font_size, RED, edit_callback, [i])
+            row += config.font_size
 
         if self.to_delete is not None:
             KarabinerConfig().remove_override(self.to_delete)

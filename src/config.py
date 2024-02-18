@@ -2,15 +2,17 @@ import sys
 from raylib import *
 
 
-class Config:
+class config:
     window_width = 960
     window_height = 540
     font_size = 20
     generic_padding = 20
     karabiner_file = '~/.config/karabiner/karabiner.json'
     default_text_color = BLACK
+    secondary_color = BLUE
+    background_color = GRAY
 
-class Config_Debug:
+class config_debug:
     karabiner_file = '~/.config/karabiner/karabiner.json'
 
 
@@ -18,10 +20,10 @@ class Config_Debug:
 
 def merge_configs_if_debug(debug_mode):
     if debug_mode:
-        for attribute_name in dir(Config_Debug):
+        for attribute_name in dir(config_debug):
             if not attribute_name.startswith("__"):
-                attribute_value = getattr(Config_Debug, attribute_name)
-                setattr(Config, attribute_name, attribute_value)
+                attribute_value = getattr(config_debug, attribute_name)
+                setattr(config, attribute_name, attribute_value)
 
 if not getattr(sys, 'frozen', False):
     debug_mode = True
