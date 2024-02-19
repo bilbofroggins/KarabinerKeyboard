@@ -16,7 +16,6 @@ The Overrides panel is very similar, but just shows a larger view of all the ove
 - **Backup and Recovery**: Automatically backs up the `karabiner.json` file on the first modification, allowing easy reversion if needed.
 - **Features not supported yet**: Does not support profiles, devices, app-specific settings, shell commands, sticky keys, or mouse support.
 - **Complex Modifications**: Converts all simple modifications in Karabiner-Elements to complex modifications; original names are overwritten.
-- **Number of modifications**: There is no scroll bar at the moment so it's hard to see every modification - searching is necessary.
 - **Language**: Limited to English language configurations.
 - **Macros**: Only supports a single "to" field for key mappings, affecting the ability to create macros (e.g., mapping `alt-d` to the string "diapers").
 - **External Keyboard**: Currently not showing keys that don't exist on mac keyboard (e.g. PageUp) in the display but they should still bind correctly.
