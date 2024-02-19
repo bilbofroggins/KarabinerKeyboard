@@ -11,9 +11,10 @@ class config:
     default_text_color = BLACK
     secondary_color = BLUE
     background_color = GRAY
+    scroll_speed = 4
 
 class config_debug:
-    karabiner_file = '~/.config/karabiner/karabiner.json'
+    karabiner_file = '~/.config/karabiner/karabiner_debug.json'
 
 
 

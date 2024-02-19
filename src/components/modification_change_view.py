@@ -74,7 +74,7 @@ class ModificationChangeView():
             DrawingHelper.clickable_link("Add new binding...", row, col + width, config.font_size, PURPLE, edit_callback)
 
     def draw_overrides(self, start_row, start_col):
-        if not len(self.modification_pairs) and self.keyboard_state_controller.state not in (STATE_IS_PRESSING, STATE_LOCKED):
+        if not len(self.modification_pairs) and self.keyboard_state_controller.state not in (STATE_IS_PRESSING, STATE_LOCKED, STATE_OVERRIDING):
             self.draw_instructions(start_row, start_col)
             return
         max_from_end = 0
@@ -126,6 +126,7 @@ class ModificationChangeView():
             row += config.font_size
 
         if self.to_delete is not None:
+            print(self.to_delete)
             KarabinerConfig().remove_override(self.to_delete)
 
         return row

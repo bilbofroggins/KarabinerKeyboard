@@ -50,6 +50,7 @@ class KarabinerConfig:
                     )
                     self.modification_pairs[i] = mod_pair
                     i += 1
+
         except FileNotFoundError:
             print(f"Config file not found: {self.config_file_path}")
         except json.JSONDecodeError:

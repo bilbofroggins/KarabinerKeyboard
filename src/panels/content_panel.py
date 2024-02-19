@@ -30,15 +30,15 @@ class ContentPanel(BaseView):
 
         if self.list_panel.selected_option:
             if self.list_panel.selected_option.decode('utf-8') == "Keyboard":
-                # Draw keyboard with some padding
-                self.keyboard_view.draw_keyboard(left_panel_width + config.generic_padding, config.generic_padding)
-
                 # Draw two lines of text at the bottom
                 bottom_text_row = 280  # Adjusted Y position of the bottom text section
                 self.keyboard_search_section.draw_overrides(
                     bottom_text_row + config.generic_padding,
                     left_panel_width + config.generic_padding
                 )
+
+                # Draw keyboard with some padding
+                self.keyboard_view.draw_keyboard(left_panel_width + config.generic_padding, config.generic_padding)
             elif self.list_panel.selected_option.decode('utf-8') == "Overrides":
                 self.overrides_view.draw_overrides(left_panel_width + config.generic_padding, config.generic_padding)
             elif self.list_panel.selected_option.decode('utf-8') == "Help":
