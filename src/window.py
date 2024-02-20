@@ -13,6 +13,7 @@ class MyApp:
         title = "Karabiner Keyboard"
         InitWindow(config.window_width, config.window_height, title.encode('utf-8'))
         SetTargetFPS(60)
+        SetExitKey(KEY_NULL)
         self.list_panel = ListPanel()
         self.content_panel = ContentPanel(self.list_panel)
 
