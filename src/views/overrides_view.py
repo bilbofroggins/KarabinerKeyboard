@@ -60,7 +60,7 @@ class OverridesView():
         self.modification_change_view.update_fn()
         self.modification_change_view.modification_pairs = self.karabiner_config.modification_pairs
 
-        self.scroll_row_offset = self.set_scroll_offset(self.scroll_row_offset + int(GetMouseWheelMove() * config.scroll_speed), len(self.modification_change_view.modification_pairs))
+        self.scroll_row_offset = self.set_scroll_offset(self.scroll_row_offset + int(GetMouseWheelMove() * config.scroll_speed), len(self.modification_change_view.modification_pairs) + 1)
         start_row += self.scroll_row_offset
 
         self.modification_change_view.draw_overrides(start_row, start_col)
