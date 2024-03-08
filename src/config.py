@@ -5,12 +5,16 @@ from raylib import *
 class config:
     window_width = 960
     window_height = 540
-    font_size = 20
+    small_font_size = 14
+    font_size = 18
+    large_font_size = 40
     generic_padding = 20
+    small_padding = 5
     karabiner_file = '~/.config/karabiner/karabiner.json'
     default_text_color = BLACK
     secondary_color = BLUE
     background_color = GRAY
+    disabled_color = LIGHTGRAY
     scroll_speed = 4
 
 class config_debug:

@@ -2,6 +2,7 @@ from raylib import *
 
 from src.devices.keyboard_controller import KeyboardController
 from src.devices.mouse_controller import MouseController
+from src.logic.bundle_ids import BundleIds
 from src.panels.list_panel import ListPanel
 from src.panels.content_panel import ContentPanel
 from src.panels.panel_registry import panel_registry
@@ -16,6 +17,7 @@ class MyApp:
         SetExitKey(KEY_NULL)
         self.list_panel = ListPanel()
         self.content_panel = ContentPanel(self.list_panel)
+        BundleIds()
 
     def run(self):
         while not WindowShouldClose():

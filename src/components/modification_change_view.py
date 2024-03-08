@@ -1,10 +1,12 @@
 from raylib import *
 from src.components.drawing_helper import DrawingHelper
 from src.config import config
+from src.logic.condition import Condition
 from src.logic.karabiner_config import KarabinerConfig
 from src.logic.keyboard_state_controller import *
 from src.logic.modification import Modification
 from src.logic.modification_pair import ModificationPair
+from src.views.ask_view import AskView
 
 
 class ModificationChangeView():
@@ -16,6 +18,8 @@ class ModificationChangeView():
         self.to_delete = None
         self.keyboard_state_controller = keyboard_state_controller
         self.new_modification = Modification()
+        self.ask_view = AskView(self, keyboard_state_controller)
+        self.ask_highlight = None
 
     def update_fn(self):
         if self.keyboard_state_controller.state != STATE_OVERRIDING:
@@ -33,9 +37,9 @@ class ModificationChangeView():
                 self.to_modification_being_edited.save()
             if self.from_modification_being_edited or self.to_modification_being_edited:
                 if self.to_modification_being_edited == self.new_modification:
-                    new_pair = ModificationPair(self.keyboard_state_controller.locked_Modification, self.new_modification)
+                    new_pair = ModificationPair(self.keyboard_state_controller.locked_Modification, self.new_modification, Condition())
                     self.modification_pairs['new_obj'] = new_pair
-                KarabinerConfig().write_overrides(self.modification_pairs)
+                self.save()
                 self.new_modification.reset()
                 self.from_modification_being_edited = None
                 self.to_modification_being_edited = None
@@ -45,6 +49,9 @@ class ModificationChangeView():
             self.from_modification_being_edited.update_dirty(KeyboardController.last_frame_pressed_keys)
         elif self.to_modification_being_edited:
             self.to_modification_being_edited.update_dirty(KeyboardController.last_frame_pressed_keys)
+
+    def save(self):
+        KarabinerConfig().write_overrides(self.modification_pairs)
 
     def draw_instructions(self, row, col):
         text = b"Press keys and hold to rebind..."
@@ -73,11 +80,17 @@ class ModificationChangeView():
         else:
             DrawingHelper.clickable_link("Add new binding...", row, col + width, config.font_size, PURPLE, edit_callback)
 
+    def open_ask_panel(self, mod_pair):
+        self.ask_view.show(mod_pair)
+
     def draw_overrides(self, start_row, start_col):
         if not len(self.modification_pairs) and self.keyboard_state_controller.state not in (STATE_IS_PRESSING, STATE_LOCKED, STATE_OVERRIDING):
             self.draw_instructions(start_row, start_col)
             return
         max_from_end = 0
+
+        if self.ask_highlight:
+            DrawRectangle(start_col, self.ask_highlight, config.window_width, config.font_size, PURPLE)
 
         # FROM modifications
         row = start_row
@@ -114,6 +127,27 @@ class ModificationChangeView():
 
             row, width = DrawingHelper.modification_view(current_modification, being_edited, edit_callback, row, col)
             max_from_end = max(col + width + config.generic_padding, max_from_end)
+
+        row = start_row
+        col = max_from_end
+        self.to_delete = None
+        for i, _ in self.modification_pairs.items():
+            DrawText(" ::".encode('utf-8'), col, row, config.font_size, config.default_text_color)
+            width = MeasureText(" ::".encode('utf-8'), config.font_size)
+            row += config.font_size
+        max_from_end = max(col + width + config.generic_padding, max_from_end)
+
+        row = start_row
+        col = max_from_end
+        self.to_delete = None
+        for i, mod_pair in self.modification_pairs.items():
+            def ask_callback(row, inner_mod_pair):
+                self.open_ask_panel(inner_mod_pair)
+                self.ask_highlight = row
+
+            width = DrawingHelper.clickable_link("ASK", row, col, config.font_size, mod_pair.condition.color(), ask_callback, [row, mod_pair])
+            row += config.font_size
+        max_from_end = max(col + width + config.generic_padding, max_from_end)
 
         row = start_row
         col = max_from_end

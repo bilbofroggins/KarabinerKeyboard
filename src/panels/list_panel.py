@@ -25,6 +25,7 @@ class ListPanel(BaseView):
             # Check if a list item is clicked
             for i, option in enumerate(self.options):
                 if 10 <= mouse_position.y <= 30 + i*config.font_size and mouse_position.x <= self.panel_width:
+                    self.base_message("close_ask_window")
                     self.selected_option = option
                     break
 
