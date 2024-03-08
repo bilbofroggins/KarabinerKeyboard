@@ -10,11 +10,13 @@ Karabiner Keyboard is a user interface designed to simplify the customization of
 ## Instructions
 From the Keyboard panel, press the keys you want to change. This will trigger a search to check anything containing the keys you've pressed. Once the keys turn gold, you can take your fingers off the keys as it has locked them in. You can then click the one of the sides of the binding to rebind, or the "x" to delete the modification.
 
+If you want to add app-specific keybindings (ASK), press the ASK button, which will open up a window to edit your application bundle ids.
+
 The Overrides panel is very similar, but just shows a larger view of all the overrides you have set.
 
 ### WARNING! Early Development -- Current Limitations
 - **Backup and Recovery**: Automatically backs up the `karabiner.json` file on the first modification, allowing easy reversion if needed.
-- **Features not supported yet**: Does not support profiles, devices, app-specific settings, shell commands, sticky keys, or mouse support.
+- **Features not supported yet**: Does not support profiles, devices, shell commands, sticky keys, or mouse support.
 - **Complex Modifications**: Converts all simple modifications in Karabiner-Elements to complex modifications; original names are overwritten.
 - **Language**: Limited to English language configurations.
 - **Macros**: Only supports a single "to" field for key mappings, affecting the ability to create macros (e.g., mapping `alt-d` to the string "diapers").
