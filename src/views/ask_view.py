@@ -191,6 +191,8 @@ class AskView(BaseView):
 
     def draw_save_button(self):
         def save():
+            if len(self.bundle_identifiers) and not self.include_type_str:
+                self.include_type_str = "frontmost_application_if"
             condition = Condition(self.bundle_identifiers, self.include_type_str)
             self.mod_pair.condition = condition
             self.mod_change_view.save()
