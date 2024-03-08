@@ -6,7 +6,7 @@ from src.logic.modification import Modification
 
 class DrawingHelper:
     @staticmethod
-    def is_mouse_over_text(mouse_x, mouse_y, x, y, width, height):
+    def is_mouse_over(mouse_x, mouse_y, x, y, width, height):
         return x <= mouse_x <= x + width and y <= mouse_y <= y + height
 
     @staticmethod
@@ -17,7 +17,7 @@ class DrawingHelper:
         DrawText(text, col, row, fontSize, color)
         width = MeasureText(text, fontSize)
 
-        if DrawingHelper.is_mouse_over_text(mouse_position.x, mouse_position.y, col,
+        if DrawingHelper.is_mouse_over(mouse_position.x, mouse_position.y, col,
                                    row, width, fontSize):
             MouseController.set_hand_mouse(True)
             DrawLine(col, row + fontSize, col + width,
@@ -27,6 +27,43 @@ class DrawingHelper:
 
         return width
 
+    @staticmethod
+    def button(*, text, row, col, width, height, font_size, bg_color, text_color, callback, args=[]):
+        mouse_position = GetMousePosition()
+        text = text.encode('utf-8')
+
+        DrawRectangle(col, row, width, height, bg_color)
+
+        if DrawingHelper.is_mouse_over(
+                mouse_position.x, mouse_position.y,
+                col, row, width, height
+        ):
+            MouseController.set_hand_mouse(True)
+            DrawRectangle(col, row, width, height, DARKBROWN)
+
+            if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
+                callback(*args) if len(args) else callback()
+
+        DrawText(text, col, row, font_size, text_color)
+
+        return width
+
+    @staticmethod
+    def highlight_box(row, col, height, width, color, hovercolor, callback, args=[]):
+        mouse_position = GetMousePosition()
+
+        DrawRectangle(col, row, width, height, color)
+
+        if DrawingHelper.is_mouse_over(mouse_position.x, mouse_position.y, col,
+                                            row, width, height):
+            DrawRectangle(col, row, width, height, hovercolor)
+            MouseController.set_hand_mouse(True)
+            if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
+                callback(*args) if len(args) else callback()
+
+        return
+
+    @staticmethod
     def modification_view(modification: Modification, being_edited, click_callback, row, col):
         from_text = str(modification)
 

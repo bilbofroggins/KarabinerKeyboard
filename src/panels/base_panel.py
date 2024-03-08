@@ -10,3 +10,10 @@ class BaseView:
 
     def draw(self):
         pass
+
+    def base_message(self, message):
+        for panel in panel_registry:
+            if hasattr(panel, "message_consumer"):
+                method = getattr(panel, "message_consumer")
+                if callable(method):
+                    method(message)

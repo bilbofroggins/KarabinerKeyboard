@@ -41,7 +41,8 @@ class KeyboardView(BaseView):
             STATE_EMPTY: ORANGE,
             STATE_IS_PRESSING: ORANGE,
             STATE_LOCKED: YELLOW,
-            STATE_OVERRIDING: self.key_color
+            STATE_OVERRIDING: self.key_color,
+            STATE_BUNDLE_SEARCH: YELLOW,
         }
 
     def change_keyboard_state(self, state):

@@ -8,6 +8,7 @@ STATE_EMPTY = 0
 STATE_IS_PRESSING = 1
 STATE_LOCKED = 2
 STATE_OVERRIDING = 3
+STATE_BUNDLE_SEARCH = 4
 
 class KeyboardStateController(BaseView):
     def __init__(self):
@@ -39,10 +40,14 @@ class KeyboardStateController(BaseView):
     def color(self):
         if self.state == STATE_IS_PRESSING:
             return ORANGE
-        elif self.state == STATE_LOCKED:
+        elif self.state in (STATE_LOCKED, STATE_BUNDLE_SEARCH):
             return YELLOW
         else:
             return BLACK
+
+    def set_state(self, new_state):
+        self.state = new_state
+        self.notify_listeners()
 
     def update(self):
         if self.state == STATE_OVERRIDING:

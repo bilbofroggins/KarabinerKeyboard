@@ -4,6 +4,7 @@ import threading
 import time
 import os
 
+from src.logic.condition import Condition
 from src.logic.modification import Modification
 from src.logic.modification_pair import ModificationPair
 from src.config import config
@@ -38,15 +39,28 @@ class KarabinerConfig:
                 for mod in simple_modifications:
                     mod_pair = ModificationPair(
                         Modification([], mod['from']['key_code']),
-                        Modification([], mod['to'][0]['key_code'])
+                        Modification([], mod['to'][0]['key_code']),
+                        None
                     )
                     self.modification_pairs[i] = mod_pair
                     i += 1
                 for mod in complex_modifications:
                     transform = mod['manipulators'][0] # TODO: take more than just one
+                    conditions = transform.get('conditions', [])
+                    if conditions:
+                        bundle_identifiers = conditions[0].get('bundle_identifiers', {})
+                        include_type_str = conditions[0].get('type', {})
+                    else:
+                        bundle_identifiers = []
+                        include_type_str = ''
+
                     mod_pair = ModificationPair(
                         Modification(transform['from'].get('modifiers', {}).get('mandatory', {}), transform['from']['key_code']),
-                        Modification(transform['to'][0].get('modifiers', {}), transform['to'][0]['key_code'])
+                        Modification(transform['to'][0].get('modifiers', {}), transform['to'][0]['key_code']),
+                        Condition(
+                            bundle_identifiers,
+                            include_type_str
+                        )
                     )
                     self.modification_pairs[i] = mod_pair
                     i += 1
