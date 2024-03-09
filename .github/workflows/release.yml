@@ -17,7 +17,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.11
 
     - name: Install Poetry
       run: |
@@ -27,13 +27,9 @@ jobs:
       run: |
         poetry install
 
-    - name: Get virtual environment path
-      run: |
-        echo "venv_path=$(poetry env info --path)" >> $GITHUB_ENV
-
     - name: Build app
       run: |
-        source ${{ env.venv_path }}/bin/activate
+        source $(poetry env info --path)/bin/activate
         bundle-app
 
     - name: Zip app
