@@ -27,9 +27,15 @@ jobs:
       run: |
         poetry install
 
+    - name: Get virtual environment path
+      id: get_venv_path
+      run: |
+        VENV_PATH=$(poetry env info --path)
+        echo "::set-output name=venv_path::$VENV_PATH"
+
     - name: Build app
       run: |
-        source $HOME/.cache/pypoetry/virtualenvs/karabinerkeyboard-*/bin/activate
+        source ${{ steps.get_venv_path.outputs.venv_path }}/bin/activate
         bundle-app
 
     - name: Zip app
