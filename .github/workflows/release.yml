@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: macos-latest
+    if: "contains(github.event.head_commit.message, 'Version ')"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install Poetry
+      run: |
+        pip3 install poetry
+
+    - name: Install dependencies
+      run: |
+        poetry shell
+        poetry install
+
+    - name: Build app
+      run: |
+        poetry run bundle-app
+
+    - name: Zip app
+      run: |
+        cd dist
+        zip -r KarabinerKeyboard.zip KarabinerKeyboard.app
+
+    - name: Get version from commit message
+      id: get_version
+      run: |
+        VERSION=$(echo "${{ github.event.head_commit.message }}" | grep -o 'Version [0-9]\+\.[0-9]\+\.[0-9]\+' | cut -d ' ' -f 2)
+        echo "::set-output name=version::$VERSION"
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.version }}
+        release_name: Release ${{ steps.get_version.outputs.version }}
+        body: ${{ github.event.head_commit.message }}
+        draft: false
+        prerelease: false
+
+    - name: Upload app
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/KarabinerKeyboard.zip
+        asset_name: KarabinerKeyboard.zip
+        asset_content_type: application/zip
