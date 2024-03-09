@@ -25,12 +25,12 @@ jobs:
 
     - name: Install dependencies
       run: |
-        poetry shell
         poetry install
 
     - name: Build app
       run: |
-        poetry run bundle-app
+        source $HOME/.cache/pypoetry/virtualenvs/karabinerkeyboard-*/bin/activate
+        bundle-app
 
     - name: Zip app
       run: |
@@ -64,4 +64,3 @@ jobs:
         asset_path: ./dist/KarabinerKeyboard.zip
         asset_name: KarabinerKeyboard.zip
         asset_content_type: application/zip
-        
