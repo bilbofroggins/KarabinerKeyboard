@@ -27,10 +27,18 @@ jobs:
       run: |
         poetry install
 
+    - name: Activate virtual environment
+      run: |
+        echo "VIRTUAL_ENV=$(poetry env info --path)" >> $GITHUB_ENV
+        echo "$(poetry env info --path)/bin" >> $GITHUB_PATH
+
+    - name: Clean output directory
+      run: |
+        rm -rf dist/KarabinerKeyboard
+
     - name: Build app
       run: |
-        source $(poetry env info --path)/bin/activate
-        bundle-app
+        poetry run bundle-app
 
     - name: Zip app
       run: |
@@ -43,7 +51,7 @@ jobs:
 
     - name: Create release
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@v1.1.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -54,7 +62,7 @@ jobs:
         prerelease: false
 
     - name: Upload app
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
