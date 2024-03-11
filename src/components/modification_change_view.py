@@ -16,7 +16,6 @@ class ModificationChangeView():
         self.modification_pairs = modification_pairs # Dict
         self.from_modification_being_edited: Modification = None
         self.to_modification_being_edited: Modification = None
-        self.to_delete = None
         self.keyboard_state_controller = keyboard_state_controller
         self.new_modification = Modification()
         self.ask_view = AskView(self, keyboard_state_controller)
@@ -147,7 +146,6 @@ class ModificationChangeView():
 
         row = start_row
         col = max_from_end
-        self.to_delete = None
         for i, _ in self.modification_pairs.items():
             DrawText(" ::".encode('utf-8'), col, row, config.font_size, config.default_text_color)
             width = MeasureText(" ::".encode('utf-8'), config.font_size)
@@ -156,7 +154,6 @@ class ModificationChangeView():
 
         row = start_row
         col = max_from_end
-        self.to_delete = None
         for i, mod_pair in self.modification_pairs.items():
             def ask_callback(row, inner_mod_pair):
                 self.open_ask_panel(inner_mod_pair)
@@ -168,16 +165,11 @@ class ModificationChangeView():
 
         row = start_row
         col = max_from_end
-        self.to_delete = None
         for i, _ in self.modification_pairs.items():
             def edit_callback(to_del):
-                self.to_delete = to_del
+                KarabinerConfig().remove_override(to_del)
 
             DrawingHelper.clickable_link("x", row, col, config.font_size, RED, edit_callback, [i])
             row += config.font_size
-
-        if self.to_delete is not None:
-            print(self.to_delete)
-            KarabinerConfig().remove_override(self.to_delete)
 
         return row

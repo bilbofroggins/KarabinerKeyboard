@@ -11,7 +11,9 @@ class DrawingHelper:
         return x <= mouse_x <= x + width and y <= mouse_y <= y + height
 
     @staticmethod
-    def clickable_link(text, row, col, fontSize, color, callback, args=[]):
+    def clickable_link(text, row, col, fontSize, color, callback, args=None):
+        if args is None:
+            args = []
         mouse_position = GetMousePosition()
         text = text.encode('utf-8')
 
@@ -29,7 +31,10 @@ class DrawingHelper:
         return width
 
     @staticmethod
-    def button(*, text, row, col, width, height, font_size, bg_color, text_color, callback, args=[]):
+    def button(*, text, row, col, width, height, font_size, bg_color, text_color, callback,
+               args=None):
+        if args is None:
+            args = []
         mouse_position = GetMousePosition()
         text = text.encode('utf-8')
 
@@ -49,7 +54,9 @@ class DrawingHelper:
         return width
 
     @staticmethod
-    def highlight_box(row, col, height, width, color, hovercolor, callback, args=[]):
+    def highlight_box(row, col, height, width, color, hovercolor, callback, args=None):
+        if args is None:
+            args = []
         mouse_position = GetMousePosition()
 
         DrawRectangle(col, row, width, height, color)
@@ -64,7 +71,10 @@ class DrawingHelper:
         return
 
     @staticmethod
-    def modification_view(modification: Modification, being_edited, row, col, click_callback, args=[]):
+    def modification_view(modification: Modification, being_edited, row, col, click_callback,
+                          args=None):
+        if args is None:
+            args = []
         from_text = str(modification)
 
         if being_edited:
