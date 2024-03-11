@@ -33,14 +33,8 @@ class ModificationChangeView():
         if 'mod_change_view' not in self.background_listeners:
             self.background_listeners['mod_change_view'] = self.background_click_callback
 
-
         if self.keyboard_state_controller.state != STATE_OVERRIDING:
             return
-        # Reset
-        # if (self.from_modification_being_edited or self.to_modification_being_edited) and IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-        #     self.from_modification_being_edited = False
-        #     self.to_modification_being_edited = False
-        #     self.keyboard_state_controller.overrides_have_stopped()
         # Set new bindings
         if KeyboardController.removed_keys():
             if self.from_modification_being_edited:
