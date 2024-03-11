@@ -7,6 +7,8 @@ from src.logic.keyboard_state_controller import *
 from src.panels.base_panel import BaseView
 from raylib import *
 
+from src.panels.click_handler import ClickHandler
+
 
 class AskView(BaseView):
     def __init__(self, mod_change_view, keyboard_state_controller):
@@ -18,8 +20,8 @@ class AskView(BaseView):
         self.frame_counter = 0
         self.search_text = ""
         self.show_results = True
-        self.clicked_input = False
         self.mod_change_view = mod_change_view
+        self.background_listeners = {} # key: callback
 
     def message_consumer(self, message):
         if message == "close_ask_window":
@@ -50,6 +52,9 @@ class AskView(BaseView):
         DrawCircle(col - (rec_size//2), row + (config.small_font_size//2), (config.small_font_size//2), left_color)
         DrawCircle(col + (rec_size//2), row + (config.small_font_size//2), (config.small_font_size//2), right_color)
 
+        def callback():
+            self.include_type_str = "frontmost_application_unless" if self.include_type_str == "frontmost_application_if" else "frontmost_application_if"
+
         mouse_position = GetMousePosition()
         if DrawingHelper.is_mouse_over(
                 mouse_position.x, mouse_position.y,
@@ -59,8 +64,7 @@ class AskView(BaseView):
                 config.small_font_size
         ):
             MouseController.set_hand_mouse(True)
-            if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-                self.include_type_str = "frontmost_application_unless" if self.include_type_str == "frontmost_application_if" else "frontmost_application_if"
+            ClickHandler.append(callback, [])
 
         return 1 if self.include_type_str == "frontmost_application_unless" else 0
 
@@ -88,7 +92,6 @@ class AskView(BaseView):
         return row + config.small_font_size + config.generic_padding
 
     def draw_text_box(self, row):
-        self.clicked_input = False
         textbox_width = self.side_width - 100
         textbox_start_col = (self.start_col_side + config.window_width)//2 - textbox_width//2
         DrawRectangle(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), WHITE)
@@ -97,14 +100,15 @@ class AskView(BaseView):
         else:
             DrawRectangleLines(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), DARKBLUE)
 
+        def callback():
+            self.show_results = True
+
         mouse_position = GetMousePosition()
         if DrawingHelper.is_mouse_over(
                 mouse_position.x, mouse_position.y,
                 textbox_start_col, row, textbox_width, int(config.small_font_size*1.4)
         ):
-            if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-                self.clicked_input = True
-                self.show_results = True
+            ClickHandler.append(callback, [])
 
         padding = (config.font_size*1.4 - config.font_size)//2
         textbox_start_col = int(textbox_start_col + padding)
@@ -152,21 +156,24 @@ class AskView(BaseView):
         apps = BundleIds().fuzzy_search(search_text)
         return apps
 
+    def background_click_callback(self):
+        self.show_results = False
+
     def draw_search_results(self, row):
+        if 'ask_view_search_results' not in self.background_listeners:
+            self.background_listeners['ask_view_search_results'] = self.background_click_callback
+
         if not self.show_results or not self.search_text:
             return
         width = self.side_width - 50
         box_start_col = (self.start_col_side + config.window_width)//2 - width//2
 
-        has_clicked = False
         def callback(app):
             bundle = app.bundle()
             # TODO: Let the user know something is wrong, preferably don't show it in the fitst place
             if bundle == None:
                 return
 
-            nonlocal has_clicked
-            has_clicked = True
             self.search_text = ""
             self.bundle_identifiers.append(app.bundle())
 
@@ -185,9 +192,6 @@ class AskView(BaseView):
                 args=[app]
             )
             row += config.small_font_size*2 + config.small_padding
-
-        if not has_clicked and not self.clicked_input and IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-            self.show_results = False
 
     def draw_save_button(self):
         def save():
@@ -225,7 +229,18 @@ class AskView(BaseView):
             self.keyboard_state_controller.set_state(STATE_LOCKED)
             self.mod_change_view.ask_highlight = None
 
+        def background_click():
+            for callback in self.background_listeners.values():
+                callback()
+
         DrawRectangle(self.start_col, 0, config.window_width, config.window_height, ORANGE)
+        mouse_position = GetMousePosition()
+        if DrawingHelper.is_mouse_over(
+                mouse_position.x, mouse_position.y,
+                self.start_col, 0,
+                config.window_width, config.window_height
+        ):
+            ClickHandler.append(background_click, [])
 
         # Close Button
         DrawingHelper.highlight_box(0, self.start_col, config.window_height, self.button_width, PURPLE, BLUE, close_ask_window)

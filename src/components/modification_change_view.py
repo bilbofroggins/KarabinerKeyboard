@@ -6,6 +6,7 @@ from src.logic.karabiner_config import KarabinerConfig
 from src.logic.keyboard_state_controller import *
 from src.logic.modification import Modification
 from src.logic.modification_pair import ModificationPair
+from src.panels.click_handler import ClickHandler
 from src.views.ask_view import AskView
 
 
@@ -20,17 +21,22 @@ class ModificationChangeView():
         self.new_modification = Modification()
         self.ask_view = AskView(self, keyboard_state_controller)
         self.ask_highlight = None
+        self.background_listeners = {} # key: callback
 
-    def update_fn(self):
-        if self.keyboard_state_controller.state != STATE_OVERRIDING:
-            return
-        # Reset
-        if (self.from_modification_being_edited or self.to_modification_being_edited) and IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
+    def background_click_callback(self):
+        if self.from_modification_being_edited or self.to_modification_being_edited:
             self.from_modification_being_edited = False
             self.to_modification_being_edited = False
             self.keyboard_state_controller.overrides_have_stopped()
+
+    def update_fn(self):
+        if 'mod_change_view' not in self.background_listeners:
+            self.background_listeners['mod_change_view'] = self.background_click_callback
+
+        if self.keyboard_state_controller.state != STATE_OVERRIDING:
+            return
         # Set new bindings
-        elif KeyboardController.removed_keys():
+        if KeyboardController.removed_keys():
             if self.from_modification_being_edited:
                 self.from_modification_being_edited.save()
             elif self.to_modification_being_edited:
@@ -76,7 +82,7 @@ class ModificationChangeView():
 
         if self.to_modification_being_edited == self.new_modification:
             DrawingHelper.modification_view(self.new_modification, being_edited,
-                                            edit_callback, row, col + width)
+                                            row, col + width, edit_callback)
         else:
             DrawingHelper.clickable_link("Add new binding...", row, col + width, config.font_size, PURPLE, edit_callback)
 
@@ -84,6 +90,17 @@ class ModificationChangeView():
         self.ask_view.show(mod_pair)
 
     def draw_overrides(self, start_row, start_col):
+        def background_click():
+            for callback in self.background_listeners.values():
+                callback()
+        mouse_position = GetMousePosition()
+        if DrawingHelper.is_mouse_over(
+                mouse_position.x, mouse_position.y,
+                start_col, start_row,
+                config.window_width, config.window_height
+        ):
+            ClickHandler.append(background_click, [])
+
         if not len(self.modification_pairs) and self.keyboard_state_controller.state not in (STATE_IS_PRESSING, STATE_LOCKED, STATE_OVERRIDING):
             self.draw_instructions(start_row, start_col)
             return
@@ -98,11 +115,11 @@ class ModificationChangeView():
         for override_pair in self.modification_pairs.values():
             current_modification = override_pair.modification_from
             being_edited = self.from_modification_being_edited is current_modification
-            def edit_callback():
-                self.from_modification_being_edited = override_pair.modification_from
+            def edit_callback(ov_pair):
+                self.from_modification_being_edited = ov_pair.modification_from
                 self.keyboard_state_controller.something_is_doing_overrides()
 
-            row, width = DrawingHelper.modification_view(current_modification, being_edited, edit_callback, row, col)
+            row, width = DrawingHelper.modification_view(current_modification, being_edited, row, col, edit_callback, [override_pair])
             max_from_end = max(col + width + config.generic_padding, max_from_end)
 
         row = start_row
@@ -121,11 +138,11 @@ class ModificationChangeView():
         for override_pair in self.modification_pairs.values():
             current_modification = override_pair.modification_to
             being_edited = self.to_modification_being_edited is current_modification
-            def edit_callback():
-                self.to_modification_being_edited = override_pair.modification_to
+            def edit_callback(ov_pair):
+                self.to_modification_being_edited = ov_pair.modification_to
                 self.keyboard_state_controller.something_is_doing_overrides()
 
-            row, width = DrawingHelper.modification_view(current_modification, being_edited, edit_callback, row, col)
+            row, width = DrawingHelper.modification_view(current_modification, being_edited, row, col, edit_callback, [override_pair])
             max_from_end = max(col + width + config.generic_padding, max_from_end)
 
         row = start_row
