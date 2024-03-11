@@ -3,8 +3,8 @@ from window import MyApp
 
 def main():
     KarabinerConfig()
-    game = MyApp()
-    game.run()
+    app = MyApp()
+    app.run()
 
 if __name__ == '__main__':
     main()

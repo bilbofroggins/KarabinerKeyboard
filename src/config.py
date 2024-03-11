@@ -9,6 +9,7 @@ class config:
     font_size = 18
     large_font_size = 40
     generic_padding = 20
+    list_padding = 10
     small_padding = 5
     karabiner_file = '~/.config/karabiner/karabiner.json'
     default_text_color = BLACK

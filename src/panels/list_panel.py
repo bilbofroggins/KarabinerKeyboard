@@ -2,6 +2,7 @@ from raylib import *
 
 from src.config import config
 from src.panels.base_panel import BaseView
+from src.panels.click_handler import ClickHandler
 
 
 class ListPanel(BaseView):
@@ -20,20 +21,22 @@ class ListPanel(BaseView):
         return max_width + config.generic_padding  # Add some padding
 
     def update(self):
-        if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-            mouse_position = GetMousePosition()
-            # Check if a list item is clicked
-            for i, option in enumerate(self.options):
-                if 10 <= mouse_position.y <= 30 + i*config.font_size and mouse_position.x <= self.panel_width:
-                    self.base_message("close_ask_window")
-                    self.selected_option = option
-                    break
+        def callback(opt):
+            self.base_message("close_ask_window")
+            self.selected_option = opt
+
+        mouse_position = GetMousePosition()
+        # Check if a list item is clicked
+        for i, option in enumerate(self.options):
+            if mouse_position.x <= self.panel_width:
+                if i * config.font_size + config.list_padding <= mouse_position.y <= (i+1) * config.font_size + config.list_padding:
+                    ClickHandler.append(callback, [option])
 
     def draw(self):
         DrawRectangle(0, 0, self.panel_width, config.window_height, GREEN)
 
         for i, option in enumerate(self.options):
             if option == self.selected_option:
-                DrawText(option, 10, 10 + i * config.font_size, config.font_size, RED)
+                DrawText(option, config.list_padding, config.list_padding + i * config.font_size, config.font_size, RED)
             else:
-                DrawText(option, 10, 10 + i * config.font_size, config.font_size, config.default_text_color)
+                DrawText(option, config.list_padding, config.list_padding + i * config.font_size, config.font_size, config.default_text_color)

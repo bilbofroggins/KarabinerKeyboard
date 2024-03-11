@@ -2,6 +2,7 @@ from raylib import *
 from src.config import config
 from src.devices.mouse_controller import MouseController
 from src.logic.modification import Modification
+from src.panels.click_handler import ClickHandler
 
 
 class DrawingHelper:
@@ -22,8 +23,8 @@ class DrawingHelper:
             MouseController.set_hand_mouse(True)
             DrawLine(col, row + fontSize, col + width,
                      row + fontSize, config.default_text_color)
-            if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-                callback(*args) if len(args) else callback()
+
+            ClickHandler.append(callback, args)
 
         return width
 
@@ -41,8 +42,7 @@ class DrawingHelper:
             MouseController.set_hand_mouse(True)
             DrawRectangle(col, row, width, height, DARKBROWN)
 
-            if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-                callback(*args) if len(args) else callback()
+            ClickHandler.append(callback, args)
 
         DrawText(text, col, row, font_size, text_color)
 
@@ -58,13 +58,13 @@ class DrawingHelper:
                                             row, width, height):
             DrawRectangle(col, row, width, height, hovercolor)
             MouseController.set_hand_mouse(True)
-            if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
-                callback(*args) if len(args) else callback()
+
+            ClickHandler.append(callback, args)
 
         return
 
     @staticmethod
-    def modification_view(modification: Modification, being_edited, click_callback, row, col):
+    def modification_view(modification: Modification, being_edited, row, col, click_callback, args=[]):
         from_text = str(modification)
 
         if being_edited:
@@ -80,7 +80,7 @@ class DrawingHelper:
                 width = MeasureText(b"press keys...", config.font_size)
         else:
             width = DrawingHelper.clickable_link(from_text, row, col,
-                                                 config.font_size, config.default_text_color, click_callback)
+                                                 config.font_size, config.default_text_color, click_callback, args)
 
         row += config.font_size
         return (row, width)
