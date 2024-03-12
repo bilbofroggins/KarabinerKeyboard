@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import subprocess
 
 from karabinerkeyboard.notarization import notarize_app
@@ -60,6 +61,13 @@ def load_env_variables_from_file(env_file_path):
 
 
 def bundle_app():
+    # Remove old build files
+    try:
+        shutil.rmtree('build')
+        shutil.rmtree('dist')
+    except OSError as e:
+        print(f"Error removing build dirs")
+
     load_env_variables_from_file('.env')
     update_version_number()
 
