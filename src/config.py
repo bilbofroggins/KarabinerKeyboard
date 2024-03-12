@@ -11,6 +11,8 @@ class config:
     generic_padding = 20
     list_padding = 10
     small_padding = 5
+    key_padding = 1
+    key_font_size = 12
     karabiner_file = '~/.config/karabiner/karabiner.json'
     default_text_color = BLACK
     secondary_color = BLUE

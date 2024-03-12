@@ -1,7 +1,5 @@
-from raylib import *
-
 from src.config import config
-from src.logic.key_mappings import rl_to_display_key_map
+from src.logic.key_mappings import *
 from src.logic.keyboard_state_controller import *
 
 
@@ -54,7 +52,7 @@ class KeyboardView(BaseView):
             x = start_x
             for key_id, width in keyboard_row:
                 key_width = int(self.base_key_width * width + self.key_padding * (width - 1))
-                key_text = rl_to_display_key_map[key_id].encode('utf-8') if key_id in rl_to_display_key_map else b""
+                key_text = rl_to_display_key_map[key_id].encode('utf-8') if key_id is not None and key_id not in non_alpha_chars else b""
 
                 if key_id in (KEY_LEFT, KEY_DOWN, KEY_RIGHT):
                     self.key_height //= 2

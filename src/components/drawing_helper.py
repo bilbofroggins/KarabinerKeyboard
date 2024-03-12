@@ -89,8 +89,9 @@ class DrawingHelper:
                 DrawText(b"press keys...", col, row, config.font_size, RED)
                 width = MeasureText(b"press keys...", config.font_size)
         else:
-            width = DrawingHelper.clickable_link(from_text, row, col,
-                                                 config.font_size, config.default_text_color, click_callback, args)
+            width = modification.draw(row, col, config.font_size, config.default_text_color, click_callback, args)
+            # width = DrawingHelper.clickable_link(from_text, row, col,
+            #                                      config.font_size, config.default_text_color, click_callback, args)
 
         row += config.font_size
         return (row, width)

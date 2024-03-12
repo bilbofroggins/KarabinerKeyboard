@@ -18,7 +18,7 @@ class ListPanel(BaseView):
             text_width = MeasureText(option, config.font_size)
             if text_width > max_width:
                 max_width = text_width
-        return max_width + config.generic_padding  # Add some padding
+        return max_width + config.generic_padding
 
     def update(self):
         def callback(opt):

@@ -167,14 +167,62 @@ rl_to_display_key_map = {
     KEY_COMMA: ',',
     KEY_PERIOD: '.',
     KEY_SLASH: '/',
+    KEY_BACKSPACE: '⌫',
+    KEY_TAB: '⇥',
+    KEY_CAPS_LOCK: '⇪',
+    KEY_ENTER: '↵',
+    KEY_LEFT_SHIFT: 'L-⇧',
+    KEY_RIGHT_SHIFT: 'R-⇧',
+    KEY_SPACE: '␣',
+    KEY_LEFT_SUPER: 'L-⌘',
+    KEY_RIGHT_SUPER: 'R-⌘',
+    KEY_LEFT_ALT: 'L-⌥',
+    KEY_RIGHT_ALT: 'R-⌥',
+    KEY_LEFT_CONTROL: 'L-⌃',
+    KEY_RIGHT_CONTROL: 'R-⌃',
+    KEY_LEFT: '←',
+    KEY_UP: '↑',
+    KEY_DOWN: '↓',
+    KEY_RIGHT: '→',
+    KEY_PRINT_SCREEN: 'print',
+    KEY_SCROLL_LOCK: 'slock',
+    KEY_PAUSE: 'pause',
+    KEY_INSERT: 'ins',
+    KEY_HOME: '⇱',
+    KEY_PAGE_UP: '⇞',
+    KEY_DELETE: '⌦',
+    KEY_END: '⇲',
+    KEY_PAGE_DOWN: '⇟',
+    KEY_NUM_LOCK: '⇭',
+    KEY_KP_DIVIDE: 'n/',
+    KEY_KP_MULTIPLY: 'n*',
+    KEY_KP_SUBTRACT: 'n-',
+    KEY_KP_ADD: 'n+',
+    KEY_KP_ENTER: 'n=',
+    KEY_KP_1: 'n1',
+    KEY_KP_2: 'n2',
+    KEY_KP_3: 'n3',
+    KEY_KP_4: 'n4',
+    KEY_KP_5: 'n5',
+    KEY_KP_6: 'n6',
+    KEY_KP_7: 'n7',
+    KEY_KP_8: 'n8',
+    KEY_KP_9: 'n9',
+    KEY_KP_0: 'n0',
+    KEY_KP_DECIMAL: 'n.'
 }
 
 # Reverse mappings
 kb_to_rl_key_map = {v: k for k, v in rl_to_kb_key_map.items()}
 
 # Set of modification keys
-non_alpha_chars = set(['left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt',
-                   'right_alt', 'left_command', 'right_command', 'caps_lock', 'tab', 'return', 'delete_or_backspace',
-                       'up_arrow', 'left_arrow', 'right_arrow', 'down_arrow'])
+# non_alpha_chars = set(['left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt',
+#                    'right_alt', 'left_command', 'right_command', 'caps_lock', 'tab', 'return', 'delete_or_backspace',
+#                        'up_arrow', 'left_arrow', 'right_arrow', 'down_arrow'])
+non_alpha_chars = {KEY_LEFT_SHIFT, KEY_RIGHT_SHIFT, KEY_LEFT_CONTROL, KEY_RIGHT_CONTROL,
+                   KEY_LEFT_ALT, KEY_RIGHT_ALT, KEY_LEFT_SUPER, KEY_RIGHT_SUPER,
+                   KEY_CAPS_LOCK, KEY_TAB, KEY_ENTER, KEY_BACKSPACE, KEY_UP, KEY_LEFT,
+                   KEY_RIGHT, KEY_DOWN, KEY_SPACE}
+
 modification_keys = set(['left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt',
                      'right_alt', 'left_command', 'right_command'])
