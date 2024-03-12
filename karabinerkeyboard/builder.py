@@ -1,5 +1,9 @@
+import os
 import re
 import subprocess
+
+from karabinerkeyboard.notarization import notarize_app
+
 
 def modify_bundle_spec(spec_file, icon_path, bundle_id):
     with open(spec_file, 'r') as file:
@@ -41,8 +45,22 @@ def update_version_number():
 
     print(f"Version updated to: {updated_version_string}")
 
+def load_env_variables_from_file(env_file_path):
+    try:
+        with open(env_file_path, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    key, value = line.split('=', 1)
+                    os.environ[key.strip()] = value.strip()
+    except FileNotFoundError:
+        print(f"Error: The file {env_file_path} was not found.")
+    except Exception as e:
+        print(f"An error occurred while reading {env_file_path}: {e}")
+
 
 def bundle_app():
+    load_env_variables_from_file('.env')
     update_version_number()
 
     subprocess.run([
@@ -62,3 +80,5 @@ def bundle_app():
 
     # Run PyInstaller
     subprocess.run(["pyinstaller", spec_file])
+
+    notarize_app("pjcfifa@gmail.com", "GD76CFHAZT", "dist/KarabinerKeyboard.app", "KarabinerKeyboard.zip")

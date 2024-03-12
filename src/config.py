@@ -6,7 +6,7 @@ class config:
     window_width = 960
     window_height = 540
     small_font_size = 14
-    font_size = 18
+    font_size = 20
     large_font_size = 40
     generic_padding = 20
     list_padding = 10
