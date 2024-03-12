@@ -1,58 +1,52 @@
-import os
 import subprocess
-import time
-import json
+import os
 
 def run_command(command):
-    process = subprocess.run(command, shell=True, text=True, capture_output=True)
-    if process.returncode != 0:
-        print(f"Error running command: {command}\n{process.stderr}")
-        exit(process.returncode)
-    return process.stdout
+    """
+    Executes a command and prints output in real-time.
+    Returns the command output as a string.
+    """
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True)
+    output_lines = []
+    while True:
+        output_line = process.stdout.readline()
+        if not output_line and process.poll() is not None:
+            break
+        if output_line:
+            print(output_line.strip())
+            output_lines.append(output_line.strip())
+    return '\n'.join(output_lines)
 
 def notarize_app(apple_id, team_id, app_path, zip_name):
-    app_specific_password = os.environ.get("KK_APP_SPECIFIC_PASSWORD")
+    app_specific_password = os.getenv("KK_APP_SPECIFIC_PASSWORD")
     if not app_specific_password:
-        print("App-specific password not found in environment variables. Cannot notarize, but app has been created in ./dist")
+        print("App-specific password not found in environment variables but app built successfully")
         return
 
     # Sign the app
-    sign_command = f'codesign --deep --force --verbose --sign "Developer ID Application: Patrick Cunniff (GD76CFHAZT)" {app_path} --options=runtime'
-    print(run_command(sign_command))
+    sign_command = f'codesign --deep --force --verbose --sign "Developer ID Application: Patrick Cunniff (GD76CFHAZT)" "{app_path}" --options=runtime'
+    run_command(sign_command)
 
     # Zip the app
-    zip_command = f'ditto -c -k --keepParent {app_path} {zip_name}'
-    print(run_command(zip_command))
+    zip_command = f'ditto -c -k --keepParent "{app_path}" "{zip_name}"'
+    run_command(zip_command)
 
     # Submit for notarization
-    submit_command = f'xcrun notarytool submit --apple-id "{apple_id}" --team-id "{team_id}" --password "{app_specific_password}" {zip_name} --wait'
+    submit_command = f'xcrun notarytool submit "{zip_name}" --apple-id "{apple_id}" --team-id "{team_id}" --password "{app_specific_password}" --wait'
     submit_output = run_command(submit_command)
+
+    # Check if "Accepted" is in the output of the submit_command
+    if "Accepted" in submit_output:
+        print("Notarization Accepted.")
+        # Staple the app
+        staple_command = f'xcrun stapler staple "{app_path}"'
+        run_command(staple_command)
+    else:
+        print("Notarization may not be accepted, please check the output above for details.")
+
+    # Remove the zipped file
     try:
-        submission_info = json.loads(submit_output)
-        request_id = submission_info.get("id")
-    except (json.JSONDecodeError, KeyError):
-        print("Failed to parse notarization submission response.")
-        return
-
-    # Check notarization status in a loop
-    while True:
-        info_command = f'xcrun notarytool info {request_id} --apple-id "{apple_id}" --team-id "{team_id}" --password "{app_specific_password}"'
-        info_output = run_command(info_command)
-        try:
-            info_status = json.loads(info_output)
-            if info_status.get("status") == "Accepted":
-                print("Notarization succeeded.")
-                break
-            elif info_status.get("status") == "Invalid":
-                print("Notarization failed.")
-                print(info_output)
-                return
-        except (json.JSONDecodeError, KeyError):
-            print("Failed to parse notarization info response.")
-
-        print("Waiting for notarization to complete...")
-        time.sleep(60)  # Wait for a minute before checking again
-
-    # Staple the app
-    staple_command = f'xcrun stapler staple {app_path}'
-    print(run_command(staple_command))
+        os.remove(zip_name)
+        print(f"Removed zipped file: {zip_name}")
+    except OSError as e:
+        print(f"Error removing zipped file {zip_name}: {e}")
