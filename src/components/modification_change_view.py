@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 from src.components.drawing_helper import DrawingHelper
 from src.config import config
 from src.logic.condition import Condition
@@ -59,8 +59,8 @@ class ModificationChangeView():
         KarabinerConfig().write_overrides(self.modification_pairs)
 
     def draw_instructions(self, row, col):
-        text = b"Press keys and hold to rebind..."
-        DrawText(text, col, row, config.font_size, config.default_text_color)
+        text = "Press keys and hold to rebind..."
+        ray.draw_text(text, col, row, config.font_size, config.default_text_color)
 
     def draw_add_row(self, row, col):
         being_edited = self.to_modification_being_edited is self.new_modification
@@ -69,21 +69,21 @@ class ModificationChangeView():
             self.to_modification_being_edited = self.new_modification
             self.keyboard_state_controller.something_is_doing_overrides()
 
-        DrawText(str(self.keyboard_state_controller.locked_Modification).encode('utf-8'), col, row, config.font_size, self.keyboard_state_controller.color())
-        width = MeasureText(
-            str(self.keyboard_state_controller.locked_Modification).encode('utf-8'),
+        ray.draw_text(str(self.keyboard_state_controller.locked_Modification), col, row, config.font_size, self.keyboard_state_controller.color())
+        width = ray.measure_text(
+            str(self.keyboard_state_controller.locked_Modification),
             config.font_size) + config.generic_padding
-        DrawText("->".encode('utf-8'), col + width, row, config.font_size,
+        ray.draw_text("->", col + width, row, config.font_size,
                  config.default_text_color)
-        width += MeasureText(
-            "->".encode('utf-8'),
+        width += ray.measure_text(
+            "->",
             config.font_size) + config.generic_padding
 
         if self.to_modification_being_edited == self.new_modification:
             DrawingHelper.modification_view(self.new_modification, being_edited,
                                             row, col + width, edit_callback)
         else:
-            DrawingHelper.clickable_link("Add new binding...", row, col + width, config.font_size, PURPLE, edit_callback)
+            DrawingHelper.clickable_link("Add new binding...", row, col + width, config.font_size, ray.PURPLE, edit_callback)
 
     def open_ask_panel(self, mod_pair):
         self.ask_view.show(mod_pair)
@@ -92,7 +92,7 @@ class ModificationChangeView():
         def background_click():
             for callback in self.background_listeners.values():
                 callback()
-        mouse_position = GetMousePosition()
+        mouse_position = ray.get_mouse_position()
         if DrawingHelper.is_mouse_over(
                 mouse_position.x, mouse_position.y,
                 start_col, start_row,
@@ -106,7 +106,7 @@ class ModificationChangeView():
         max_from_end = 0
 
         if self.ask_highlight:
-            DrawRectangle(start_col, self.ask_highlight, config.window_width, config.font_size, PURPLE)
+            ray.draw_rectangle(start_col, self.ask_highlight, config.window_width, config.font_size, ray.PURPLE)
 
         # FROM modifications
         row = start_row
@@ -125,9 +125,9 @@ class ModificationChangeView():
         width = 0
         col = max_from_end
         for override_pair in self.modification_pairs.values():
-            DrawText("->".encode('utf-8'), col, row, config.font_size, config.default_text_color)
-            width = MeasureText(
-                    "->".encode('utf-8'),
+            ray.draw_text("->", col, row, config.font_size, config.default_text_color)
+            width = ray.measure_text(
+                    "->",
                     config.font_size)
             row += config.font_size
 
@@ -147,8 +147,8 @@ class ModificationChangeView():
         row = start_row
         col = max_from_end
         for i, _ in self.modification_pairs.items():
-            DrawText(" ::".encode('utf-8'), col, row, config.font_size, config.default_text_color)
-            width = MeasureText(" ::".encode('utf-8'), config.font_size)
+            ray.draw_text(" ::", col, row, config.font_size, config.default_text_color)
+            width = ray.measure_text(" ::", config.font_size)
             row += config.font_size
         max_from_end = max(col + width + config.generic_padding, max_from_end)
 
@@ -169,7 +169,7 @@ class ModificationChangeView():
             def edit_callback(to_del):
                 KarabinerConfig().remove_override(to_del)
 
-            DrawingHelper.clickable_link("x", row, col, config.font_size, RED, edit_callback, [i])
+            DrawingHelper.clickable_link("x", row, col, config.font_size, ray.RED, edit_callback, [i])
             row += config.font_size
 
         return row

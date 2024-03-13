@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 
 from src.devices.keyboard_controller import KeyboardController
 from src.devices.mouse_controller import MouseController
@@ -13,22 +13,22 @@ from config import config
 class MyApp:
     def __init__(self):
         title = "Karabiner Keyboard"
-        InitWindow(config.window_width, config.window_height, title.encode('utf-8'))
-        SetTargetFPS(60)
-        SetExitKey(KEY_NULL)
+        ray.init_window(config.window_width, config.window_height, title)
+        ray.set_target_fps(60)
+        ray.set_exit_key(ray.KEY_NULL)
         self.list_panel = ListPanel()
         self.content_panel = ContentPanel(self.list_panel)
         BundleIds()
 
     def run(self):
-        while not WindowShouldClose():
+        while not ray.window_should_close():
             KeyboardController.update()
 
             for panel in panel_registry:
                 panel.update()
 
-            BeginDrawing()
-            ClearBackground(RAYWHITE)
+            ray.begin_drawing()
+            ray.clear_background(ray.RAYWHITE)
 
             for panel in panel_registry:
                 panel.draw()
@@ -36,6 +36,6 @@ class MyApp:
             MouseController.draw()
             handle_clicks()
 
-            EndDrawing()
+            ray.end_drawing()
 
-        CloseWindow()
+        ray.close_window()

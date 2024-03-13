@@ -1,5 +1,5 @@
 import sys
-from raylib import *
+import pyray as ray
 
 
 class config:
@@ -12,10 +12,10 @@ class config:
     list_padding = 10
     small_padding = 5
     karabiner_file = '~/.config/karabiner/karabiner.json'
-    default_text_color = BLACK
-    secondary_color = BLUE
-    background_color = GRAY
-    disabled_color = LIGHTGRAY
+    default_text_color = ray.BLACK
+    secondary_color = ray.BLUE
+    background_color = ray.GRAY
+    disabled_color = ray.LIGHTGRAY
     scroll_speed = 4
 
 class config_debug:

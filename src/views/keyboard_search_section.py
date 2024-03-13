@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 
 from src.config import config
 from src.logic.karabiner_config import KarabinerConfig
@@ -59,8 +59,8 @@ class KeyboardSearchSection():
             scrollbar_width = 10
             scrollbar_column = config.window_width - scrollbar_width - 1
 
-            DrawRectangle(scrollbar_column, self.start_row + scrollbar_position,
-                          scrollbar_width, scrollbar_height, VIOLET)
+            ray.draw_rectangle(scrollbar_column, self.start_row + scrollbar_position,
+                          scrollbar_width, scrollbar_height, ray.VIOLET)
 
     def draw_overrides(self, row, col):
         self.start_row = row
@@ -80,7 +80,7 @@ class KeyboardSearchSection():
 
         self.modification_change_view.modification_pairs = pairs_to_show
 
-        self.scroll_row_offset = self.set_scroll_offset(self.scroll_row_offset + int(GetMouseWheelMove() * config.scroll_speed), len(pairs_to_show) + 1)
+        self.scroll_row_offset = self.set_scroll_offset(self.scroll_row_offset + int(ray.get_mouse_wheel_move() * config.scroll_speed), len(pairs_to_show) + 1)
         row += self.scroll_row_offset
 
         # Draw
@@ -88,5 +88,5 @@ class KeyboardSearchSection():
         if row:
             self.modification_change_view.draw_add_row(row, col)
 
-        DrawRectangle(col, 0, config.window_width - col, self.start_row, config.background_color)
+        ray.draw_rectangle(col, 0, config.window_width - col, self.start_row, config.background_color)
         self.draw_scrollbar(len(pairs_to_show))

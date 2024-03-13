@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 from src.config import config
 from src.devices.mouse_controller import MouseController
 from src.logic.modification import Modification
@@ -14,16 +14,16 @@ class DrawingHelper:
     def clickable_link(text, row, col, fontSize, color, callback, args=None):
         if args is None:
             args = []
-        mouse_position = GetMousePosition()
-        text = text.encode('utf-8')
+        mouse_position = ray.get_mouse_position()
+        text = text
 
-        DrawText(text, col, row, fontSize, color)
-        width = MeasureText(text, fontSize)
+        ray.draw_text(text, col, row, fontSize, color)
+        width = ray.measure_text(text, fontSize)
 
         if DrawingHelper.is_mouse_over(mouse_position.x, mouse_position.y, col,
                                    row, width, fontSize):
             MouseController.set_hand_mouse(True)
-            DrawLine(col, row + fontSize, col + width,
+            ray.draw_line(col, row + fontSize, col + width,
                      row + fontSize, config.default_text_color)
 
             ClickHandler.append(callback, args)
@@ -35,21 +35,21 @@ class DrawingHelper:
                args=None):
         if args is None:
             args = []
-        mouse_position = GetMousePosition()
-        text = text.encode('utf-8')
+        mouse_position = ray.get_mouse_position()
+        text = text
 
-        DrawRectangle(col, row, width, height, bg_color)
+        ray.draw_rectangle(col, row, width, height, bg_color)
 
         if DrawingHelper.is_mouse_over(
                 mouse_position.x, mouse_position.y,
                 col, row, width, height
         ):
             MouseController.set_hand_mouse(True)
-            DrawRectangle(col, row, width, height, DARKBROWN)
+            ray.get_mouse_position(col, row, width, height, ray.DARKBROWN)
 
             ClickHandler.append(callback, args)
 
-        DrawText(text, col, row, font_size, text_color)
+        ray.draw_text(text, col, row, font_size, text_color)
 
         return width
 
@@ -57,13 +57,13 @@ class DrawingHelper:
     def highlight_box(row, col, height, width, color, hovercolor, callback, args=None):
         if args is None:
             args = []
-        mouse_position = GetMousePosition()
+        mouse_position = ray.get_mouse_position()
 
-        DrawRectangle(col, row, width, height, color)
+        ray.draw_rectangle(col, row, width, height, color)
 
         if DrawingHelper.is_mouse_over(mouse_position.x, mouse_position.y, col,
                                             row, width, height):
-            DrawRectangle(col, row, width, height, hovercolor)
+            ray.draw_rectangle(col, row, width, height, hovercolor)
             MouseController.set_hand_mouse(True)
 
             ClickHandler.append(callback, args)
@@ -79,15 +79,15 @@ class DrawingHelper:
 
         if being_edited:
             if modification.edit_object.eo_currently_changing():
-                DrawText(
-                    str(modification.edit_object).encode('utf-8'),
-                    col, row, config.font_size, RED)
-                width = MeasureText(
-                    str(modification.edit_object).encode('utf-8'),
+                ray.draw_text(
+                    str(modification.edit_object),
+                    col, row, config.font_size, ray.RED)
+                width = ray.measure_text(
+                    str(modification.edit_object),
                     config.font_size)
             else:
-                DrawText(b"press keys...", col, row, config.font_size, RED)
-                width = MeasureText(b"press keys...", config.font_size)
+                ray.draw_text("press keys...", col, row, config.font_size, ray.RED)
+                width = ray.measure_text("press keys...", config.font_size)
         else:
             width = DrawingHelper.clickable_link(from_text, row, col,
                                                  config.font_size, config.default_text_color, click_callback, args)

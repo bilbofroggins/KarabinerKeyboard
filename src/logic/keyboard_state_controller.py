@@ -1,4 +1,4 @@
-from raylib import GetFPS, YELLOW, ORANGE, BLACK
+import pyray as ray
 
 from src.devices.keyboard_controller import KeyboardController
 from src.logic.modification import Modification
@@ -39,11 +39,11 @@ class KeyboardStateController(BaseView):
 
     def color(self):
         if self.state == STATE_IS_PRESSING:
-            return ORANGE
+            return ray.ORANGE
         elif self.state in (STATE_LOCKED, STATE_BUNDLE_SEARCH):
-            return YELLOW
+            return ray.YELLOW
         else:
-            return BLACK
+            return ray.BLACK
 
     def set_state(self, new_state):
         self.state = new_state
@@ -54,7 +54,7 @@ class KeyboardStateController(BaseView):
             self.notify_listeners()
             return
 
-        fps = max(GetFPS(), 1)
+        fps = max(ray.get_fps(), 1)
         if self.state == STATE_EMPTY:
             self.pressed_keys = []
             self.locked_keys = []
