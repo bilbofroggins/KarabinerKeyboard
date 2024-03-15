@@ -5,7 +5,7 @@ from src.logic.bundle_ids import BundleIds
 from src.logic.condition import Condition
 from src.logic.keyboard_state_controller import *
 from src.panels.base_panel import BaseView
-from raylib import *
+import pyray as ray
 
 from src.panels.click_handler import ClickHandler
 
@@ -44,18 +44,18 @@ class AskView(BaseView):
         self.side_width = self.window_width - self.button_width
 
     def draw_toggle(self, row, col, val):
-        left_color = GREEN if val == 0 else GRAY
-        right_color = RED if val == 1 else GRAY
+        left_color = ray.GREEN if val == 0 else ray.GRAY
+        right_color = ray.RED if val == 1 else ray.GRAY
 
         rec_size = config.small_font_size
-        DrawRectangle(col - (rec_size//2), row, rec_size, rec_size, GRAY)
-        DrawCircle(col - (rec_size//2), row + (config.small_font_size//2), (config.small_font_size//2), left_color)
-        DrawCircle(col + (rec_size//2), row + (config.small_font_size//2), (config.small_font_size//2), right_color)
+        ray.draw_rectangle(col - (rec_size//2), row, rec_size, rec_size, ray.GRAY)
+        ray.draw_circle(col - (rec_size//2), row + (config.small_font_size//2), (config.small_font_size//2), left_color)
+        ray.draw_circle(col + (rec_size//2), row + (config.small_font_size//2), (config.small_font_size//2), right_color)
 
         def callback():
             self.include_type_str = "frontmost_application_unless" if self.include_type_str == "frontmost_application_if" else "frontmost_application_if"
 
-        mouse_position = GetMousePosition()
+        mouse_position = ray.get_mouse_position()
         if DrawingHelper.is_mouse_over(
                 mouse_position.x, mouse_position.y,
                 col - (rec_size // 2) - (config.small_font_size // 2),
@@ -75,35 +75,35 @@ class AskView(BaseView):
             toggle_val = 0
         toggle_result = self.draw_toggle(row, (self.start_col_side + config.window_width)//2, toggle_val)
 
-        DrawText(
-            "Include".encode('utf-8'),
+        ray.draw_text(
+            "Include",
             self.start_col_side + config.generic_padding,
             row,
-            config.small_font_size, GREEN if toggle_result == 0 else GRAY
+            config.small_font_size, ray.GREEN if toggle_result == 0 else ray.GRAY
         )
 
-        exclude_width = MeasureText("Exclude".encode('utf-8'), config.small_font_size)
-        DrawText(
-            "Exclude".encode('utf-8'),
+        exclude_width = ray.measure_text("Exclude", config.small_font_size)
+        ray.draw_text(
+            "Exclude",
             config.window_width - exclude_width - config.generic_padding,
             row,
-            config.small_font_size, RED if toggle_result == 1 else GRAY
+            config.small_font_size, ray.RED if toggle_result == 1 else ray.GRAY
         )
         return row + config.small_font_size + config.generic_padding
 
     def draw_text_box(self, row):
         textbox_width = self.side_width - 100
         textbox_start_col = (self.start_col_side + config.window_width)//2 - textbox_width//2
-        DrawRectangle(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), WHITE)
+        ray.draw_rectangle(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), ray.WHITE)
         if (self.input_active):
-            DrawRectangleLines(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), RED)
+            ray.draw_rectangle_lines(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), ray.RED)
         else:
-            DrawRectangleLines(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), DARKBLUE)
+            ray.draw_rectangle_lines(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), ray.DARKBLUE)
 
         def callback():
             self.show_results = True
 
-        mouse_position = GetMousePosition()
+        mouse_position = ray.get_mouse_position()
         if DrawingHelper.is_mouse_over(
                 mouse_position.x, mouse_position.y,
                 textbox_start_col, row, textbox_width, int(config.small_font_size*1.4)
@@ -113,21 +113,21 @@ class AskView(BaseView):
         padding = (config.font_size*1.4 - config.font_size)//2
         textbox_start_col = int(textbox_start_col + padding)
         row = int(row + padding)
-        width = MeasureText(self.search_text.encode('utf-8'), config.small_font_size)
-        DrawText(self.search_text.encode('utf-8'), textbox_start_col, row, config.small_font_size, config.default_text_color)
+        width = ray.measure_text(self.search_text, config.small_font_size)
+        ray.draw_text(self.search_text, textbox_start_col, row, config.small_font_size, config.default_text_color)
         if self.frame_counter < 30 and self.input_active:
-            DrawText(b"|", textbox_start_col + width, row, config.small_font_size, config.default_text_color)
+            ray.draw_text("|", textbox_start_col + width, row, config.small_font_size, config.default_text_color)
 
         if self.input_active:
-            key = GetCharPressed()
+            key = ray.get_char_pressed()
             # Check if more characters have been pressed on the same frame
             while key > 0:
                 self.show_results = True
                 if 32 <= key <= 125:
                     self.search_text += chr(key)
-                key = GetCharPressed()
+                key = ray.get_char_pressed()
 
-            if IsKeyPressed(KEY_BACKSPACE) and len(self.search_text) > 0:
+            if ray.is_key_pressed(ray.KEY_BACKSPACE) and len(self.search_text) > 0:
                 self.show_results = True
                 self.search_text = self.search_text[:-1]  # Remove the last character
 
@@ -186,8 +186,8 @@ class AskView(BaseView):
                 width=width,
                 height=config.small_font_size*2,
                 font_size=config.small_font_size,
-                bg_color=LIGHTGRAY,
-                text_color=DARKBLUE,
+                bg_color=ray.LIGHTGRAY,
+                text_color=ray.DARKBLUE,
                 callback=callback,
                 args=[app]
             )
@@ -212,8 +212,8 @@ class AskView(BaseView):
             width=width,
             height=50,
             font_size=config.small_font_size,
-            bg_color=BLUE,
-            text_color=WHITE,
+            bg_color=ray.BLUE,
+            text_color=ray.WHITE,
             callback=save
         )
 
@@ -233,8 +233,8 @@ class AskView(BaseView):
             for callback in self.background_listeners.values():
                 callback()
 
-        DrawRectangle(self.start_col, 0, config.window_width, config.window_height, ORANGE)
-        mouse_position = GetMousePosition()
+        ray.draw_rectangle(self.start_col, 0, config.window_width, config.window_height, ray.ORANGE)
+        mouse_position = ray.get_mouse_position()
         if DrawingHelper.is_mouse_over(
                 mouse_position.x, mouse_position.y,
                 self.start_col, 0,
@@ -243,18 +243,18 @@ class AskView(BaseView):
             ClickHandler.append(background_click, [])
 
         # Close Button
-        DrawingHelper.highlight_box(0, self.start_col, config.window_height, self.button_width, PURPLE, BLUE, close_ask_window)
-        arrow_width = MeasureText(">".encode('utf-8'), config.large_font_size)
-        DrawText(
-            ">".encode('utf-8'),
+        DrawingHelper.highlight_box(0, self.start_col, config.window_height, self.button_width, ray.PURPLE, ray.BLUE, close_ask_window)
+        arrow_width = ray.measure_text(">", config.large_font_size)
+        ray.draw_text(
+            ">",
             self.start_col + (self.button_width//2) - (arrow_width//2),
             config.window_height//2 - (arrow_width//2),
             config.large_font_size, config.default_text_color
         )
 
-        text_width = MeasureText("Application Specific Keybinding".encode('utf-8'), config.small_font_size)
-        DrawText(
-            "Application Specific Keybinding".encode('utf-8'),
+        text_width = ray.measure_text("Application Specific Keybinding", config.small_font_size)
+        ray.draw_text(
+            "Application Specific Keybinding",
             self.start_col_side + (self.side_width//2) - (text_width // 2),
             config.generic_padding,
             config.small_font_size, config.default_text_color
@@ -262,9 +262,9 @@ class AskView(BaseView):
 
         row = self.draw_include_exclude(config.generic_padding*2 + config.small_font_size)
 
-        text_width = MeasureText("For applications".encode('utf-8'), config.small_font_size)
-        DrawText(
-            "For applications:".encode('utf-8'),
+        text_width = ray.measure_text("For applications", config.small_font_size)
+        ray.draw_text(
+            "For applications:",
             (self.side_width//2) + self.start_col_side - text_width//2,
             row,
             config.small_font_size,

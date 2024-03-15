@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 
 from src.config import config
 from src.logic.bundle import Bundle
@@ -17,9 +17,9 @@ class Condition:
 
     def color(self):
         if self.include_type_str == self.include_str:
-            return GREEN
+            return ray.GREEN
         elif self.include_type_str == self.exclude_str:
-            return RED
+            return ray.RED
         return config.disabled_color
 
     def __bool__(self):

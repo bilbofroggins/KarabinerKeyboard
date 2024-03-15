@@ -82,7 +82,7 @@ def bundle_app():
     ])
 
     spec_file = 'KarabinerKeyboard.spec'
-    icon_path = 'images/icon.icns'
+    icon_path = 'resources/icon.icns'
     bundle_identifier = 'com.patcunniff.karabinerkeyboard'
     modify_bundle_spec(spec_file, icon_path, bundle_identifier)
 

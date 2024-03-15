@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 
 from src.config import config
 from src.logic.karabiner_config import KarabinerConfig
@@ -59,8 +59,8 @@ class KeyboardSearchSection():
             scrollbar_width = 10
             scrollbar_column = config.window_width - scrollbar_width - 1
 
-            DrawRectangle(scrollbar_column, self.start_row + scrollbar_position,
-                          scrollbar_width, scrollbar_height, VIOLET)
+            ray.draw_rectangle(scrollbar_column, self.start_row + scrollbar_position,
+                          scrollbar_width, scrollbar_height, ray.VIOLET)
 
     def draw_overrides(self, row, col):
         self.start_row = row
@@ -71,16 +71,16 @@ class KeyboardSearchSection():
         pressed_keys = set([rl_to_kb_key_map[key] for key in self.keyboard_state_controller.locked_keys])
         if len(pressed_keys):
             for i, modification_pair in self.karabiner_config.modification_pairs.items():
-                if pressed_keys <= set(str(modification_pair.modification_from).split(DELIMITER)):
+                if pressed_keys <= modification_pair.modification_from.set():
                     pairs_to_show[i] = modification_pair
                     continue
-                elif pressed_keys <= set(str(modification_pair.modification_to).split(DELIMITER)):
+                elif pressed_keys <= modification_pair.modification_to.set():
                     pairs_to_show[i] = modification_pair
                     continue
 
         self.modification_change_view.modification_pairs = pairs_to_show
 
-        self.scroll_row_offset = self.set_scroll_offset(self.scroll_row_offset + int(GetMouseWheelMove() * config.scroll_speed), len(pairs_to_show) + 1)
+        self.scroll_row_offset = self.set_scroll_offset(self.scroll_row_offset + int(ray.get_mouse_wheel_move() * config.scroll_speed), len(pairs_to_show) + 1)
         row += self.scroll_row_offset
 
         # Draw
@@ -88,5 +88,5 @@ class KeyboardSearchSection():
         if row:
             self.modification_change_view.draw_add_row(row, col)
 
-        DrawRectangle(col, 0, config.window_width - col, self.start_row, config.background_color)
+        ray.draw_rectangle(col, 0, config.window_width - col, self.start_row, config.background_color)
         self.draw_scrollbar(len(pairs_to_show))

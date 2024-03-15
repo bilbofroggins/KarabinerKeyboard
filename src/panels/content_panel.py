@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 from src.config import config
 from src.panels.base_panel import BaseView
 from src.versions.update_view import UpdateView
@@ -25,11 +25,11 @@ class ContentPanel(BaseView):
         left_panel_width = self.list_panel.panel_width
 
         # Draw the background for the content panel
-        DrawRectangle(left_panel_width, 0, config.window_width - left_panel_width, config.window_height,
+        ray.draw_rectangle(left_panel_width, 0, config.window_width - left_panel_width, config.window_height,
                       self.background_color)
 
         if self.list_panel.selected_option:
-            if self.list_panel.selected_option.decode('utf-8') == "Keyboard":
+            if self.list_panel.selected_option == "Keyboard":
                 # Draw two lines of text at the bottom
                 bottom_text_row = 280  # Adjusted Y position of the bottom text section
                 self.keyboard_search_section.draw_overrides(
@@ -39,9 +39,9 @@ class ContentPanel(BaseView):
 
                 # Draw keyboard with some padding
                 self.keyboard_view.draw_keyboard(left_panel_width + config.generic_padding, config.generic_padding)
-            elif self.list_panel.selected_option.decode('utf-8') == "Overrides":
+            elif self.list_panel.selected_option == "Overrides":
                 self.overrides_view.draw_overrides(left_panel_width + config.generic_padding, config.generic_padding)
-            elif self.list_panel.selected_option.decode('utf-8') == "Help":
+            elif self.list_panel.selected_option == "Help":
                 self.help_view.draw_help(left_panel_width + config.generic_padding,
                                                config.generic_padding)
 

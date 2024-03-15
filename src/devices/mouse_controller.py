@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 
 class MouseController():
     is_hand_mouse = False
@@ -16,9 +16,9 @@ class MouseController():
     def draw():
         if MouseController.is_hand_mouse:
             MouseController.set_hand_mouse(False)
-            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND)
+            ray.set_mouse_cursor(ray.MOUSE_CURSOR_POINTING_HAND)
         elif MouseController.is_hand_type:
             MouseController.set_hand_type(False)
-            SetMouseCursor(MOUSE_CURSOR_IBEAM)
+            ray.set_mouse_cursor(ray.MOUSE_CURSOR_IBEAM)
         else:
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT)
+            ray.set_mouse_cursor(ray.MOUSE_CURSOR_DEFAULT)

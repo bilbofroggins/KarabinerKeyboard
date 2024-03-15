@@ -1,4 +1,4 @@
-from raylib import IsMouseButtonPressed, MOUSE_BUTTON_LEFT
+import pyray as ray
 
 
 class ClickHandler:
@@ -11,7 +11,7 @@ class ClickHandler:
 def handle_clicks():
     while ClickHandler.stack:
         callback, args = ClickHandler.stack.pop()
-        if IsMouseButtonPressed(MOUSE_BUTTON_LEFT):
+        if ray.is_mouse_button_pressed(ray.MOUSE_BUTTON_LEFT):
             callback(*args) if len(args) else callback()
             break
 

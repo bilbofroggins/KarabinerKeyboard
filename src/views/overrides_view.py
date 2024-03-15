@@ -1,4 +1,4 @@
-from raylib import *
+import pyray as ray
 
 from src.components.modification_change_view import ModificationChangeView
 from src.config import config
@@ -52,15 +52,15 @@ class OverridesView():
             scrollbar_width = 10
             scrollbar_column = config.window_width - scrollbar_width - 1
 
-            DrawRectangle(scrollbar_column, self.start_row + scrollbar_position,
-                          scrollbar_width, scrollbar_height, VIOLET)
+            ray.draw_rectangle(scrollbar_column, self.start_row + scrollbar_position,
+                          scrollbar_width, scrollbar_height, ray.VIOLET)
 
 
     def draw_overrides(self, start_col, start_row):
         self.modification_change_view.update_fn()
         self.modification_change_view.modification_pairs = self.karabiner_config.modification_pairs
 
-        self.scroll_row_offset = self.set_scroll_offset(self.scroll_row_offset + int(GetMouseWheelMove() * config.scroll_speed), len(self.modification_change_view.modification_pairs) + 1)
+        self.scroll_row_offset = self.set_scroll_offset(self.scroll_row_offset + int(ray.get_mouse_wheel_move() * config.scroll_speed), len(self.modification_change_view.modification_pairs) + 1)
         start_row += self.scroll_row_offset
 
         self.modification_change_view.draw_overrides(start_row, start_col)

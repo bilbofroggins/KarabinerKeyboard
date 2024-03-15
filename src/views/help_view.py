@@ -1,6 +1,6 @@
 import threading
 
-from raylib import *
+import pyray as ray
 
 from src.config import config
 from src.logic.karabiner_config import KarabinerConfig
@@ -25,35 +25,35 @@ class HelpView(BaseView):
         if self.quitting_done_flag[0] == True:
             sys.exit(0)
         elif self.is_quitting:
-            DrawText(b"Restarting...",
+            ray.draw_text("Restarting...",
                      start_x, start_y, config.font_size * 4, config.default_text_color)
             return
 
-        DrawText(f"Version: {__version__}".encode('utf-8'),
+        ray.draw_text(f"Version: {__version__}",
                  start_x, start_y, config.font_size, config.default_text_color)
         start_y += config.font_size
-        DrawText(b"This application is pre-alpha and may screw up your karabiner file",
+        ray.draw_text("This application is pre-alpha and may screw up your karabiner file",
                  start_x, start_y, config.font_size, config.default_text_color)
         start_y += config.font_size
-        DrawText(b"We save a copy of your karabiner config file before we make changes to it",
+        ray.draw_text("We save a copy of your karabiner config file before we make changes to it",
                  start_x, start_y, config.font_size, config.default_text_color)
         start_y += config.font_size
-        DrawText(b"Resetting your karabiner file will destroy all changes you've made",
+        ray.draw_text("Resetting your karabiner file will destroy all changes you've made",
                  start_x, start_y, config.font_size, config.default_text_color)
         start_y += config.font_size
-        DrawText(b"through this app",
+        ray.draw_text("through this app",
                  start_x, start_y, config.font_size, config.default_text_color)
         start_y += config.font_size * 2
 
         if KarabinerConfig().backup_exists():
             DrawingHelper.clickable_link("Reset", start_y, start_x, config.font_size, config.default_text_color, KarabinerConfig().help_blow_away_config)
         else:
-            DrawText(b"(No changes have been made to your keybindings so far)",
+            ray.draw_text("(No changes have been made to your keybindings so far)",
                  start_x, start_y, config.font_size, config.default_text_color)
 
         start_y += config.font_size * 3
         if not self.is_updated:
-            DrawText(f"Update available: {self.latest_version}".encode('utf-8'),
+            ray.draw_text(f"Update available: {self.latest_version}",
                      start_x, start_y, config.font_size, config.default_text_color)
             start_y += config.font_size * 2
             DrawingHelper.clickable_link("Update", start_y, start_x, config.font_size, config.default_text_color, self.update_app, [self.latest_version])
