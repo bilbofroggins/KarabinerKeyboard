@@ -167,14 +167,60 @@ rl_to_display_key_map = {
     ray.KEY_COMMA: ',',
     ray.KEY_PERIOD: '.',
     ray.KEY_SLASH: '/',
+    ray.KEY_BACKSPACE: '⌫',
+    ray.KEY_TAB: '⇥',
+    ray.KEY_CAPS_LOCK: '⇪',
+    ray.KEY_ENTER: '↵',
+    ray.KEY_LEFT_SHIFT: '⇧',
+    ray.KEY_RIGHT_SHIFT: '⇧',
+    ray.KEY_SPACE: 'space',
+    ray.KEY_LEFT_SUPER: '⌘',
+    ray.KEY_RIGHT_SUPER: '⌘',
+    ray.KEY_LEFT_ALT: '⌥',
+    ray.KEY_RIGHT_ALT: '⌥',
+    ray.KEY_LEFT_CONTROL: '⌃',
+    ray.KEY_RIGHT_CONTROL: '⌃',
+    ray.KEY_LEFT: '←',
+    ray.KEY_UP: '↑',
+    ray.KEY_DOWN: '↓',
+    ray.KEY_RIGHT: '→',
+    ray.KEY_PRINT_SCREEN: 'print',
+    ray.KEY_SCROLL_LOCK: 'slock',
+    ray.KEY_PAUSE: 'pause',
+    ray.KEY_INSERT: 'ins',
+    ray.KEY_HOME: '⇱',
+    ray.KEY_PAGE_UP: '⇞',
+    ray.KEY_DELETE: '⌦',
+    ray.KEY_END: '⇲',
+    ray.KEY_PAGE_DOWN: '⇟',
+    ray.KEY_NUM_LOCK: '⇭',
+    ray.KEY_KP_DIVIDE: 'keypad_/',
+    ray.KEY_KP_MULTIPLY: 'keypad_*',
+    ray.KEY_KP_SUBTRACT: 'keypad_-',
+    ray.KEY_KP_ADD: 'keypad_+',
+    ray.KEY_KP_ENTER: 'keypad_=',
+    ray.KEY_KP_1: 'keypad_1',
+    ray.KEY_KP_2: 'keypad_2',
+    ray.KEY_KP_3: 'keypad_3',
+    ray.KEY_KP_4: 'keypad_4',
+    ray.KEY_KP_5: 'keypad_5',
+    ray.KEY_KP_6: 'keypad_6',
+    ray.KEY_KP_7: 'keypad_7',
+    ray.KEY_KP_8: 'keypad_8',
+    ray.KEY_KP_9: 'keypad_9',
+    ray.KEY_KP_0: 'keypad_0',
+    ray.KEY_KP_DECIMAL: 'keypad_.'
 }
+
+special_chars = set([ray.KEY_BACKSPACE,ray.KEY_TAB,ray.KEY_CAPS_LOCK,ray.KEY_ENTER,ray.KEY_LEFT_SHIFT,ray.KEY_RIGHT_SHIFT,
+ray.KEY_LEFT_SUPER,ray.KEY_RIGHT_SUPER,ray.KEY_LEFT_ALT,ray.KEY_RIGHT_ALT,ray.KEY_LEFT_CONTROL,ray.KEY_RIGHT_CONTROL,ray.KEY_LEFT,ray.KEY_UP,
+ray.KEY_DOWN,ray.KEY_RIGHT,ray.KEY_HOME,ray.KEY_PAGE_UP,ray.KEY_DELETE,ray.KEY_END,ray.KEY_PAGE_DOWN,ray.KEY_NUM_LOCK])
 
 # Reverse mappings
 kb_to_rl_key_map = {v: k for k, v in rl_to_kb_key_map.items()}
+kb_to_rl_key_map['command'] = ray.KEY_LEFT_SUPER
+kb_to_rl_key_map['control'] = ray.KEY_LEFT_CONTROL
 
 # Set of modification keys
-non_alpha_chars = set(['left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt',
-                   'right_alt', 'left_command', 'right_command', 'caps_lock', 'tab', 'return', 'delete_or_backspace',
-                       'up_arrow', 'left_arrow', 'right_arrow', 'down_arrow'])
 modification_keys = set(['left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt',
                      'right_alt', 'left_command', 'right_command'])

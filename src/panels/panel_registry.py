@@ -1,1 +1,0 @@
-panel_registry = []

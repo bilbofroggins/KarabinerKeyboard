@@ -71,10 +71,10 @@ class KeyboardSearchSection():
         pressed_keys = set([rl_to_kb_key_map[key] for key in self.keyboard_state_controller.locked_keys])
         if len(pressed_keys):
             for i, modification_pair in self.karabiner_config.modification_pairs.items():
-                if pressed_keys <= set(str(modification_pair.modification_from).split(DELIMITER)):
+                if pressed_keys <= modification_pair.modification_from.set():
                     pairs_to_show[i] = modification_pair
                     continue
-                elif pressed_keys <= set(str(modification_pair.modification_to).split(DELIMITER)):
+                elif pressed_keys <= modification_pair.modification_to.set():
                     pairs_to_show[i] = modification_pair
                     continue
 

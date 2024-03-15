@@ -1,4 +1,4 @@
-from src.logic.key_mappings import rl_to_kb_key_map, modification_keys
+from src.logic.key_mappings import *
 
 DELIMITER = ' + '
 
@@ -56,6 +56,11 @@ class Modification:
             return self.key
 
         return DELIMITER.join(self.modifiers) + DELIMITER + self.key
+
+    def set(self):
+        res = set(self.modifiers)
+        res.add(self.key)
+        return res
 
     # Only used by internal edit_object
     def eo_currently_changing(self):

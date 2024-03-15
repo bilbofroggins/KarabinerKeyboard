@@ -1,4 +1,4 @@
-from src.panels.panel_registry import panel_registry
+from src.panels.global_vars import panel_registry
 
 
 class BaseView:

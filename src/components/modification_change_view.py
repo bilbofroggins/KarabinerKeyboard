@@ -69,10 +69,7 @@ class ModificationChangeView():
             self.to_modification_being_edited = self.new_modification
             self.keyboard_state_controller.something_is_doing_overrides()
 
-        ray.draw_text(str(self.keyboard_state_controller.locked_Modification), col, row, config.font_size, self.keyboard_state_controller.color())
-        width = ray.measure_text(
-            str(self.keyboard_state_controller.locked_Modification),
-            config.font_size) + config.generic_padding
+        width = DrawingHelper.modification_link(self.keyboard_state_controller.locked_Modification, row, col, config.font_size, ray.BLACK, edit_callback)
         ray.draw_text("->", col + width, row, config.font_size,
                  config.default_text_color)
         width += ray.measure_text(
