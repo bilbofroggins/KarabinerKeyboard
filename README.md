@@ -1,16 +1,16 @@
 <h1 align="center">An alternate UI for Karabiner-Elements</h1>
 
 <p align="center">
-  <img style="display:block;margin: auto;" src="https://github.com/bilbofroggins/KarabinerKeyboard/assets/82745308/cc8b1bbd-add8-4240-abd5-4905a68f3550" width="700"/>
+  <img style="display:block;margin: auto;" src="https://github.com/bilbofroggins/KarabinerKeyboard/assets/82745308/1d4842c4-433f-4194-96cc-7ebe96188d62" width="700"/>
 </p>
 
 ## Overview
 Karabiner Keyboard is a user interface designed to simplify the customization of keyboard configurations using [Karabiner-Elements](https://github.com/pqrs-org/Karabiner-Elements). It eliminates the need to manually edit JSON files by providing a friendly UI for reading and writing configurations directly to the Karabiner-Elements JSON file. This tool is essential for users seeking an easier way to adjust their keyboard settings without diving into complex file structures.
 
 ## Instructions
-From the Keyboard panel, press the keys you want to change. This will trigger a search to check anything containing the keys you've pressed. Once the keys turn gold, you can take your fingers off the keys as it has locked them in. You can then click the one of the sides of the binding to rebind, or the "x" to delete the modification.
+From the Keyboard panel, press the keys you want to change. This will trigger a search to check anything containing the keys you've pressed. Once the keys turn gold, you can take your fingers off the keys as it has locked them in. You can then click the one of the sides of the binding to rebind, or the trash can to delete the modification.
 
-If you want to add app-specific keybindings (ASK), press the ASK button, which will open up a window to edit your application bundle ids.
+If you want to add app-specific keybindings, press the gear button, which will open up a window to edit your application bundle ids.
 
 The Overrides panel is very similar, but just shows a larger view of all the overrides you have set.
 
