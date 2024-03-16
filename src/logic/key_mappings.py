@@ -220,6 +220,8 @@ ray.KEY_DOWN,ray.KEY_RIGHT,ray.KEY_HOME,ray.KEY_PAGE_UP,ray.KEY_DELETE,ray.KEY_E
 kb_to_rl_key_map = {v: k for k, v in rl_to_kb_key_map.items()}
 kb_to_rl_key_map['command'] = ray.KEY_LEFT_SUPER
 kb_to_rl_key_map['control'] = ray.KEY_LEFT_CONTROL
+kb_to_rl_key_map['left_option'] = ray.KEY_LEFT_ALT
+kb_to_rl_key_map['right_option'] = ray.KEY_RIGHT_ALT
 
 # Set of modification keys
 modification_keys = set(['left_shift', 'right_shift', 'left_control', 'right_control', 'left_alt',
