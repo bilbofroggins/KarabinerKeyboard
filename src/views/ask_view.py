@@ -135,20 +135,21 @@ class AskView(BaseView):
         return bundle.pystring
 
     def draw_bundle_list(self, row):
-        def callback(index):
+        col = self.start_col_side + config.generic_padding
+        def click_callback(index):
             if self.show_results and self.search_text:
                 return
             del self.bundle_identifiers[index]
+        def draw_callback(row, col, text):
+            ray.draw_text(text, col, row, config.small_font_size, config.default_text_color)
+        def hover_callback(row, col, text):
+            ray.draw_text(text, col, row, config.small_font_size, config.error_color)
 
         for i, bundle in enumerate(self.bundle_identifiers):
-            DrawingHelper.clickable_link(
-                self.bundle_to_display(bundle),
-                row,
-                self.start_col_side + config.generic_padding,
-                config.small_font_size,
-                config.default_text_color,
-                callback,
-                [i]
+            width = ray.measure_text(self.bundle_to_display(bundle), config.small_font_size)
+            DrawingHelper.generic_clickable(
+                row, col, width, config.small_font_size,
+                draw_callback, hover_callback, click_callback, [i], [self.bundle_to_display(bundle)]
             )
             row += config.small_font_size + config.small_padding
 
@@ -168,7 +169,7 @@ class AskView(BaseView):
         width = self.side_width - 50
         box_start_col = (self.start_col_side + config.window_width)//2 - width//2
 
-        def callback(app):
+        def click_callback(app):
             bundle = app.bundle()
             # TODO: Let the user know something is wrong, preferably don't show it in the fitst place
             if bundle == None:
@@ -176,25 +177,33 @@ class AskView(BaseView):
 
             self.search_text = ""
             self.bundle_identifiers.append(app.bundle())
+        def draw_callback(row, col):
+            ray.draw_rectangle(col, row, width, config.small_font_size * 2, ray.LIGHTGRAY)
+        def hover_callback(row, col):
+            ray.draw_rectangle(col, row, width, config.small_font_size*2, DrawingHelper.brighten(ray.LIGHTGRAY))
 
         apps = self.search(self.search_text)
         for app in apps:
-            DrawingHelper.button(
-                text=app.name,
-                row=row,
-                col=box_start_col,
-                width=width,
-                height=config.small_font_size*2,
-                font_size=config.small_font_size,
-                bg_color=ray.LIGHTGRAY,
-                text_color=ray.DARKBLUE,
-                callback=callback,
-                args=[app]
+            DrawingHelper.generic_clickable(
+                row, box_start_col, width, config.small_font_size*2,
+                draw_callback, hover_callback, click_callback, [app]
             )
+            row = int(row + (config.small_font_size) - config.small_font_size // 2)
+            col = box_start_col + config.small_padding
+            ray.draw_text(app.name, col, row, config.small_font_size, ray.DARKBLUE)
             row += config.small_font_size*2 + config.small_padding
 
     def draw_save_button(self):
-        def save():
+        width = 100
+        col = (self.start_col_side + config.window_width)//2 - width//2
+        height = 30
+        row = config.window_height - 100
+
+        def draw_callback(row, col):
+            ray.draw_rectangle(col, row, width, height, config.ask_save_color)
+        def hover_callback(row, col):
+            ray.draw_rectangle(col, row, width, height, DrawingHelper.brighten(config.ask_save_color))
+        def click_callback():
             if len(self.bundle_identifiers) and not self.include_type_str:
                 self.include_type_str = "frontmost_application_if"
             condition = Condition(self.bundle_identifiers, self.include_type_str)
@@ -203,19 +212,13 @@ class AskView(BaseView):
             self.mod_change_view.ask_highlight = None
             self.visible = False
 
-        width = 200
-        col = (self.start_col_side + config.window_width)//2 - width//2
-        DrawingHelper.button(
-            text="Save",
-            row=config.window_height - 100,
-            col=col,
-            width=width,
-            height=50,
-            font_size=config.small_font_size,
-            bg_color=ray.BLUE,
-            text_color=ray.WHITE,
-            callback=save
+        DrawingHelper.generic_clickable(
+            row, col, width, height,
+            draw_callback, hover_callback, click_callback
         )
+        row = int(row + (height // 2) - config.small_font_size//2)
+        col = int(col + (width // 2) - ray.measure_text("Save", config.small_font_size)//2)
+        ray.draw_text("Save", col, row, config.small_font_size, ray.WHITE)
 
     def draw(self):
         if not self.visible:
@@ -223,11 +226,6 @@ class AskView(BaseView):
         self.frame_counter += 1
         if self.frame_counter > 60:
             self.frame_counter = 0
-
-        def close_ask_window():
-            self.visible = False
-            self.keyboard_state_controller.set_state(STATE_LOCKED)
-            self.mod_change_view.ask_highlight = None
 
         def background_click():
             for callback in self.background_listeners.values():
@@ -242,8 +240,21 @@ class AskView(BaseView):
         ):
             ClickHandler.append(background_click, [])
 
+        def draw_callback(row, col):
+            ray.draw_rectangle(col, row, self.button_width, config.window_height, config.ask_highlight_color)
+        def hover_callback(row, col):
+            ray.draw_rectangle(col, row, self.button_width, config.window_height, DrawingHelper.brighten(config.ask_highlight_color))
+        def click_callback():
+            self.visible = False
+            self.keyboard_state_controller.set_state(STATE_LOCKED)
+            self.mod_change_view.ask_highlight = None
         # Close Button
-        DrawingHelper.highlight_box(0, self.start_col, config.window_height, self.button_width, ray.PURPLE, ray.BLUE, close_ask_window)
+        DrawingHelper.generic_clickable(
+            0, self.start_col, self.button_width, config.window_height,
+            draw_callback,
+            hover_callback,
+            click_callback
+        )
         arrow_width = ray.measure_text(">", config.large_font_size)
         ray.draw_text(
             ">",

@@ -4,7 +4,7 @@ from src.devices.mouse_controller import MouseController
 from src.logic.key_mappings import *
 from src.logic.modification import Modification
 from src.panels.click_handler import ClickHandler
-from src.panels.global_vars import special_font
+import src.panels.global_vars as g
 
 
 class DrawingHelper:
@@ -17,9 +17,11 @@ class DrawingHelper:
         if args is None:
             args = []
         mouse_position = ray.get_mouse_position()
-        text = text
 
-        ray.draw_text(text, col, row, fontSize, color)
+        if set(text) & g.unicode_chars:
+            ray.draw_text_ex(g.special_font[0], text, (col, row), fontSize, 1, color)
+        else:
+            ray.draw_text(text, col, row, fontSize, color)
         width = ray.measure_text(text, fontSize)
 
         if DrawingHelper.is_mouse_over(mouse_position.x, mouse_position.y, col,
@@ -33,44 +35,34 @@ class DrawingHelper:
         return width
 
     @staticmethod
-    def button(*, text, row, col, width, height, font_size, bg_color, text_color, callback,
-               args=None):
-        if args is None:
-            args = []
-        mouse_position = ray.get_mouse_position()
-        text = text
+    def brighten(color):
+        ret = list(color)
+        for i in range(0, 3):
+            ret[i] = min(255, color[i] + 100)
 
-        ray.draw_rectangle(col, row, width, height, bg_color)
-
-        if DrawingHelper.is_mouse_over(
-                mouse_position.x, mouse_position.y,
-                col, row, width, height
-        ):
-            MouseController.set_hand_mouse(True)
-            ray.get_mouse_position(col, row, width, height, ray.DARKBROWN)
-
-            ClickHandler.append(callback, args)
-
-        ray.draw_text(text, col, row, font_size, text_color)
-
-        return width
+        return ret
 
     @staticmethod
-    def highlight_box(row, col, height, width, color, hovercolor, callback, args=None):
-        if args is None:
-            args = []
+    def generic_clickable(row, col, width, height, draw_callback, hover_callback, click_callback, click_args=None, draw_args=None):
+        if click_args is None:
+            click_args = []
+        if draw_args is None:
+            draw_args = []
         mouse_position = ray.get_mouse_position()
 
-        ray.draw_rectangle(col, row, width, height, color)
-
         if DrawingHelper.is_mouse_over(mouse_position.x, mouse_position.y, col,
-                                            row, width, height):
-            ray.draw_rectangle(col, row, width, height, hovercolor)
+                                   row, width, height):
             MouseController.set_hand_mouse(True)
-
-            ClickHandler.append(callback, args)
-
-        return
+            if len(draw_args):
+                hover_callback(row, col, *draw_args)
+            else:
+                hover_callback(row, col)
+            ClickHandler.append(click_callback, click_args)
+        else:
+            if len(draw_args):
+                draw_callback(row, col, *draw_args)
+            else:
+                draw_callback(row, col)
 
     @staticmethod
     def modification_link(modification: Modification, row, col, font_size, color, click_callback, args=None):
@@ -91,7 +83,7 @@ class DrawingHelper:
             if mod:
                 text = rl_to_display_key_map[kb_to_rl_key_map[mod]]
             if mod in kb_to_rl_key_map and kb_to_rl_key_map[mod] in special_chars:
-                ray.draw_text_codepoint(special_font[0], ord(text), (col, row),
+                ray.draw_text_codepoint(g.special_font[0], ord(text), (col, row),
                                         font_size, char_color)
                 col += font_size
             elif mod:
@@ -101,7 +93,7 @@ class DrawingHelper:
         def draw_delimiter():
             nonlocal col
             col += int(font_size * 0.2)
-            ray.draw_text_codepoint(special_font[0], ord('·'), (col, row),
+            ray.draw_text_codepoint(g.special_font[0], ord('·'), (col, row),
                                     font_size, config.delimiter_color)
             col += int(font_size * 0.7)
 

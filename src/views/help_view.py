@@ -25,28 +25,25 @@ class HelpView(BaseView):
         if self.quitting_done_flag[0] == True:
             sys.exit(0)
         elif self.is_quitting:
-            ray.draw_text("Restarting...",
+            ray.draw_text("Downloading...",
                      start_x, start_y, config.font_size * 4, config.default_text_color)
             return
 
         ray.draw_text(f"Version: {__version__}",
                  start_x, start_y, config.font_size, config.default_text_color)
-        start_y += config.font_size
+        start_y += config.font_size*2
         ray.draw_text("This application is pre-alpha and may screw up your karabiner file",
                  start_x, start_y, config.font_size, config.default_text_color)
         start_y += config.font_size
         ray.draw_text("We save a copy of your karabiner config file before we make changes to it",
                  start_x, start_y, config.font_size, config.default_text_color)
-        start_y += config.font_size
-        ray.draw_text("Resetting your karabiner file will destroy all changes you've made",
-                 start_x, start_y, config.font_size, config.default_text_color)
-        start_y += config.font_size
-        ray.draw_text("through this app",
-                 start_x, start_y, config.font_size, config.default_text_color)
+        start_y += config.font_size*2
+        ray.draw_text("(Resetting your karabiner file will destroy all changes you've made through this app)",
+                 start_x, start_y, config.small_font_size, config.default_text_color)
         start_y += config.font_size * 2
 
         if KarabinerConfig().backup_exists():
-            DrawingHelper.clickable_link("Reset", start_y, start_x, config.font_size, config.default_text_color, KarabinerConfig().help_blow_away_config)
+            DrawingHelper.clickable_link("Reset", start_y, start_x, config.font_size, ray.DARKBLUE, KarabinerConfig().help_blow_away_config)
         else:
             ray.draw_text("(No changes have been made to your keybindings so far)",
                  start_x, start_y, config.font_size, config.default_text_color)

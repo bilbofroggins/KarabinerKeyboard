@@ -7,6 +7,7 @@ from src.logic.keyboard_state_controller import *
 from src.logic.modification import Modification
 from src.logic.modification_pair import ModificationPair
 from src.panels.click_handler import ClickHandler
+import src.panels.global_vars as g
 from src.views.ask_view import AskView
 
 
@@ -103,7 +104,7 @@ class ModificationChangeView():
         max_from_end = 0
 
         if self.ask_highlight:
-            ray.draw_rectangle(start_col, self.ask_highlight, config.window_width, config.font_size, ray.PURPLE)
+            ray.draw_rectangle(start_col, self.ask_highlight, config.window_width, config.font_size, config.ask_highlight_color)
 
         # FROM modifications
         row = start_row
@@ -141,13 +142,6 @@ class ModificationChangeView():
             row, width = DrawingHelper.modification_view(current_modification, being_edited, row, col, edit_callback, [override_pair])
             max_from_end = max(col + width + config.generic_padding, max_from_end)
 
-        row = start_row
-        col = max_from_end
-        for i, _ in self.modification_pairs.items():
-            ray.draw_text(" ::", col, row, config.font_size, config.default_text_color)
-            width = ray.measure_text(" ::", config.font_size)
-            row += config.font_size
-        max_from_end = max(col + width + config.generic_padding, max_from_end)
 
         row = start_row
         col = max_from_end
@@ -156,17 +150,33 @@ class ModificationChangeView():
                 self.open_ask_panel(inner_mod_pair)
                 self.ask_highlight = row
 
-            width = DrawingHelper.clickable_link("ASK", row, col, config.font_size, mod_pair.condition.color(), ask_callback, [row, mod_pair])
+            def click_callback(row, inner_mod_pair):
+                self.open_ask_panel(inner_mod_pair)
+                self.ask_highlight = row
+            def draw_callback(row, col):
+                ray.draw_text_ex(g.special_font[0], "⚙", (col, row), config.font_size, 1,
+                             mod_pair.condition.color())
+
+            def hover_callback(row, col):
+                ray.draw_text_ex(g.special_font[0], "⚙", (col, row), config.font_size, 1, DrawingHelper.brighten(mod_pair.condition.color()))
+
+            DrawingHelper.generic_clickable(row, col, config.font_size, config.font_size, draw_callback, hover_callback, click_callback, [row, mod_pair])
+            width = config.font_size
+
             row += config.font_size
         max_from_end = max(col + width + config.generic_padding, max_from_end)
 
         row = start_row
         col = max_from_end
         for i, _ in self.modification_pairs.items():
-            def edit_callback(to_del):
+            def click_callback(to_del):
                 KarabinerConfig().remove_override(to_del)
+            def draw_callback(row, col):
+                ray.draw_texture_ex(g.textures['trash'], (col, row), 0, 0.15, config.error_color)
+            def hover_callback(row, col):
+                ray.draw_texture_ex(g.textures['trash'], (col, row), 0, 0.15, DrawingHelper.brighten(config.error_color))
 
-            DrawingHelper.clickable_link("x", row, col, config.font_size, ray.RED, edit_callback, [i])
+            DrawingHelper.generic_clickable(row, col, int(100*0.15), int(123*0.15), draw_callback, hover_callback, click_callback, [i])
             row += config.font_size
 
         return row

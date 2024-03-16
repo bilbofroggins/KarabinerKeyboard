@@ -43,6 +43,6 @@ class UpdateView():
             box_start_row = max_row - config.font_size*2 - config.generic_padding*3
             box_start_col = max_col - self.text_width - config.generic_padding*2
 
-            ray.draw_rectangle(box_start_col, box_start_row, max_col - box_start_col, max_row - box_start_row, BLUE)
+            ray.draw_rectangle(box_start_col, box_start_row, max_col - box_start_col, max_row - box_start_row, ray.BLUE)
             ray.draw_text(self.text1, box_start_col + config.generic_padding, box_start_row + config.generic_padding, config.font_size, config.default_text_color)
             DrawingHelper.clickable_link(self.text2, box_start_row + config.generic_padding*2 + config.font_size, box_start_col + config.generic_padding, config.font_size, config.default_text_color, self.update_app, [self.latest_version])

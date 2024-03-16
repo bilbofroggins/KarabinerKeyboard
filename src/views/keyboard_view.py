@@ -3,7 +3,7 @@ import pyray as ray
 from src.config import config
 from src.logic.key_mappings import *
 from src.logic.keyboard_state_controller import *
-from src.panels.global_vars import special_font
+import src.panels.global_vars as g
 
 
 class KeyboardView(BaseView):
@@ -67,7 +67,7 @@ class KeyboardView(BaseView):
                     ray.draw_rectangle(x, y, key_width, self.key_height, self.key_color)
 
                 if key_id in special_chars:
-                    font_width = ray.measure_text_ex(special_font[0], key_text, config.font_size, 0).x
+                    font_width = ray.measure_text_ex(g.special_font[0], key_text, config.font_size, 0).x
                 else:
                     font_width = ray.measure_text(key_text, config.font_size)
 
@@ -82,7 +82,7 @@ class KeyboardView(BaseView):
                         char_color = config.right_mod_kb_color
                     else:
                         char_color = config.default_text_color
-                    ray.draw_text_ex(special_font[0], key_text, (text_x, text_y), config.font_size, 0, char_color)
+                    ray.draw_text_ex(g.special_font[0], key_text, (text_x, text_y), config.font_size, 0, char_color)
                 else:
                     ray.draw_text(key_text, text_x, text_y, config.font_size, config.default_text_color)
 
@@ -115,8 +115,8 @@ class KeyboardView(BaseView):
             ray.draw_rectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
 
         key_text = rl_to_display_key_map[ray.KEY_UP]
-        font_width = ray.measure_text_ex(special_font[0], key_text, config.font_size, 0).x
+        font_width = ray.measure_text_ex(g.special_font[0], key_text, config.font_size, 0).x
 
         up_text_x = int(up_key_x + up_key_width / 2 - font_width / 2)
         up_text_y = int(up_key_y + self.key_height / 4 - 10)
-        ray.draw_text_ex(special_font[0], key_text, (up_text_x, up_text_y), config.font_size, 0, config.default_text_color)
+        ray.draw_text_ex(g.special_font[0], key_text, (up_text_x, up_text_y), config.font_size, 0, config.default_text_color)
