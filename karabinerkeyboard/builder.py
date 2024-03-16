@@ -17,7 +17,25 @@ def modify_bundle_spec(spec_file, icon_path, bundle_id):
     replacement = f"app = BUNDLE(\n    coll,\n    name='KarabinerKeyboard.app',\n    icon='{icon_path}',\n    bundle_identifier='{bundle_id}'\n)"
 
     # Replace the matched text with the new BUNDLE section
-    modified_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+    modified_content1 = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+
+    # Check if 'datas' exists in Analysis
+    additional_data = "('resources/*', 'resources')"
+    datas_pattern = re.compile(r'(datas=\[.*?\])', re.DOTALL)
+    datas_match = datas_pattern.search(modified_content1)
+
+    if datas_match:
+        # If 'datas' exists, append the additional_data if not already present
+        datas_content = datas_match.group(1)
+        if additional_data not in datas_content:
+            new_datas_content = datas_content[:-1] + ", " + additional_data + "]"
+            modified_content = modified_content1.replace(datas_content, new_datas_content)
+    else:
+        # If 'datas' does not exist, insert it after the first parenthesis of 'Analysis'
+        analysis_pattern = re.compile(r'(Analysis\([^\)]*)', re.DOTALL)
+        modified_content = analysis_pattern.sub(r'\1, datas=[' + additional_data + ']',
+                                                modified_content1)
 
     with open(spec_file, 'w') as file:
         file.write(modified_content)
@@ -78,7 +96,7 @@ def bundle_app():
         "--windowed",
         "--onedir",
         "--name", "KarabinerKeyboard",
-        "--add-data", "src/versions/update.sh:Scripts"
+        "--add-data", "src/versions/update.sh:Scripts",
     ])
 
     spec_file = 'KarabinerKeyboard.spec'
