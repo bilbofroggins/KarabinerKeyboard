@@ -210,6 +210,7 @@ class AskView(BaseView):
             self.mod_pair.condition = condition
             self.mod_change_view.save()
             self.mod_change_view.ask_highlight = None
+            self.keyboard_state_controller.set_state(STATE_LOCKED)
             self.visible = False
 
         DrawingHelper.generic_clickable(
