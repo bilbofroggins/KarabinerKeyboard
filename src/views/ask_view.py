@@ -79,7 +79,7 @@ class AskView(BaseView):
             "Include",
             self.start_col_side + config.generic_padding,
             row,
-            config.small_font_size, ray.GREEN if toggle_result == 0 else ray.GRAY
+            config.small_font_size, config.left_mod_kb_color if toggle_result == 0 else ray.GRAY
         )
 
         exclude_width = ray.measure_text("Exclude", config.small_font_size)
@@ -87,7 +87,7 @@ class AskView(BaseView):
             "Exclude",
             config.window_width - exclude_width - config.generic_padding,
             row,
-            config.small_font_size, ray.RED if toggle_result == 1 else ray.GRAY
+            config.small_font_size, config.error_color if toggle_result == 1 else ray.GRAY
         )
         return row + config.small_font_size + config.generic_padding
 

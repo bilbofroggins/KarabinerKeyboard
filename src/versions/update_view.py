@@ -32,7 +32,7 @@ class UpdateView():
             sys.exit(0)
         elif self.is_quitting:
             ray.draw_rectangle(start_col, start_row, max_col, max_row, config.background_color)
-            ray.draw_text("Restarting...",
+            ray.draw_text("Downloading...",
                      start_col, start_row, config.font_size * 4, config.default_text_color)
             return
 
