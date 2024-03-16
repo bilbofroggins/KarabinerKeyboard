@@ -8,7 +8,7 @@
 Karabiner Keyboard is a user interface designed to simplify the customization of keyboard configurations using [Karabiner-Elements](https://github.com/pqrs-org/Karabiner-Elements). It eliminates the need to manually edit JSON files by providing a friendly UI for reading and writing configurations directly to the Karabiner-Elements JSON file. This tool is essential for users seeking an easier way to adjust their keyboard settings without diving into complex file structures.
 
 ## Instructions
-For the latest release, please check the [Releases](https://github.com/bilbofroggins/KarabinerKeyboard/releases) section of this repository.
+For the latest release, please check the [Releases](https://github.com/bilbofroggins/KarabinerKeyboard/releases) section of this repository. Download & extract the zip file.
 
 From the Keyboard panel, press the keys you want to change. This will trigger a search to check anything containing the keys you've pressed. Once the keys turn gold, you can take your fingers off the keys as it has locked them in. You can then click the one of the sides of the binding to rebind, or the trash can to delete the modification.
 
