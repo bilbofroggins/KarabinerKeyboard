@@ -32,7 +32,7 @@ The application automatically creates a backup of the `karabiner.json` file upon
 
 ## Contributing
 
-### Running the app
+### Development - Running the app
 ```
 pip3 install poetry
 poetry shell
