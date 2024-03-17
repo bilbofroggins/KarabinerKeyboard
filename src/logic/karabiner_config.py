@@ -49,6 +49,9 @@ class KarabinerConfig:
                     if len(mod['manipulators']) > 1:
                         self.complex_unsupported_blocks.append(mod)
                         continue
+                    if len(mod['manipulators'][0]['to']) > 1:
+                        self.complex_unsupported_blocks.append(mod)
+                        continue
                     transform = mod['manipulators'][0] # TODO: take more than just one
                     conditions = transform.get('conditions', [])
                     if conditions:
