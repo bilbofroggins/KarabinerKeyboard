@@ -33,6 +33,7 @@ class KarabinerConfig:
             i = 0
             with open(self.config_file_path, 'r') as file:
                 self.modification_pairs = {} # {id: mod_pair}
+                self.complex_unsupported_blocks = []
                 self.config = json.load(file)
                 # Assuming the overrides are in a specific structure in the config
                 complex_modifications = self.config['profiles'][0]['complex_modifications']['rules']
