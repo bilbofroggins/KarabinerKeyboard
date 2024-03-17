@@ -21,6 +21,7 @@ class KarabinerConfig:
 
             cls._instance.modification_pairs = {}
             cls._instance.config = None
+            cls._instance.complex_unsupported_blocks = []
 
             cls._instance.load_overrides()
             cls._instance.start_watching()
@@ -45,6 +46,9 @@ class KarabinerConfig:
                     self.modification_pairs[i] = mod_pair
                     i += 1
                 for mod in complex_modifications:
+                    if len(mod['manipulators']) > 1:
+                        self.complex_unsupported_blocks.append(mod)
+                        continue
                     transform = mod['manipulators'][0] # TODO: take more than just one
                     conditions = transform.get('conditions', [])
                     if conditions:
@@ -53,6 +57,10 @@ class KarabinerConfig:
                     else:
                         bundle_identifiers = []
                         include_type_str = ''
+
+                    if 'key_code' not in transform['from'] or 'key_code' not in transform['to'][0]:
+                        self.complex_unsupported_blocks.append(mod)
+                        continue
 
                     mod_pair = ModificationPair(
                         Modification(transform['from'].get('modifiers', {}).get('mandatory', {}), transform['from']['key_code']),
@@ -104,6 +112,9 @@ class KarabinerConfig:
 
         self.config['profiles'][0]['simple_modifications'] = []
         self.config['profiles'][0]['complex_modifications']['rules'] = [mod.to_json() for _, mod in self.modification_pairs.items()]
+
+        for block in self.complex_unsupported_blocks:
+            self.config['profiles'][0]['complex_modifications']['rules'].append(block)
 
         with open(self.config_file_path, 'w') as file:
             json.dump(self.config, file, indent=4)
