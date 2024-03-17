@@ -86,7 +86,6 @@ def bundle_app():
     except OSError as e:
         print(f"Error removing build dirs")
 
-    load_env_variables_from_file('.env')
     update_version_number()
 
     subprocess.run([
@@ -107,4 +106,5 @@ def bundle_app():
     # Run PyInstaller
     subprocess.run(["pyinstaller", spec_file])
 
+    load_env_variables_from_file('.env')
     notarize_app("pjcfifa@gmail.com", "GD76CFHAZT", "dist/KarabinerKeyboard.app", "KarabinerKeyboard.zip")
