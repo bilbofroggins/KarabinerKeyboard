@@ -7,7 +7,7 @@ import os
 from src.logic.condition import Condition
 from src.logic.modification import Modification
 from src.logic.modification_pair import ModificationPair
-from src.config import config
+from src.config import config, DiggableWrapper
 
 
 class KarabinerConfig:
@@ -21,7 +21,10 @@ class KarabinerConfig:
 
             cls._instance.modification_pairs = {}
             cls._instance.config = None
+
+            cls._instance.supported_keys = {'type', 'from', 'to', 'conditions'}
             cls._instance.complex_unsupported_blocks = []
+            cls._instance.complex_unsupported_data = {} # i: data
 
             cls._instance.load_overrides()
             cls._instance.start_watching()
@@ -34,10 +37,10 @@ class KarabinerConfig:
             with open(self.config_file_path, 'r') as file:
                 self.modification_pairs = {} # {id: mod_pair}
                 self.complex_unsupported_blocks = []
-                self.config = json.load(file)
+                self.config = DiggableWrapper(json.load(file))
                 # Assuming the overrides are in a specific structure in the config
-                complex_modifications = self.config['profiles'][0]['complex_modifications']['rules']
-                simple_modifications = self.config['profiles'][0]['simple_modifications']
+                complex_modifications = self.config.dig('profiles', 0, 'complex_modifications', 'rules', default=[])
+                simple_modifications = self.config.dig('profiles', 0, 'simple_modifications', default=[])
                 for mod in simple_modifications:
                     mod_pair = ModificationPair(
                         Modification([], mod['from']['key_code']),
@@ -54,7 +57,7 @@ class KarabinerConfig:
                         self.complex_unsupported_blocks.append(mod)
                         continue
                     transform = mod['manipulators'][0] # TODO: take more than just one
-                    conditions = transform.get('conditions', [])
+                    conditions = transform.dig('conditions', default=[])
                     if conditions:
                         bundle_identifiers = conditions[0].get('bundle_identifiers', {})
                         include_type_str = conditions[0].get('type', {})
@@ -62,7 +65,7 @@ class KarabinerConfig:
                         bundle_identifiers = []
                         include_type_str = ''
 
-                    if 'key_code' not in transform['from'] or 'key_code' not in transform['to'][0]:
+                    if 'key_code' not in transform['from'] or 'key_code' not in transform.dig('to', 0, default=''):
                         self.complex_unsupported_blocks.append(mod)
                         continue
 

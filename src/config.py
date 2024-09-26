@@ -44,3 +44,47 @@ if not getattr(sys, 'frozen', False):
 else:
     debug_mode = False
 merge_configs_if_debug(debug_mode)
+
+
+class DiggableWrapper:
+    def __init__(self, value):
+        # Automatically wrap lists and dictionaries
+        if isinstance(value, list):
+            self._value = [DiggableWrapper(item) for item in value]
+        elif isinstance(value, dict):
+            self._value = {key: DiggableWrapper(item) for key, item in value.items()}
+        else:
+            self._value = value
+
+    def dig(self, *keys, default=None):
+        value = self._value
+        try:
+            for key in keys:
+                if isinstance(value, DiggableWrapper):
+                    value = value._value
+                if isinstance(value, list) and isinstance(key, int):
+                    value = value[key]
+                elif isinstance(value, dict) and isinstance(key, (str, int)):
+                    value = value[key]
+                else:
+                    return default
+                value = DiggableWrapper(value)  # Re-wrap the nested value
+        except (IndexError, KeyError, TypeError):
+            return default
+        return value._value if isinstance(value, DiggableWrapper) else value
+
+    def __getitem__(self, key):
+        return self._value[key]
+
+    def __len__(self):
+        if isinstance(self._value, (list, dict)):
+            return len(self._value)
+        raise TypeError(f"object of type '{type(self._value).__name__}' has no len()")
+
+    def __contains__(self, item):
+        if isinstance(self._value, (list, dict)):
+            return item in self._value
+        raise TypeError(f"object of type '{type(self._value).__name__}' has no contains()")
+
+    def __repr__(self):
+        return repr(self._value)
