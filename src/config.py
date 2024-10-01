@@ -11,7 +11,7 @@ class config:
     generic_padding = 20
     list_padding = 10
     small_padding = 5
-    karabiner_file = '~/.config/karabiner/karabiner.json'
+    karabiner_file = '~/.config/karabiner_keyboard/kbkeyboard.json'
     default_text_color = ray.BLACK
     secondary_color = ray.BLUE
     background_color = ray.GRAY
@@ -29,7 +29,7 @@ class config:
     scroll_speed = 4
 
 class config_debug:
-    karabiner_file = '~/.config/karabiner/karabiner_debug.json'
+    karabiner_file = '~/.config/karabiner_keyboard/kbkeyboard_debug.json'
 
 
 def merge_configs_if_debug(debug_mode):

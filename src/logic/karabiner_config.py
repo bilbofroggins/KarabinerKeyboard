@@ -16,15 +16,23 @@ class KarabinerConfig:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(KarabinerConfig, cls).__new__(cls)
-            cls._instance.config_file_path = os.path.expanduser(config.karabiner_file)
-            cls._instance.backup_config_file_path = os.path.expanduser('~/.config/karabiner/karabiner_back.json')
 
+            # Get the expanded file path
+            cls._instance.config_file_path = os.path.expanduser(config.karabiner_file)
+
+            # Ensure the directory exists
+            config_dir = os.path.dirname(cls._instance.config_file_path)
+            if not os.path.exists(config_dir):
+                os.makedirs(config_dir)  # Create the directory if it doesn't exist
+
+            # Ensure the config file exists
+            if not os.path.exists(cls._instance.config_file_path):
+                with open(cls._instance.config_file_path, 'w') as f:
+                    f.write('{}')  # Create an empty file if it doesn't exist
+
+            # Initialize other instance variables
             cls._instance.modification_pairs = {}
             cls._instance.config = None
-
-            cls._instance.supported_keys = {'type', 'from', 'to', 'conditions'}
-            cls._instance.complex_unsupported_blocks = []
-            cls._instance.complex_unsupported_data = {} # i: data
 
             cls._instance.load_overrides()
             cls._instance.start_watching()
@@ -36,7 +44,6 @@ class KarabinerConfig:
             i = 0
             with open(self.config_file_path, 'r') as file:
                 self.modification_pairs = {} # {id: mod_pair}
-                self.complex_unsupported_blocks = []
                 self.config = DiggableWrapper(json.load(file))
                 # Assuming the overrides are in a specific structure in the config
                 complex_modifications = self.config.dig('profiles', 0, 'complex_modifications', 'rules', default=[])
@@ -50,12 +57,6 @@ class KarabinerConfig:
                     self.modification_pairs[i] = mod_pair
                     i += 1
                 for mod in complex_modifications:
-                    if len(mod['manipulators']) > 1:
-                        self.complex_unsupported_blocks.append(mod)
-                        continue
-                    if len(mod['manipulators'][0]['to']) > 1:
-                        self.complex_unsupported_blocks.append(mod)
-                        continue
                     transform = mod['manipulators'][0] # TODO: take more than just one
                     conditions = transform.dig('conditions', default=[])
                     if conditions:
@@ -64,10 +65,6 @@ class KarabinerConfig:
                     else:
                         bundle_identifiers = []
                         include_type_str = ''
-
-                    if 'key_code' not in transform['from'] or 'key_code' not in transform.dig('to', 0, default=''):
-                        self.complex_unsupported_blocks.append(mod)
-                        continue
 
                     mod_pair = ModificationPair(
                         Modification(transform['from'].get('modifiers', {}).get('mandatory', {}), transform['from']['key_code']),
@@ -101,29 +98,14 @@ class KarabinerConfig:
 
         threading.Thread(target=watch_file, daemon=True).start()
 
-    def backup_exists(self):
-        return os.path.exists(self.backup_config_file_path)
-
-    def help_blow_away_config(self):
-        if self.backup_exists():
-            shutil.copyfile(self.backup_config_file_path, self.config_file_path)
-            os.remove(self.backup_config_file_path)
-
     def write_overrides(self, modification_pairs):
         for i, modification_pair in modification_pairs.items():
             self.modification_pairs[i] = modification_pair
 
-        """Write back to the config file."""
-        if not os.path.exists(self.backup_config_file_path):
-            shutil.copyfile(self.config_file_path, self.backup_config_file_path)
-
         self.config['profiles'][0]['simple_modifications'] = []
         self.config['profiles'][0]['complex_modifications']['rules'] = [mod.to_json() for _, mod in self.modification_pairs.items()]
-
-        for block in self.complex_unsupported_blocks:
-            self.config['profiles'][0]['complex_modifications']['rules'].append(block)
-
         with open(self.config_file_path, 'w') as file:
+
             json.dump(self.config, file, indent=4)
 
     def remove_override(self, id):
