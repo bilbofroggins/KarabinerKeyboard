@@ -3,7 +3,6 @@ import threading
 import pyray as ray
 
 from src.config import config
-from src.logic.karabiner_config import KarabinerConfig
 from src.panels.base_panel import BaseView
 from src.components.drawing_helper import DrawingHelper
 from src.versions.updates import *

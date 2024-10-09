@@ -1,0 +1,43 @@
+layers:
+  0:
+    i:
+      data: left_shift + 8
+      type: single
+    left_command:
+      data: '1'
+      type: layer|MO
+    m:
+      data: left_control + left_alt + h
+      type: single
+    tab:
+      data: 2
+      type: layer|MT
+    u:
+      data: '8'
+      type: single
+  1:
+    j,k:
+      data: left_alt + delete_or_backspace
+      type: single
+  2:
+    comma:
+      app:
+      - Lens
+      - CLion
+      app_mode: inclusive
+      data: '2'
+      type: single
+    f:
+      data:
+      - t
+      - e
+      - s
+      - t
+      - return_or_enter
+      type: array
+    k:
+      data: left_shift + left_control + left_command
+      type: osm
+    m:
+      data: open Safari
+      type: shell

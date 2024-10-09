@@ -2,8 +2,6 @@ from src.components.drawing_helper import DrawingHelper
 from src.config import config
 from src.devices.mouse_controller import MouseController
 from src.logic.bundle_ids import BundleIds
-from src.logic.condition import Condition
-from src.logic.keyboard_state_controller import *
 from src.panels.base_panel import BaseView
 import pyray as ray
 
@@ -11,11 +9,10 @@ from src.panels.click_handler import ClickHandler
 
 
 class AskView(BaseView):
-    def __init__(self, mod_change_view, keyboard_state_controller):
+    def __init__(self, mod_change_view):
         super().__init__()
         self.visible = False
         self.mod_pair = None
-        self.keyboard_state_controller = keyboard_state_controller
         self.input_active = True
         self.frame_counter = 0
         self.search_text = ""
@@ -30,7 +27,6 @@ class AskView(BaseView):
 
     def show(self, modification_pair):
         self.visible = True
-        self.keyboard_state_controller.set_state(STATE_BUNDLE_SEARCH)
 
         self.mod_pair = modification_pair
 
@@ -206,11 +202,10 @@ class AskView(BaseView):
         def click_callback():
             if len(self.bundle_identifiers) and not self.include_type_str:
                 self.include_type_str = "frontmost_application_if"
-            condition = Condition(self.bundle_identifiers, self.include_type_str)
-            self.mod_pair.condition = condition
+            # condition = Condition(self.bundle_identifiers, self.include_type_str)
+            # self.mod_pair.condition = condition
             self.mod_change_view.save()
             self.mod_change_view.ask_highlight = None
-            self.keyboard_state_controller.set_state(STATE_LOCKED)
             self.visible = False
 
         DrawingHelper.generic_clickable(
@@ -247,7 +242,6 @@ class AskView(BaseView):
             ray.draw_rectangle(col, row, self.button_width, config.window_height, DrawingHelper.brighten(config.ask_highlight_color))
         def click_callback():
             self.visible = False
-            self.keyboard_state_controller.set_state(STATE_LOCKED)
             self.mod_change_view.ask_highlight = None
         # Close Button
         DrawingHelper.generic_clickable(

@@ -212,6 +212,36 @@ rl_to_display_key_map = {
     ray.KEY_KP_DECIMAL: 'keypad_.'
 }
 
+shift_mapping = {
+    '1': '!',
+    '2': '@',
+    '3': '#',
+    '4': '$',
+    '5': '%',
+    '6': '^',
+    '7': '&',
+    '8': '*',
+    '9': '(',
+    '0': ')',
+    '-': '_',
+    '=': '+',
+    '[': '{',
+    ']': '}',
+    '\\': '|',
+    ';': ':',
+    "'": '"',
+    ',': '<',
+    '.': '>',
+    '/': '?',
+    '`': '~',
+}
+# Add letters mapping (lowercase to uppercase)
+for letter in range(ord('a'), ord('z') + 1):
+    shift_mapping[chr(letter)] = chr(letter - 32)  # Convert lowercase to uppercase
+
+def get_shifted_key(key):
+    return shift_mapping.get(key, key)
+
 special_chars = set([ray.KEY_BACKSPACE,ray.KEY_TAB,ray.KEY_CAPS_LOCK,ray.KEY_ENTER,ray.KEY_LEFT_SHIFT,ray.KEY_RIGHT_SHIFT,
 ray.KEY_LEFT_SUPER,ray.KEY_RIGHT_SUPER,ray.KEY_LEFT_ALT,ray.KEY_RIGHT_ALT,ray.KEY_LEFT_CONTROL,ray.KEY_RIGHT_CONTROL,ray.KEY_LEFT,ray.KEY_UP,
 ray.KEY_DOWN,ray.KEY_RIGHT,ray.KEY_HOME,ray.KEY_PAGE_UP,ray.KEY_DELETE,ray.KEY_END,ray.KEY_PAGE_DOWN,ray.KEY_NUM_LOCK])
