@@ -1,5 +1,6 @@
 import os
 import sys
+import warnings
 
 import pyray as ray
 
@@ -15,6 +16,7 @@ from config import config
 
 class MyApp:
     def __init__(self):
+
         title = "Karabiner Keyboard"
         ray.init_window(config.window_width, config.window_height, title)
         ray.set_target_fps(60)

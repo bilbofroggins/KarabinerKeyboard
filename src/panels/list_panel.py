@@ -9,7 +9,7 @@ from src.panels.click_handler import ClickHandler
 class ListPanel(BaseView):
     def __init__(self):
         super().__init__()
-        self.options = ["Keyboard", "Overrides", "Help"]
+        self.options = ["Keyboard", "Help"]
         self.selected_option = "Keyboard"
         self.panel_width = self.calculate_max_width()
 

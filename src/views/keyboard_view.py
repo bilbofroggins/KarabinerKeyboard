@@ -2,13 +2,16 @@ import pyray as ray
 
 from src.config import config
 from src.logic.key_mappings import *
-from src.logic.keyboard_state_controller import *
 import src.panels.global_vars as g
+from src.panels.base_panel import BaseView
+from src.views.key_view import KeyView
 
 
 class KeyboardView(BaseView):
-    def __init__(self, keyboard_state_controller):
+    def __init__(self, layer, current_key):
         super().__init__()
+        self.layer = layer
+        self.current_key = current_key
         # Define the Mac keyboard layout
         self.key_positions = [
             [(ray.KEY_ESCAPE, 1.5), (ray.KEY_F1, 1), (ray.KEY_F2, 1), (ray.KEY_F3, 1), (ray.KEY_F4, 1),
@@ -35,16 +38,6 @@ class KeyboardView(BaseView):
         self.key_padding = 5
         self.key_color = ray.LIGHTGRAY
         self.search_keys = set()
-        self.keyboard_state_controller = keyboard_state_controller
-        self.keyboard_state_controller.register(self)
-        self.keyboard_state = STATE_EMPTY
-        self.pressed_key_color = {
-            STATE_EMPTY: ray.ORANGE,
-            STATE_IS_PRESSING: ray.ORANGE,
-            STATE_LOCKED: ray.YELLOW,
-            STATE_OVERRIDING: self.key_color,
-            STATE_BUNDLE_SEARCH: ray.YELLOW,
-        }
 
     def change_keyboard_state(self, state):
         self.keyboard_state = state
@@ -54,43 +47,7 @@ class KeyboardView(BaseView):
         for keyboard_row in self.key_positions:
             x = start_x
             for key_id, width in keyboard_row:
-                key_width = int(self.base_key_width * width + self.key_padding * (width - 1))
-                key_text = rl_to_display_key_map[key_id] if key_id is not None else ""
-
-                if key_id in (ray.KEY_LEFT, ray.KEY_DOWN, ray.KEY_RIGHT):
-                    self.key_height //= 2
-                    y += self.key_height
-
-                if key_id in self.keyboard_state_controller.locked_keys and self.keyboard_state != STATE_OVERRIDING:
-                    ray.draw_rectangle(x, y, key_width, self.key_height, self.pressed_key_color[self.keyboard_state])
-                else:
-                    ray.draw_rectangle(x, y, key_width, self.key_height, self.key_color)
-
-                if key_id in special_chars:
-                    font_width = ray.measure_text_ex(g.special_font[0], key_text, config.font_size, 0).x
-                else:
-                    font_width = ray.measure_text(key_text, config.font_size)
-
-                text_x = int(x + key_width / 2 - font_width / 2)
-                text_y = int(y + self.key_height / 2 - 10)
-
-                if key_id in special_chars:
-                    kb_begin_text = rl_to_kb_key_map[key_id][:5]
-                    if kb_begin_text == 'left_' and key_id != ray.KEY_LEFT:
-                        char_color = config.left_mod_kb_color
-                    elif kb_begin_text == 'right' and key_id != ray.KEY_RIGHT:
-                        char_color = config.right_mod_kb_color
-                    else:
-                        char_color = config.default_text_color
-                    ray.draw_text_ex(g.special_font[0], key_text, (text_x, text_y), config.font_size, 0, char_color)
-                else:
-                    ray.draw_text(key_text, text_x, text_y, config.font_size, config.default_text_color)
-
-                if key_id in (ray.KEY_LEFT, ray.KEY_DOWN, ray.KEY_RIGHT):
-                    y -= self.key_height
-                    self.key_height *= 2
-
-                x += key_width + self.key_padding
+                x = KeyView(self.layer, self.current_key, key_id, y, x, width).draw_key()
             y += self.key_height + self.key_padding
 
         # Calculate the total width of keys before the 'left' key in the last row
@@ -109,10 +66,7 @@ class KeyboardView(BaseView):
         # Draw the 'up' arrow key
         up_key_width = int(self.base_key_width)
 
-        if ray.KEY_UP in self.keyboard_state_controller.locked_keys and self.keyboard_state != STATE_OVERRIDING:
-            ray.draw_rectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.pressed_key_color[self.keyboard_state])
-        else:
-            ray.draw_rectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
+        ray.draw_rectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
 
         key_text = rl_to_display_key_map[ray.KEY_UP]
         font_width = ray.measure_text_ex(g.special_font[0], key_text, config.font_size, 0).x
@@ -120,3 +74,5 @@ class KeyboardView(BaseView):
         up_text_x = int(up_key_x + up_key_width / 2 - font_width / 2)
         up_text_y = int(up_key_y + self.key_height / 4 - 10)
         ray.draw_text_ex(g.special_font[0], key_text, (up_text_x, up_text_y), config.font_size, 0, config.default_text_color)
+
+        return y

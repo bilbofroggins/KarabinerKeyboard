@@ -1,8 +1,11 @@
-from src.logic.karabiner_config import KarabinerConfig
+import warnings
+
+from src.logic.yaml_config import YAML_Config
 from window import MyApp
 
 def main():
-    KarabinerConfig()
+    warnings.simplefilter('always', DeprecationWarning)
+    YAML_Config()
     app = MyApp()
     app.run()
 

@@ -1,0 +1,169 @@
+{
+    "description": "KBKeyboard",
+    "manipulators": [
+        {
+            "from": {
+                "key_code": "left_cmd"
+            },
+            "type": "basic",
+            "to": [
+                {
+                    "set_variable": {
+                        "name": "layer_1",
+                        "value": 1
+                    }
+                }
+            ],
+            "to_after_key_up": [
+                {
+                    "set_variable": {
+                        "name": "layer_1",
+                        "value": 0
+                    }
+                }
+            ],
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_0",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "key_code": "tab"
+            },
+            "type": "basic",
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_0",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "simultaneous": [
+                    {
+                        "key_code": "j"
+                    },
+                    {
+                        "key_code": "k"
+                    }
+                ]
+            },
+            "type": "basic",
+            "to": [
+                {
+                    "key_code": "delete_or_backspace",
+                    "modifiers": [
+                        "left_alt"
+                    ]
+                }
+            ],
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_1",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "key_code": "comma"
+            },
+            "type": "basic",
+            "to": [
+                {
+                    "key_code": "2"
+                }
+            ],
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_2",
+                    "value": 1
+                },
+                {
+                    "type": "frontmost_application_if",
+                    "bundle_identifiers": [
+                        "^Lens$",
+                        "^CLion$"
+                    ]
+                }
+            ]
+        },
+        {
+            "from": {
+                "key_code": "f"
+            },
+            "type": "basic",
+            "to": [
+                {
+                    "key_code": "t"
+                },
+                {
+                    "key_code": "e"
+                },
+                {
+                    "key_code": "s"
+                },
+                {
+                    "key_code": "t"
+                },
+                {
+                    "key_code": "return_or_enter"
+                }
+            ],
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_2",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "key_code": "k"
+            },
+            "type": "basic",
+            "to": [
+                {
+                    "key_code": "left_shift",
+                    "modifiers": [
+                        "left_cmd"
+                    ]
+                }
+            ],
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_2",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "key_code": "m"
+            },
+            "type": "basic",
+            "to": [
+                {
+                    "shell_command": "open Safari"
+                }
+            ],
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_2",
+                    "value": 1
+                }
+            ]
+        }
+    ]
+}
