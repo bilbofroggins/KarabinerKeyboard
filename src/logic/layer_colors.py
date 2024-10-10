@@ -1,6 +1,4 @@
 import random
-import pyray as ray
-
 
 def layer_color(layer):
     random.seed(int(layer) + 7)

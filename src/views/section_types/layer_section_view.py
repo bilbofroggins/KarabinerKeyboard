@@ -38,6 +38,7 @@ class LayerSectionView(BaseView):
             col += DrawingHelper.button(layer_type, self.state['layer_type'] == layer_type, row, col, config.small_font_size, self.click_layer_type_callback, [layer_type])
             col += config.small_padding
 
+        col += config.generic_padding
         DrawingHelper.button("Confirm", False, row, col, config.small_font_size, self.submit, [])
         return row + config.small_font_size + config.generic_padding
 

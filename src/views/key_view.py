@@ -104,7 +104,7 @@ class KeyView(BaseView):
                 key_text = get_shifted_key(chars[-1])
             else:
                 key_text = rl_to_display_key_map[kb_to_rl_key_map[chars[-1]]]
-        elif key_type == 'array':
+        elif key_type == 'multi':
             ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.MAROON))
             key_text = '...'
         elif key_type == 'osm':

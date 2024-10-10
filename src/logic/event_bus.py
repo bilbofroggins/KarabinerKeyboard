@@ -4,7 +4,8 @@ class EventBus:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.listeners = {} # event_type: []
+            cls._instance.listeners = {}
+            # listeners = { event_type: [] }
         return cls._instance
 
     def register(self, event_type, obj):

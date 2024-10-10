@@ -34,7 +34,7 @@ layers:
       - s
       - t
       - return_or_enter
-      type: array
+      type: multi
     k:
       data: left_shift + left_control + left_command
       type: osm

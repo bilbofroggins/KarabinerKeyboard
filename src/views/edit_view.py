@@ -26,6 +26,7 @@ class EditView(BaseView):
         self.current_key[0] = None
         EventBus().notify('key_click')
 
+    # Clicked on a new key in keyboard
     def notify(self):
         for section in self.sections.values():
             section.reset_values()
@@ -34,7 +35,7 @@ class EditView(BaseView):
             return
 
         key_type = YAML_Config().key_type(*(self.current_key[0].split(":")))
-        if key_type in ['single', 'array']:
+        if key_type in ['single', 'multi']:
             self.section_shown = self.sections["Keybind"]
         elif key_type == 'shell':
             self.section_shown = self.sections["Shell"]

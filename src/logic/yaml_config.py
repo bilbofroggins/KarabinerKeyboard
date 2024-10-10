@@ -1,5 +1,3 @@
-import os
-
 import yaml
 
 from src.config import config

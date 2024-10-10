@@ -17,11 +17,17 @@ class DrawingHelper:
             args = []
         mouse_position = ray.get_mouse_position()
 
-        if set(text) & g.unicode_chars:
-            ray.draw_text_ex(g.special_font[0], text, (col, row), fontSize, 1, color)
-        else:
-            ray.draw_text(text, col, row, fontSize, color)
-        width = ray.measure_text(text, fontSize)
+        col_offset = 0
+        for char in text:
+            if char in g.unicode_chars:
+                ray.draw_text_ex(g.special_font[0], char, (col + col_offset, row), fontSize,
+                                 1, color)
+                char_width = int(ray.measure_text_ex(g.special_font[0], char, fontSize, 1).x)
+            else:
+                ray.draw_text(char, col + col_offset, row, fontSize, color)
+                char_width = ray.measure_text(char, fontSize)
+            col_offset += char_width + config.small_padding
+        width = col_offset
 
         if DrawingHelper.is_mouse_over(mouse_position.x, mouse_position.y, col,
                                    row, width, fontSize):

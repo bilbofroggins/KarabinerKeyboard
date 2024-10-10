@@ -37,6 +37,7 @@ class OSMSectionView(BaseView):
             )
             col += config.small_padding
 
+        col += config.generic_padding
         DrawingHelper.button("Confirm", False, row, col, config.small_font_size, self.submit, [])
 
     def reset_values(self):
