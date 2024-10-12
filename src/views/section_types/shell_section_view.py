@@ -10,11 +10,11 @@ class ShellSectionView(BaseView):
     def __init__(self, current_key, reset_current_key_callback):
         super().__init__()
 
-    def draw_section(self, row, col):
-        ray.draw_rectangle(col, row, 200, int(config.small_font_size), ray.WHITE)
-        if (self.input_active):
-            ray.draw_rectangle_lines(textbox_start_col, row, textbox_width, int(config.small_font_size*1.4), ray.RED)
+    def submit(self):
+        pass
 
+    def draw_section(self, row, col):
+        ray.draw_text("Implementation coming soon", col, row, config.font_size, ray.DARKBLUE)
 
     def reset_values(self):
         pass

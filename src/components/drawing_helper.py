@@ -12,22 +12,37 @@ class DrawingHelper:
         return x <= mouse_x <= x + width and y <= mouse_y <= y + height
 
     @staticmethod
+    def measure_unicode_plus_text(text, font_size):
+        col_offset = 0
+        for char in text:
+            if char in g.unicode_chars:
+                char_width = int(ray.measure_text_ex(g.special_font[0], char, font_size, 1).x)
+            else:
+                char_width = ray.measure_text(char, font_size)
+            col_offset += char_width + config.small_padding
+        return col_offset
+
+    @staticmethod
+    def draw_unicode_plus_text(text, row, col, font_size, color):
+        col_offset = 0
+        for char in text:
+            if char in g.unicode_chars:
+                ray.draw_text_ex(g.special_font[0], char, (col + col_offset, row), font_size,
+                                 1, color)
+                char_width = int(ray.measure_text_ex(g.special_font[0], char, font_size, 1).x)
+            else:
+                ray.draw_text(char, col + col_offset, row, font_size, color)
+                char_width = ray.measure_text(char, font_size)
+            col_offset += char_width + config.small_padding
+        return col_offset
+
+    @staticmethod
     def clickable_link(text, row, col, fontSize, color, callback, args=None):
         if args is None:
             args = []
         mouse_position = ray.get_mouse_position()
 
-        col_offset = 0
-        for char in text:
-            if char in g.unicode_chars:
-                ray.draw_text_ex(g.special_font[0], char, (col + col_offset, row), fontSize,
-                                 1, color)
-                char_width = int(ray.measure_text_ex(g.special_font[0], char, fontSize, 1).x)
-            else:
-                ray.draw_text(char, col + col_offset, row, fontSize, color)
-                char_width = ray.measure_text(char, fontSize)
-            col_offset += char_width + config.small_padding
-        width = col_offset
+        width = DrawingHelper.draw_unicode_plus_text(text, row, col, fontSize, color)
 
         if DrawingHelper.is_mouse_over(mouse_position.x, mouse_position.y, col,
                                    row, width, fontSize):
@@ -40,13 +55,23 @@ class DrawingHelper:
         return width
 
     @staticmethod
-    def brighten(color):
+    def brighten(color, amount=100):
         if type(color) == tuple:
             ret = list(color)
         else:
             ret = color.to_tuple()
         for i in range(0, 3):
-            ret[i] = min(255, color[i] + 100)
+            ret[i] = min(255, color[i] + amount)
+
+        return ret
+
+    @staticmethod
+    def make_transparent(color, amount=100):
+        if type(color) == tuple:
+            ret = list(color)
+        else:
+            ret = color.to_tuple()
+        ret[3] = max(0, color[3] - amount)
 
         return ret
 

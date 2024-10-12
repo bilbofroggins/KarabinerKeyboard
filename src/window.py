@@ -7,6 +7,7 @@ import pyray as ray
 from src.devices.keyboard_controller import KeyboardController
 from src.devices.mouse_controller import MouseController
 from src.logic.bundle_ids import BundleIds
+from src.logic.global_state import GlobalState
 from src.panels.click_handler import handle_clicks
 from src.panels.list_panel import ListPanel
 from src.panels.content_panel import ContentPanel
@@ -59,5 +60,6 @@ class MyApp:
             handle_clicks()
 
             ray.end_drawing()
+            GlobalState().tick()
 
         ray.close_window()

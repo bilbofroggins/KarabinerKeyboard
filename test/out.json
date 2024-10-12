@@ -3,23 +3,70 @@
     "manipulators": [
         {
             "from": {
-                "key_code": "left_cmd"
+                "key_code": "d"
+            },
+            "type": "basic",
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_0",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "simultaneous": [
+                    {
+                        "key_code": "i"
+                    }
+                ]
             },
             "type": "basic",
             "to": [
                 {
-                    "set_variable": {
-                        "name": "layer_1",
-                        "value": 1
-                    }
+                    "key_code": "8",
+                    "modifiers": [
+                        "left_shift"
+                    ]
                 }
             ],
-            "to_after_key_up": [
+            "conditions": [
                 {
-                    "set_variable": {
-                        "name": "layer_1",
-                        "value": 0
+                    "type": "variable_if",
+                    "name": "layer_0",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "key_code": "left_command"
+            },
+            "type": "basic",
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_0",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "simultaneous": [
+                    {
+                        "key_code": "m"
                     }
+                ]
+            },
+            "type": "basic",
+            "to": [
+                {
+                    "key_code": "left_alt",
+                    "modifiers": [
+                        "left_control"
+                    ]
                 }
             ],
             "conditions": [
@@ -35,6 +82,27 @@
                 "key_code": "tab"
             },
             "type": "basic",
+            "conditions": [
+                {
+                    "type": "variable_if",
+                    "name": "layer_0",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "from": {
+                "key_code": "y"
+            },
+            "type": "basic",
+            "to": [
+                {
+                    "key_code": "e",
+                    "modifiers": [
+                        "l"
+                    ]
+                }
+            ],
             "conditions": [
                 {
                     "type": "variable_if",
@@ -101,23 +169,6 @@
                 "key_code": "f"
             },
             "type": "basic",
-            "to": [
-                {
-                    "key_code": "t"
-                },
-                {
-                    "key_code": "e"
-                },
-                {
-                    "key_code": "s"
-                },
-                {
-                    "key_code": "t"
-                },
-                {
-                    "key_code": "return_or_enter"
-                }
-            ],
             "conditions": [
                 {
                     "type": "variable_if",
@@ -133,9 +184,9 @@
             "type": "basic",
             "to": [
                 {
-                    "key_code": "left_shift",
+                    "key_code": "e",
                     "modifiers": [
-                        "left_cmd"
+                        "l"
                     ]
                 }
             ],
@@ -152,11 +203,6 @@
                 "key_code": "m"
             },
             "type": "basic",
-            "to": [
-                {
-                    "shell_command": "open Safari"
-                }
-            ],
             "conditions": [
                 {
                     "type": "variable_if",

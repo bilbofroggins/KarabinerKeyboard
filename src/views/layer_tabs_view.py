@@ -3,6 +3,7 @@ import pyray as ray
 from src.components.drawing_helper import DrawingHelper
 from src.config import config
 from src.logic.layer_colors import layer_color
+from src.logic.merge_kb_config import merge_into_karabiner_config
 from src.logic.yaml_config import YAML_Config
 from src.panels.base_panel import BaseView
 
@@ -58,5 +59,8 @@ class LayerTabsView(BaseView):
                 [layer], [layer, self.current_layer[0]]
             )
             last_col += config.generic_padding + width
+
+        width = ray.measure_text("Merge to Config ->", config.small_font_size) + config.generic_padding*2
+        DrawingHelper.button("Merge to Config ->", False, row - config.small_padding, config.window_width - width, config.small_font_size, merge_into_karabiner_config, [])
 
         return last_row

@@ -54,7 +54,7 @@ rl_to_kb_key_map = {
     ray.KEY_L: 'l',
     ray.KEY_SEMICOLON: 'semicolon',
     ray.KEY_APOSTROPHE: 'quote',
-    ray.KEY_ENTER: 'return',
+    ray.KEY_ENTER: 'return_or_enter',
     ray.KEY_LEFT_SHIFT: 'left_shift',
     ray.KEY_Z: 'z',
     ray.KEY_X: 'x',

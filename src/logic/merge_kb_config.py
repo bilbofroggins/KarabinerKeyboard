@@ -1,9 +1,15 @@
 import yaml
 import json
+import os
+import sys
+
+from src.logic.key_mappings import modification_keys
+from src.logic.yaml_config import YAML_Config
+
 
 # Function to convert YAML to Karabiner JSON with updated layer handling
 def yaml_to_karabiner(yaml_data):
-    karabiner_json = {
+    karabiner_rule = {
         "description": "KBKeyboard",
         "manipulators": []
     }
@@ -12,8 +18,6 @@ def yaml_to_karabiner(yaml_data):
     layers = yaml_data['layers']
     layer_numbers = [int(layer) for layer in layers.keys()]
     max_layer = max(layer_numbers)
-
-    # No need to initialize variables; they default to 0
 
     # Process each layer and its keys
     for layer, keys in layers.items():
@@ -66,7 +70,7 @@ def yaml_to_karabiner(yaml_data):
                     ],
                     "conditions": conditions
                 }
-                karabiner_json['manipulators'].append(manipulator)
+                karabiner_rule['manipulators'].append(manipulator)
 
             elif 'layer|MT' in key_type:  # Momentary layer with tap
                 target_layer = int(key_data)
@@ -84,7 +88,7 @@ def yaml_to_karabiner(yaml_data):
                     ],
                     "conditions": conditions
                 }
-                karabiner_json['manipulators'].append(manipulator)
+                karabiner_rule['manipulators'].append(manipulator)
 
             elif 'layer|TO' in key_type:  # Toggle layer
                 target_layer = int(key_data)
@@ -101,28 +105,63 @@ def yaml_to_karabiner(yaml_data):
                     ],
                     "conditions": conditions
                 }
-                karabiner_json['manipulators'].append(manipulator)
+                karabiner_rule['manipulators'].append(manipulator)
 
             elif key_type == 'single':
-                key_code = key_data.split(' + ')[-1]
-                modifiers = key_data.split(' + ')[:-1] if ' + ' in key_data else []
+                # Split key_data into modifiers and key_code
+                key_parts = key_data.split(' + ')
+                key_code = key_parts[-1]
+                modifiers = key_parts[:-1] if len(key_parts) > 1 else []
+
+                # Filter out any invalid modifiers
+                modifiers = [mod for mod in modifiers if mod in modification_keys]
+
                 manipulator = {
                     "type": "basic",
                     "from": from_dict,
                     "to": [{"key_code": key_code, "modifiers": modifiers}],
                     "conditions": conditions
                 }
-                karabiner_json['manipulators'].append(manipulator)
+                karabiner_rule['manipulators'].append(manipulator)
 
             elif key_type == 'multi':
-                to_sequence = [{"key_code": k} for k in key_data]
+                # Handle sequence of key presses, potentially with modifiers
+                to_sequence = []
+                for item in key_data:
+                    if isinstance(item, str):
+                        # Split into modifiers and key_code
+                        key_parts = item.split(' + ')
+                        key_code = key_parts[-1]
+                        modifiers = key_parts[:-1] if len(key_parts) > 1 else []
+                        modifiers = [mod for mod in modifiers if mod in modification_keys]
+                        to_sequence.append({"key_code": key_code, "modifiers": modifiers})
+                    else:
+                        # If item is not a string, ignore or handle as needed
+                        continue
+
                 manipulator = {
                     "type": "basic",
                     "from": from_dict,
                     "to": to_sequence,
                     "conditions": conditions
                 }
-                karabiner_json['manipulators'].append(manipulator)
+                karabiner_rule['manipulators'].append(manipulator)
+
+            elif key_type == 'osm':  # One-shot modifier
+                # For one-shot modifiers, the last key is the key_code, others are modifiers
+                key_code = key_data[-1]
+                modifiers = [mod for mod in key_data[:-1] if mod in modification_keys]
+                manipulator = {
+                    "type": "basic",
+                    "from": from_dict,
+                    "to": [{
+                        "key_code": key_code,
+                        "modifiers": modifiers,
+                        "one_shot": True
+                    }],
+                    "conditions": conditions
+                }
+                karabiner_rule['manipulators'].append(manipulator)
 
             elif key_type == 'shell':
                 manipulator = {
@@ -131,38 +170,53 @@ def yaml_to_karabiner(yaml_data):
                     "to": [{"shell_command": key_data}],
                     "conditions": conditions
                 }
-                karabiner_json['manipulators'].append(manipulator)
+                karabiner_rule['manipulators'].append(manipulator)
 
-    return karabiner_json
+    return karabiner_rule
 
-# Example YAML input
-yaml_input = """
-layers:
-  0:
-    left_command:
-      data: '1'
-      type: layer|MO
-    tab:
-      data: '2'
-      type: layer|MT
-  1:
-    left_option:
-      data: '2'
-      type: layer|MO
-    j,k:
-      data: left_alt + delete_or_backspace
-      type: single
-  2:
-    f:
-      data: k
-      type: single
-"""
+# Function to merge the generated rule into the Karabiner config file
+def merge_into_karabiner_config():
+    yaml_data = YAML_Config().data
+    rule = yaml_to_karabiner(yaml_data)
+    # Path to Karabiner configuration file
+    karabiner_config_path = os.path.expanduser('~/.config/karabiner/karabiner.json')
 
-# Load YAML input
-yaml_data = yaml.safe_load(yaml_input)
+    # Load existing configuration
+    with open(karabiner_config_path, 'r') as f:
+        config = json.load(f)
 
-# Convert YAML to Karabiner JSON
-karabiner_output = yaml_to_karabiner(yaml_data)
+    # Find the selected profile
+    selected_profile = None
+    for profile in config['profiles']:
+        if profile.get('selected', False):
+            selected_profile = profile
+            break
 
-# Print JSON output
-print(json.dumps(karabiner_output, indent=4))
+    if not selected_profile:
+        print("No selected profile found in Karabiner configuration.")
+        sys.exit(1)
+
+    # Ensure complex_modifications and rules exist
+    if 'complex_modifications' not in selected_profile:
+        selected_profile['complex_modifications'] = {}
+    if 'rules' not in selected_profile['complex_modifications']:
+        selected_profile['complex_modifications']['rules'] = []
+
+    # Find existing rule with the same description
+    existing_rule_index = None
+    for idx, rule_item in enumerate(selected_profile['complex_modifications']['rules']):
+        if rule_item.get('description') == rule['description']:
+            existing_rule_index = idx
+            break
+
+    # If the rule exists, overwrite it; else, add it
+    if existing_rule_index is not None:
+        selected_profile['complex_modifications']['rules'][existing_rule_index] = rule
+        print(f"Rule '{rule['description']}' has been updated in the selected profile.")
+    else:
+        selected_profile['complex_modifications']['rules'].append(rule)
+        print(f"Rule '{rule['description']}' has been added to the selected profile.")
+
+    # Save the updated configuration back to the file
+    with open(karabiner_config_path, 'w') as f:
+        json.dump(config, f, indent=4)

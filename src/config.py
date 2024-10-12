@@ -11,7 +11,7 @@ class config:
     generic_padding = 20
     list_padding = 10
     small_padding = 5
-    download_location = os.path.expanduser('~/Downloads')
+    kb_config_location = os.path.expanduser('~/.config/karabiner/karabiner.json')
     # yaml_location = os.path.expanduser('~/.config/karabiner_keyboard/default.yaml')
     yaml_location = os.path.expanduser('../test/test_config.yaml')
     default_text_color = ray.BLACK

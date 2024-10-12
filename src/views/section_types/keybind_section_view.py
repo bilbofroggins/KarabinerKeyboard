@@ -2,9 +2,13 @@ import pyray as ray
 
 from src.components.drawing_helper import DrawingHelper
 from src.config import config
-from src.logic.key_mappings import kb_to_rl_key_map, rl_to_display_key_map
+from src.devices.keyboard_controller import KeyboardController
+from src.logic.global_state import GlobalState
+from src.logic.key_mappings import kb_to_rl_key_map, rl_to_display_key_map, \
+    modification_keys, rl_to_kb_key_map
 from src.logic.yaml_config import YAML_Config
 from src.panels.base_panel import BaseView
+import src.panels.global_vars as g
 
 
 class KeybindSectionView(BaseView):
@@ -14,6 +18,8 @@ class KeybindSectionView(BaseView):
         self.state = []
         self.reset_current_key_callback = reset_current_key_callback
         self.current_key = current_key
+        self.trail = []
+        self.keys_held_down = set()
 
     def submit(self):
         save_type = 'single' if len(self.state) == 1 else 'multi'
@@ -24,23 +30,81 @@ class KeybindSectionView(BaseView):
         YAML_Config().save(self.current_key[0].split(':')[0], self.current_key[0].split(':')[1], save_type, save_data)
         self.reset_current_key_callback()
 
+    def draw_waiting_animation(self, row, col, width, height):
+        frame = GlobalState().frame
+        perimeter = 2 * (width + height)
+        speed = 1.5
+        distance = (frame * speed) % perimeter
+
+        # Find which edge the line is currently on and interpolate position
+        if distance < width:  # Top edge
+            current_col, current_row = col + distance, row
+        elif distance < width + height:  # Right edge
+            current_col, current_row = col + width, row + (distance - width)
+        elif distance < 2 * width + height:  # Bottom edge
+            current_col, current_row = col + (
+                        2 * width + height - distance), row + height
+        else:  # Left edge
+            current_col, current_row = col, row + (perimeter - distance)
+
+        self.trail.append((current_col, current_row))
+
+        # Limit the trail length to a certain number of points
+        if len(self.trail) > 60:
+            self.trail.pop(0)
+
+        # Draw the trail by connecting all points
+        for i in range(1, len(self.trail)):
+            ray.draw_line_ex(ray.Vector2(int(self.trail[i - 1][0]), int(self.trail[i - 1][1])), ray.Vector2(int(self.trail[i][0]),
+                          int(self.trail[i][1])), 2, DrawingHelper.make_transparent(ray.MAROON, (len(self.trail) - i)*6))
+
+    def add_keys_held_down(self):
+        if GlobalState().input_focus == 'edit_view':
+            if len(self.keys_held_down) and len(KeyboardController.removed_keys()):
+                to_add = []
+                keys_held_copy = self.keys_held_down.copy()
+                # Put the mod keys in first, then normal keys
+                for key in keys_held_copy:
+                    kb_key = rl_to_kb_key_map[key]
+                    if kb_key in modification_keys:
+                        to_add.append(kb_key)
+                        self.keys_held_down.remove(key)
+                for key in self.keys_held_down:
+                    kb_key = rl_to_kb_key_map[key]
+                    to_add.append(kb_key)
+
+                self.state.append(to_add[:])
+                self.keys_held_down = set()
+            for key in KeyboardController.added_keys():
+                self.keys_held_down.add(key)
+
     def draw_section(self, row, col):
         row += config.small_padding
         row_under = row + config.font_size
-        for chord in self.state:
+
+        def draw_chord(row, col, chord_text, width):
+            DrawingHelper.draw_unicode_plus_text(chord_text, row, col, config.font_size, ray.BLACK)
+        def hover_chord(row, col, chord_text, width):
+            col = col + width/2 - config.font_size/2
+            ray.draw_texture_ex(g.textures['trash'], (col, row), 0, 0.15, config.error_color)
+        def click_chord(index):
+            del self.state[index]
+
+        for i, chord in enumerate(self.state):
             chord_text = ''.join([rl_to_display_key_map[kb_to_rl_key_map[key]] for key in chord])
-            width = DrawingHelper.clickable_link(chord_text, row, col, config.font_size, ray.BLACK, lambda: None, [])
+            width = DrawingHelper.measure_unicode_plus_text(chord_text, config.font_size)
+            DrawingHelper.generic_clickable(row, col, width, config.font_size, draw_chord, hover_chord, click_chord, [i], [chord_text, width])
             ray.draw_line_ex(ray.Vector2(col, row_under),
                              ray.Vector2(col + width, row_under), 2,
                              ray.BLACK)
-            col += width + config.small_padding
+            col += width + config.small_padding*2
 
-        ray.draw_line_ex(ray.Vector2(col, row_under), ray.Vector2(col + config.font_size, row_under), 2, ray.MAROON)
+        self.add_keys_held_down()
+        self.draw_waiting_animation(row, col, config.font_size, row_under - row)
         col += config.font_size + config.generic_padding
 
         row -= config.small_padding
         DrawingHelper.button("Confirm", False, row, col, config.font_size, self.submit, [])
-
 
     def reset_values(self):
         self.state = []

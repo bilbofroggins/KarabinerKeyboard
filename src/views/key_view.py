@@ -1,8 +1,11 @@
+import math
+
 import pyray as ray
 
 from src.components.drawing_helper import DrawingHelper
 from src.config import config
 from src.logic.event_bus import EventBus
+from src.logic.global_state import GlobalState
 from src.logic.key_mappings import *
 from src.logic.layer_colors import layer_color
 from src.logic.yaml_config import YAML_Config
@@ -67,13 +70,19 @@ class KeyView(BaseView):
             ray.draw_text_ex(g.special_font[0], '⌘', (self.col + self.width - self.corner_mod_width, self.row),
                              config.corner_font_size, 0, ray.BLACK)
 
+    def get_brightness_value(self):
+        frame = GlobalState().frame
+        speed = 60
+        val = 100 * (1 - abs((frame % speed) - (speed / 2)) / (speed / 2)) ** 2
+        return val
+
     def adjust_key_color(self, color):
         real_color = color
         if self.current_key[0] is not None:
             current_key_layer = int(self.current_key[0].split(":")[0])
             current_key_char = self.current_key[0].split(":")[1]
             if self.layer[0] == current_key_layer and self.kb_key == current_key_char:
-                real_color = DrawingHelper.brighten(color)
+                real_color = DrawingHelper.brighten(color, int(self.get_brightness_value()))
         return real_color
 
     def draw_key(self):
@@ -88,6 +97,7 @@ class KeyView(BaseView):
         key_text = rl_to_display_key_map[self.key_id]
 
         def click_callback():
+            GlobalState().input_focus = 'edit_view'
             self.current_key[0] = str(self.layer[0]) + ":" + self.kb_key
             EventBus().notify('key_click')
 

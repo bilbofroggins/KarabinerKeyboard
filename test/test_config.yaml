@@ -1,5 +1,10 @@
 layers:
   0:
+    d:
+      data:
+      - left_shift + left_command + d
+      - m
+      type: multi
     i:
       data: left_shift + 8
       type: single
@@ -10,11 +15,8 @@ layers:
       data: left_control + left_alt + h
       type: single
     tab:
-      data: 2
+      data: '2'
       type: layer|MT
-    u:
-      data: '8'
-      type: single
   1:
     j,k:
       data: left_alt + delete_or_backspace
@@ -22,7 +24,7 @@ layers:
   2:
     comma:
       app:
-      - Lens
+      - com.brave.browser
       - CLion
       app_mode: inclusive
       data: '2'
@@ -35,9 +37,6 @@ layers:
       - t
       - return_or_enter
       type: multi
-    k:
-      data: left_shift + left_control + left_command
-      type: osm
     m:
       data: open Safari
       type: shell

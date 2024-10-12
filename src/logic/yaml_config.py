@@ -31,7 +31,11 @@ class YAML_Config:
 
     def save(self, layer, key, type, data):
         cache_key = str(layer) + ':' + key
-        self.data['layers'][int(layer)][key] = {'type': type, 'data': data}
+        if type is None:
+            if key in self.data['layers'][int(layer)]:
+                del self.data['layers'][int(layer)][key]
+        else:
+            self.data['layers'][int(layer)][key] = {'type': type, 'data': data}
         del self.overrides[cache_key]
         del self.types[cache_key]
         self.save_yaml()

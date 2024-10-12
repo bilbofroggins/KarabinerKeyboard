@@ -1,6 +1,9 @@
 import pyray as ray
 
 from src.config import config
+from src.devices.keyboard_controller import KeyboardController
+from src.logic.event_bus import EventBus
+from src.logic.global_state import GlobalState
 from src.logic.key_mappings import *
 import src.panels.global_vars as g
 from src.panels.base_panel import BaseView
@@ -39,10 +42,12 @@ class KeyboardView(BaseView):
         self.key_color = ray.LIGHTGRAY
         self.search_keys = set()
 
-    def change_keyboard_state(self, state):
-        self.keyboard_state = state
-
     def draw_keyboard(self, start_x, start_y):
+        if GlobalState().input_focus == 'keyboard' and len(KeyboardController.added_keys()):
+            GlobalState().input_focus = 'edit_view'
+            self.current_key[0] = str(self.layer[0]) + ':' + rl_to_kb_key_map[next(iter(KeyboardController.pressed_keys))]
+            EventBus().notify('key_click')
+
         y = start_y
         for keyboard_row in self.key_positions:
             x = start_x

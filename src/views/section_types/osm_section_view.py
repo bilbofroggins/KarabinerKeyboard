@@ -28,6 +28,9 @@ class OSMSectionView(BaseView):
         self.reset_current_key_callback()
 
     def draw_section(self, row, col):
+        ray.draw_text("Implementation coming soon", col, row, config.font_size, ray.DARKBLUE)
+        return
+
         for mod_key in self.state.keys():
             col += DrawingHelper.button(
                 mod_key, self.state[mod_key],
