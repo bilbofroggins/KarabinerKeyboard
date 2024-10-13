@@ -43,10 +43,12 @@ class KeyboardView(BaseView):
         self.search_keys = set()
 
     def draw_keyboard(self, start_x, start_y):
-        if GlobalState().input_focus == 'keyboard' and len(KeyboardController.added_keys()):
-            GlobalState().input_focus = 'edit_view'
-            self.current_key[0] = str(self.layer[0]) + ':' + rl_to_kb_key_map[next(iter(KeyboardController.pressed_keys))]
-            EventBus().notify('key_click')
+        if GlobalState().input_focus == 'keyboard':
+            keys = KeyboardController.listen_to_keys()
+            if keys:
+                GlobalState().input_focus = 'edit_view'
+                self.current_key[0] = str(self.layer[0]) + ':' + ','.join(keys)
+                EventBus().notify('key_click')
 
         y = start_y
         for keyboard_row in self.key_positions:

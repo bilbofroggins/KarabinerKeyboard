@@ -60,23 +60,9 @@ class KeybindSectionView(BaseView):
 
     def add_keys_held_down(self):
         if GlobalState().input_focus == 'edit_view':
-            if len(self.keys_held_down) and len(KeyboardController.removed_keys()):
-                to_add = []
-                keys_held_copy = self.keys_held_down.copy()
-                # Put the mod keys in first, then normal keys
-                for key in keys_held_copy:
-                    kb_key = rl_to_kb_key_map[key]
-                    if kb_key in modification_keys:
-                        to_add.append(kb_key)
-                        self.keys_held_down.remove(key)
-                for key in self.keys_held_down:
-                    kb_key = rl_to_kb_key_map[key]
-                    to_add.append(kb_key)
-
-                self.state.append(to_add[:])
-                self.keys_held_down = set()
-            for key in KeyboardController.added_keys():
-                self.keys_held_down.add(key)
+            keys = KeyboardController.listen_to_keys()
+            if keys:
+                self.state.append(keys)
 
     def draw_section(self, row, col):
         row += config.small_padding

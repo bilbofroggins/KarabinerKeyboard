@@ -87,15 +87,19 @@ class DrawingHelper:
                                    row, width, height):
             MouseController.set_hand_mouse(True)
             if len(draw_args):
-                hover_callback(row, col, *draw_args)
+                result = hover_callback(row, col, *draw_args)
             else:
-                hover_callback(row, col)
+                result = hover_callback(row, col)
             ClickHandler.append(click_callback, click_args)
         else:
             if len(draw_args):
-                draw_callback(row, col, *draw_args)
+                result = draw_callback(row, col, *draw_args)
             else:
-                draw_callback(row, col)
+                result = draw_callback(row, col)
+
+        if result is not None:
+            r, c = result
+            return (r, c)
 
     @staticmethod
     def button(text, pressed, row, col, font_size, click_callback, click_args=None):

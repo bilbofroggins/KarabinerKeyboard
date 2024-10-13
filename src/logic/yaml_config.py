@@ -19,8 +19,12 @@ class YAML_Config:
         return cls._instance
 
     def load_yaml(self):
-        with open(config.yaml_location, 'r') as file:
-            self.data = yaml.safe_load(file)
+        try:
+            with open(config.yaml_location, 'r') as file:
+                self.data = yaml.safe_load(file)
+        except FileNotFoundError:
+            self.data = {'layers': {0:{}}}
+            self.save_yaml()
 
     def save_yaml(self):
         with open(config.yaml_location, 'w') as file:
@@ -29,6 +33,10 @@ class YAML_Config:
     def layers(self):
         return self.data.get('layers', {}).keys()
 
+    def delete_layer(self, layer):
+        del self.data['layers'][int(layer)]
+        self.save_yaml()
+
     def save(self, layer, key, type, data):
         cache_key = str(layer) + ':' + key
         if type is None:
@@ -36,8 +44,13 @@ class YAML_Config:
                 del self.data['layers'][int(layer)][key]
         else:
             self.data['layers'][int(layer)][key] = {'type': type, 'data': data}
-        del self.overrides[cache_key]
-        del self.types[cache_key]
+
+        if cache_key in self.overrides:
+            del self.overrides[cache_key]
+        if cache_key in self.types:
+            del self.types[cache_key]
+        if int(layer) in self.simultaneous_overrides:
+            del self.simultaneous_overrides[int(layer)]
         self.save_yaml()
 
     def key_type(self, layer, key_to_check):
@@ -79,6 +92,7 @@ class YAML_Config:
 
     # Handle cases where multiple keys are specified (e.g., 'j,k')
     def all_simultaneous_overrides(self, layer):
+        layer = int(layer)
         if layer in self.simultaneous_overrides:
             return self.simultaneous_overrides[layer]
 

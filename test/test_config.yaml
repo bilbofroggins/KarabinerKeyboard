@@ -5,6 +5,9 @@ layers:
       - left_shift + left_command + d
       - m
       type: multi
+    f,g:
+      data: b
+      type: single
     i:
       data: left_shift + 8
       type: single

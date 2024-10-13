@@ -17,8 +17,8 @@ class EditView(BaseView):
         EventBus().register('key_click', self)
         self.current_key = current_key
         self.sections = {
-            "Keybind": KeybindSectionView(current_key, self.reset_current_key), "Shell": ShellSectionView(current_key, self.reset_current_key),
-            "Layer": LayerSectionView(current_key, self.reset_current_key)
+            "Keybind": KeybindSectionView(current_key, self.reset_current_key), "Layer": LayerSectionView(current_key, self.reset_current_key),
+            "Shell": ShellSectionView(current_key, self.reset_current_key)
         }
         self.section_shown = self.sections["Keybind"]
 
