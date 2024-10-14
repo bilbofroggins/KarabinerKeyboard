@@ -54,7 +54,7 @@ class KeyboardView(BaseView):
         for keyboard_row in self.key_positions:
             x = start_x
             for key_id, width in keyboard_row:
-                x = KeyView(self.layer, self.current_key, key_id, y, x, width).draw_key()
+                x = KeyView(self.layer, key_id, self.current_key, y, x, width).draw_key()
             y += self.key_height + self.key_padding
 
         # Calculate the total width of keys before the 'left' key in the last row
@@ -70,16 +70,5 @@ class KeyboardView(BaseView):
         up_key_x = int(start_x + total_width_before_left)
         up_key_y = int(start_y + total_height_above_last_row)
 
-        # Draw the 'up' arrow key
-        up_key_width = int(self.base_key_width)
-
-        ray.draw_rectangle(up_key_x, up_key_y, up_key_width, self.key_height // 2, self.key_color)
-
-        key_text = rl_to_display_key_map[ray.KEY_UP]
-        font_width = ray.measure_text_ex(g.special_font[0], key_text, config.font_size, 0).x
-
-        up_text_x = int(up_key_x + up_key_width / 2 - font_width / 2)
-        up_text_y = int(up_key_y + self.key_height / 4 - 10)
-        ray.draw_text_ex(g.special_font[0], key_text, (up_text_x, up_text_y), config.font_size, 0, config.default_text_color)
-
+        KeyView(self.layer, ray.KEY_UP, self.current_key, up_key_y, up_key_x, 1, self.key_height // 2).draw_key()
         return y

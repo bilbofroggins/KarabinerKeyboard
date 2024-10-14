@@ -71,7 +71,7 @@ def yaml_to_karabiner(yaml_data):
                 }
                 karabiner_rule['manipulators'].append(manipulator)
 
-            elif 'layer|MT' in key_type:  # Momentary layer with tap
+            elif 'layer|LT' in key_type:  # Momentary layer with tap
                 target_layer = int(key_data)
                 manipulator = {
                     "type": "basic",

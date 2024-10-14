@@ -1,5 +1,13 @@
 layers:
   0:
+    a,f,w:
+      data:
+      - v
+      - v
+      type: multi
+    a,s,e:
+      data: g
+      type: single
     d:
       data:
       - left_shift + left_command + d
@@ -11,15 +19,30 @@ layers:
     i:
       data: left_shift + 8
       type: single
+    left_arrow:
+      data: comma
+      type: single
     left_command:
       data: '1'
       type: layer|MO
+    left_shift,left_control,a:
+      data: g
+      type: single
     m:
       data: left_control + left_alt + h
       type: single
+    q,a:
+      data: v
+      type: single
+    right_arrow:
+      data: semicolon
+      type: single
     tab:
       data: '2'
-      type: layer|MT
+      type: layer|LT
+    up_arrow:
+      data: left_shift + f
+      type: single
   1:
     j,k:
       data: left_alt + delete_or_backspace

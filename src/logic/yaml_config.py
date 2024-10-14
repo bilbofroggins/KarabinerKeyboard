@@ -69,6 +69,7 @@ class YAML_Config:
         return ""
 
     def key_overriddes(self, layer, key_to_check):
+        layer = int(layer)
         cache_key = str(layer) + ':' + key_to_check
         if cache_key in self.overrides:
             return self.overrides[cache_key]

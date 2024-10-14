@@ -21,6 +21,7 @@ class MyApp:
         title = "Karabiner Keyboard"
         ray.init_window(config.window_width, config.window_height, title)
         ray.set_target_fps(60)
+        # Prevent escape key from quitting app
         ray.set_exit_key(ray.KEY_NULL)
 
         unicode_chars = {'?', '⌫', '⇥', '⇪', '↵', '⇧', '␣', '⌘', '⌥', '⌃', '←', '↑', '↓',

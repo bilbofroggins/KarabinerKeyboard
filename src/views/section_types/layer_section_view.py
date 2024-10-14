@@ -49,7 +49,7 @@ class LayerSectionView(BaseView):
         return row + config.small_font_size + config.generic_padding
 
     def draw_layer_types(self, row, col):
-        layer_types = ['MO', 'MT', 'TO'] # Momentary, Momentary w Tap, Toggle
+        layer_types = ['MO', 'LT', 'TO'] # Momentary, Momentary w Tap, Toggle
         for layer_type in layer_types:
             col += DrawingHelper.button(layer_type, self.state['layer_type'] == layer_type, row, col, config.small_font_size, self.click_layer_type_callback, [layer_type])
             col += config.small_padding

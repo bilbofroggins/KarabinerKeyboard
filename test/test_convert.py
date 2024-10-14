@@ -68,7 +68,7 @@ def yaml_to_karabiner(yaml_data):
                 }
                 karabiner_json['manipulators'].append(manipulator)
 
-            elif 'layer|MT' in key_type:  # Momentary layer with tap
+            elif 'layer|LT' in key_type:  # Momentary layer with tap
                 target_layer = int(key_data)
                 manipulator = {
                     "type": "basic",
@@ -144,7 +144,7 @@ layers:
       type: layer|MO
     tab:
       data: '2'
-      type: layer|MT
+      type: layer|LT
   1:
     left_option:
       data: '2'
