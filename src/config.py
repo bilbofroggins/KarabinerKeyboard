@@ -30,3 +30,4 @@ class config:
     ask_highlight_color = (180, 151, 186, 255)
     ask_save_color = ray.BLUE
     scroll_speed = 4
+    enabled_flag = None

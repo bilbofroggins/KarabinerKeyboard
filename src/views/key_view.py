@@ -178,9 +178,16 @@ class KeyView():
 
             chars = override[1].split(' + ')
             if len(chars) > 1 and ('left_shift' in chars or 'right_shift' in chars):
-                key_text = get_shifted_key(chars[-1])
+                if chars[-1] not in modification_keys:
+                    key_text = get_shifted_key(rl_to_display_key_map[kb_to_rl_key_map[chars[-1]]])
+                else:
+                    key_text = ""
             else:
-                key_text = rl_to_display_key_map[kb_to_rl_key_map[chars[-1]]]
+                removed_mods = [char for char in chars if char not in modification_keys]
+                if len(removed_mods) > 0:
+                    key_text = rl_to_display_key_map[kb_to_rl_key_map[removed_mods[-1]]]
+                else:
+                    key_text = ""
         elif key_type == 'multi':
             ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.BROWN, self.kb_key in GlobalState().highlighted_chord_to_show()))
             key_text = '...'
@@ -199,16 +206,9 @@ class KeyView():
         self.draw_sim_outlines()
 
         font_width = DrawingHelper.measure_unicode_plus_text(key_text, config.font_size)
-        kb_begin_text = rl_to_kb_key_map[self.key_id][:5]
 
-        if kb_begin_text == 'left_' and self.key_id != ray.KEY_LEFT:
-            char_color = config.left_mod_kb_color
-        elif kb_begin_text == 'right' and self.key_id != ray.KEY_RIGHT:
-            char_color = config.right_mod_kb_color
-        else:
-            char_color = config.default_text_color
         text_col = int(self.col + self.width / 2 - font_width / 2)
         text_row = int(self.row + self.key_height / 2 - 10)
-        DrawingHelper.draw_unicode_plus_text(key_text, text_row, text_col, config.font_size, char_color)
+        DrawingHelper.draw_unicode_plus_text(key_text, text_row, text_col, config.font_size, config.default_text_color)
 
         return self.col + self.width + self.key_padding

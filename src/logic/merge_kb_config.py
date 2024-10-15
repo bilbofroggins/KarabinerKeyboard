@@ -2,6 +2,7 @@ import json
 import os
 import sys
 
+from src.config import config
 from src.logic.key_mappings import modification_keys
 from src.logic.yaml_config import YAML_Config
 
@@ -12,6 +13,9 @@ def yaml_to_karabiner(yaml_data):
         "description": "KBKeyboard",
         "manipulators": []
     }
+
+    if not config.enabled_flag:
+        karabiner_rule["enabled"] = "false"
 
     # Extract layer numbers and determine the maximum layer
     layers = yaml_data['layers']
@@ -133,7 +137,7 @@ def yaml_to_karabiner(yaml_data):
                 manipulator = {
                     "type": "basic",
                     "from": from_dict,
-                    "to": [{"key_code": key_code, "modifiers": modifiers}],
+                    "to": [{"key_code": key_code, "repeat": False, "modifiers": modifiers}],
                     "conditions": conditions
                 }
                 karabiner_rule['manipulators'].append(manipulator)
@@ -148,7 +152,7 @@ def yaml_to_karabiner(yaml_data):
                         key_code = key_parts[-1]
                         modifiers = key_parts[:-1] if len(key_parts) > 1 else []
                         modifiers = [mod for mod in modifiers if mod in modification_keys]
-                        to_sequence.append({"key_code": key_code, "modifiers": modifiers})
+                        to_sequence.append({"key_code": key_code, "repeat": False, "modifiers": modifiers})
                     else:
                         # If item is not a string, ignore or handle as needed
                         continue
@@ -188,6 +192,93 @@ def yaml_to_karabiner(yaml_data):
 
     return karabiner_rule
 
+def set_enabled_flag():
+    # Path to Karabiner configuration file
+    karabiner_config_path = os.path.expanduser('~/.config/karabiner/karabiner.json')
+
+    # Load existing configuration
+    with open(karabiner_config_path, 'r') as f:
+        config_file = json.load(f)
+
+    # Find the selected profile
+    selected_profile = None
+    for profile in config_file.get('profiles', []):
+        if profile.get('selected', False):
+            selected_profile = profile
+            break
+
+    if not selected_profile:
+        print("No selected profile found in Karabiner configuration.")
+        sys.exit(1)
+
+    # Ensure complex_modifications and rules exist
+    complex_mods = selected_profile.get('complex_modifications', {})
+    rules = complex_mods.get('rules', [])
+
+    # The description of your rule
+    rule_description = "KBKeyboard"
+
+    # Find the rule with the matching description
+    rule_found = False
+    for rule_item in rules:
+        if rule_item.get('description') == rule_description:
+            rule_found = True
+            # Get the 'enabled' status
+            enabled = rule_item.get('enabled', True)
+            config.enabled_flag = enabled
+            break
+
+    if not rule_found:
+        print(f"Rule '{rule_description}' not found in the selected profile.")
+        config.enabled_flag = True
+
+def write_enabled_flag():
+    # Path to Karabiner configuration file
+    karabiner_config_path = os.path.expanduser('~/.config/karabiner/karabiner.json')
+
+    # Load existing configuration
+    with open(karabiner_config_path, 'r') as f:
+        config_file = json.load(f)
+
+    # Find the selected profile
+    selected_profile = None
+    for profile in config_file.get('profiles', []):
+        if profile.get('selected', False):
+            selected_profile = profile
+            break
+
+    if not selected_profile:
+        print("No selected profile found in Karabiner configuration.")
+        sys.exit(1)
+
+    # Access complex_modifications and rules
+    complex_mods = selected_profile.get('complex_modifications', {})
+    rules = complex_mods.get('rules', [])
+
+    # The description of your rule
+    rule_description = "KBKeyboard"  # Update this to match your rule's description
+
+    # Find the rule with the matching description
+    rule_found = False
+    for rule_item in rules:
+        if rule_item.get('description') == rule_description:
+            rule_found = True
+            # Update the 'enabled' flag
+            if config.enabled_flag:
+                # Remove 'enabled' key if present, as enabled is default
+                rule_item.pop('enabled', None)
+            else:
+                rule_item['enabled'] = False
+            print(f"'enabled' flag for rule '{rule_description}' has been updated to {config.enabled_flag}.")
+            break
+
+    if not rule_found:
+        print(f"Rule '{rule_description}' not found. No changes were made.")
+
+    # Save the updated configuration back to the file
+    with open(karabiner_config_path, 'w') as f:
+        json.dump(config_file, f, indent=4)
+
 # Function to merge the generated rule into the Karabiner config file
 def merge_into_karabiner_config():
     yaml_data = YAML_Config().data
@@ -197,11 +288,11 @@ def merge_into_karabiner_config():
 
     # Load existing configuration
     with open(karabiner_config_path, 'r') as f:
-        config = json.load(f)
+        config_file = json.load(f)
 
     # Find the selected profile
     selected_profile = None
-    for profile in config['profiles']:
+    for profile in config_file['profiles']:
         if profile.get('selected', False):
             selected_profile = profile
             break
@@ -233,4 +324,4 @@ def merge_into_karabiner_config():
 
     # Save the updated configuration back to the file
     with open(karabiner_config_path, 'w') as f:
-        json.dump(config, f, indent=4)
+        json.dump(config_file, f, indent=4)
