@@ -51,10 +51,13 @@ class KeyboardView(BaseView):
                 EventBus().notify('key_click')
 
         y = start_y
-        for keyboard_row in self.key_positions:
+        key_views = []
+        for r, keyboard_row in enumerate(self.key_positions):
             x = start_x
-            for key_id, width in keyboard_row:
-                x = KeyView(self.layer, key_id, self.current_key, y, x, width).draw_key()
+            for ind, (key_id, width) in enumerate(keyboard_row):
+                key_view = KeyView(self.layer, str(r) + ':' + str(ind), key_id, self.current_key, y, x, width)
+                key_views.append(key_view)
+                x = key_view.draw_key()
             y += self.key_height + self.key_padding
 
         # Calculate the total width of keys before the 'left' key in the last row
@@ -70,5 +73,16 @@ class KeyboardView(BaseView):
         up_key_x = int(start_x + total_width_before_left)
         up_key_y = int(start_y + total_height_above_last_row)
 
-        KeyView(self.layer, ray.KEY_UP, self.current_key, up_key_y, up_key_x, 1, self.key_height // 2).draw_key()
+        key_view = KeyView(self.layer, '5:UP', ray.KEY_UP, self.current_key, up_key_y, up_key_x, 1, self.key_height // 2)
+        key_views.append(key_view)
+        key_view.draw_key()
+
+        dont_reset = False
+        for key_view in key_views:
+            if key_view.is_hover:
+                dont_reset = True
+        # TODO: fix this, I'm tired
+        if not dont_reset:
+            GlobalState().highlighted_keys = []
+
         return y

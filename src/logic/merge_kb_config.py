@@ -33,6 +33,21 @@ def yaml_to_karabiner(yaml_data):
             else:
                 from_dict['key_code'] = key
 
+            # Make all modifiers optional
+            from_dict['modifiers'] = {
+                "optional":
+                [
+                    "left_shift",
+                    "left_control",
+                    "left_alt",
+                    "left_command",
+                    "right_shift",
+                    "right_control",
+                    "right_alt",
+                    "right_command"
+                ]
+            }
+
             # Build conditions
             conditions = []
 

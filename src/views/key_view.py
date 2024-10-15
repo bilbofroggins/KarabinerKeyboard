@@ -16,8 +16,8 @@ import src.panels.global_vars as g
 class KeyView():
     _instances = {}
 
-    def __new__(cls, layer, key_id, current_key, row, col, width_modifier, height=40):
-        key = (layer[0], key_id)
+    def __new__(cls, layer, key_index, key_id, current_key, row, col, width_modifier, height=40):
+        key = (layer[0], key_index)
         if key in cls._instances:
             # Return existing instance from cache
             return cls._instances[key]
@@ -27,9 +27,9 @@ class KeyView():
             cls._instances[key] = instance
             return instance
 
-    def __init__(self, layer, key_id, current_key, row, col, width_modifier, height=40):
+    def __init__(self, layer, key_index, key_id, current_key, row, col, width_modifier, height=40):
+        super().__init__()
         if not hasattr(self, '_initialized'):
-            super().__init__()
             self.base_key_width = 50
             self.corner_mod_width = 10
             self.corner_mod_height = 10
@@ -37,20 +37,25 @@ class KeyView():
             self.key_padding = 5
             self.key_color = ray.LIGHTGRAY
             self.is_hover = False
+            self.sim_keys = None
 
             self.layer = layer
-            self.current_key = current_key
             self.key_id = key_id
-            self.row = row
-            self.col = col
-            self.width = int(self.base_key_width * width_modifier + self.key_padding * (width_modifier - 1))
+            self.current_key = current_key
+            self.width = int(self.base_key_width * width_modifier + self.key_padding * (
+                    width_modifier - 1))
             self.height = self.key_height
             if self.key_id is not None:
                 self.kb_key = rl_to_kb_key_map[self.key_id]
 
+            self.row = row
+            self.col = col
+
             if self.key_id in (ray.KEY_LEFT, ray.KEY_DOWN, ray.KEY_RIGHT):
                 self.key_height //= 2
                 self.row += self.key_height
+
+            self._initialized = True
 
     def get_mods(self, override_string):
         shift, ctrl, alt, cmd = 0, 0, 0, 0
@@ -114,18 +119,19 @@ class KeyView():
 
         return (red, green, blue, 255)
 
-    def draw_sim_outlines(self):
-        sim_keys = defaultdict(list)
+    def update_sim_outline_data(self):
+        self.sim_keys = defaultdict(list)
         for key in YAML_Config().all_simultaneous_overrides(self.layer[0]).keys():
-            color = self.simultaneous_color(key)
             keys = key.split(',')
             for k in keys:
-                sim_keys[k].append(color)
-        if self.kb_key in sim_keys:
+                self.sim_keys[k].append(key)
+
+    def draw_sim_outlines(self):
+        if self.kb_key in self.sim_keys:
             start_row, start_col, start_width, start_height = self.row, self.col, self.width, self.height
-            for i in range(len(sim_keys[self.kb_key])):
+            for i in range(len(self.sim_keys[self.kb_key])):
                 rec = ray.Rectangle(start_col, start_row, start_width, start_height)
-                ray.draw_rectangle_lines_ex(rec, 2, sim_keys[self.kb_key][i])
+                ray.draw_rectangle_lines_ex(rec, 2, self.simultaneous_color(self.sim_keys[self.kb_key][i]))
                 start_row -= 2
                 start_col -= 2
                 start_width += 4
@@ -134,21 +140,29 @@ class KeyView():
     def draw_key(self):
         if self.key_id is None:
             # Fn key & Power key
-            self.col += self.base_key_width + self.key_padding
-            return self.col
+            return self.col + self.base_key_width + self.key_padding
 
         override = YAML_Config().key_overriddes(self.layer[0], self.kb_key)
         key_type = YAML_Config().key_type(self.layer[0], self.kb_key)
 
         key_text = rl_to_display_key_map[self.key_id]
 
+        self.update_sim_outline_data()
+
         def draw_callback(row, col):
             ray.draw_rectangle(col, row, self.width, self.key_height,
-                               self.adjust_key_color(self.key_color))
+                               self.adjust_key_color(self.key_color, self.kb_key in GlobalState().highlighted_chord_to_show()))
             self.is_hover = False
         def hover_callback(row, col):
             ray.draw_rectangle(col, row, self.width, self.key_height,
                                self.adjust_key_color(self.key_color, True))
+            if self.is_hover == False:
+                GlobalState().highlighted_keys = []
+                GlobalState().highlighted_keys.append([self.kb_key])
+                for chord in self.sim_keys[self.kb_key]:
+                    GlobalState().highlighted_keys.append(chord.split(','))
+
+                GlobalState().highlighted_frame_start = GlobalState().frame
             self.is_hover = True
 
         def click_callback():
@@ -159,7 +173,7 @@ class KeyView():
         DrawingHelper.generic_clickable(self.row, self.col, self.width, self.key_height, draw_callback, hover_callback, click_callback)
 
         if key_type == 'single':
-            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.GOLD, self.is_hover))
+            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.GOLD, self.kb_key in GlobalState().highlighted_chord_to_show()))
             self.draw_corner_mods(*self.get_mods(override[1]))
 
             chars = override[1].split(' + ')
@@ -168,19 +182,19 @@ class KeyView():
             else:
                 key_text = rl_to_display_key_map[kb_to_rl_key_map[chars[-1]]]
         elif key_type == 'multi':
-            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.BROWN, self.is_hover))
+            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.BROWN, self.kb_key in GlobalState().highlighted_chord_to_show()))
             key_text = '...'
         elif key_type == 'osm':
             key_text = 'OSM'
-            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.SKYBLUE, self.is_hover))
+            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.SKYBLUE, self.kb_key in GlobalState().highlighted_chord_to_show()))
             self.draw_corner_mods(*self.get_mods(override[1]))
         elif key_type == 'shell':
-            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.MAGENTA, self.is_hover))
+            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.MAGENTA, self.kb_key in GlobalState().highlighted_chord_to_show()))
             key_text = '>_'
         elif key_type.split('|')[0] == 'layer':
             key_text = key_type.split('|')[1]
             color = layer_color(override[1])
-            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(color, self.is_hover))
+            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(color, self.kb_key in GlobalState().highlighted_chord_to_show()))
 
         self.draw_sim_outlines()
 
@@ -197,5 +211,4 @@ class KeyView():
         text_row = int(self.row + self.key_height / 2 - 10)
         DrawingHelper.draw_unicode_plus_text(key_text, text_row, text_col, config.font_size, char_color)
 
-        self.col += self.width + self.key_padding
-        return self.col
+        return self.col + self.width + self.key_padding

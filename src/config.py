@@ -12,8 +12,8 @@ class config:
     list_padding = 10
     small_padding = 5
     kb_config_location = os.path.expanduser('~/.config/karabiner/karabiner.json')
-    # yaml_location = os.path.expanduser('~/.config/karabiner_keyboard/default.yaml')
-    yaml_location = os.path.expanduser('~/Projects/python/KarabinerKeyboard/test/test_config.yaml')
+    yaml_location = os.path.expanduser('~/.config/karabiner_keyboard/default.yaml')
+    # yaml_location = os.path.expanduser('~/Projects/python/KarabinerKeyboard/test/test_config.yaml')
     default_text_color = ray.BLACK
     secondary_color = ray.BLUE
     background_color = ray.GRAY
