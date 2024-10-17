@@ -183,9 +183,9 @@ class KeyView():
                 else:
                     key_text = ""
             else:
-                removed_mods = [char for char in chars if char not in modification_keys]
-                if len(removed_mods) > 0:
-                    key_text = rl_to_display_key_map[kb_to_rl_key_map[removed_mods[-1]]]
+                chars_minus_mods = [char for char in chars if char not in modification_keys]
+                if len(chars_minus_mods) > 0:
+                    key_text = rl_to_display_key_map[kb_to_rl_key_map[chars_minus_mods[-1]]]
                 else:
                     key_text = ""
         elif key_type == 'multi':

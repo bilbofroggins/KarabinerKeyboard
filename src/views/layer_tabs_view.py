@@ -113,7 +113,7 @@ class LayerTabsView(BaseView):
                 [layer], [layer, self.current_layer[0]]
             )
 
-        self.draw_on_off_toggle(row - config.small_padding, last_col + config.generic_padding*7)
+        self.draw_on_off_toggle(row - config.small_padding, config.window_width - 300)
 
         width = ray.measure_text("Merge to Config ->", config.small_font_size) + config.generic_padding*2
         DrawingHelper.button("Merge to Config ->", False, row - config.small_padding, config.window_width - width, config.small_font_size, merge_into_karabiner_config, [])
