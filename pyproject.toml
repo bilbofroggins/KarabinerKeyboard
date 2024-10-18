@@ -7,8 +7,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11, <3.13"
-raylib = "^5.0.0.0"
-requests = "^2.32.2"
+raylib = "=5.0.0.1"
+requests = "^2.32.3"
+pyyaml = "^6.0.2"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^6.3.0"

@@ -1,11 +1,13 @@
 import os
 import sys
+import warnings
 
 import pyray as ray
 
 from src.devices.keyboard_controller import KeyboardController
 from src.devices.mouse_controller import MouseController
 from src.logic.bundle_ids import BundleIds
+from src.logic.global_state import GlobalState
 from src.panels.click_handler import handle_clicks
 from src.panels.list_panel import ListPanel
 from src.panels.content_panel import ContentPanel
@@ -15,9 +17,11 @@ from config import config
 
 class MyApp:
     def __init__(self):
+
         title = "Karabiner Keyboard"
         ray.init_window(config.window_width, config.window_height, title)
         ray.set_target_fps(60)
+        # Prevent escape key from quitting app
         ray.set_exit_key(ray.KEY_NULL)
 
         unicode_chars = {'?', '⌫', '⇥', '⇪', '↵', '⇧', '␣', '⌘', '⌥', '⌃', '←', '↑', '↓',
@@ -57,5 +61,6 @@ class MyApp:
             handle_clicks()
 
             ray.end_drawing()
+            GlobalState().tick()
 
         ray.close_window()
