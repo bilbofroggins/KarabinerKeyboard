@@ -8,7 +8,7 @@ from src.logic.yaml_config import YAML_Config
 
 
 # Constants
-KARABINER_CONFIG_PATH = os.path.expanduser('~/.config/karabiner/karabiner.json')
+KARABINER_CONFIG_PATH = config.kb_config_location
 RULE_DESCRIPTION = "KBKeyboard"
 OPTIONAL_MODIFIERS = [
     "left_shift", "left_control", "left_alt", "left_command",

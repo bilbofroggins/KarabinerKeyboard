@@ -1,5 +1,6 @@
 from collections import defaultdict
 import random
+from functools import lru_cache
 
 import pyray as ray
 
@@ -110,6 +111,7 @@ class KeyView():
             return DrawingHelper.darken(tuple(real_color), 50)
         return real_color
 
+    @lru_cache
     def simultaneous_color(self, key_string):
         random.seed(key_string)
 

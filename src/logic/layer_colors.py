@@ -1,5 +1,8 @@
 import random
+from functools import lru_cache
 
+
+@lru_cache
 def layer_color(layer):
     random.seed(int(layer) + 7)
 
