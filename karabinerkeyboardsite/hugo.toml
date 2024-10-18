@@ -1,0 +1,16 @@
+baseURL = "https://www.karabinerkeyboard.bilbofroggins.com/"
+languageCode = "en-us"
+title = "Karabiner Keyboard"
+theme = "PaperMod"
+
+[params]
+  author = "Pat Cunniff"
+  description = "A QMK-like alternative to the normal Karabiner UI."
+  logo = "images/icon.png"
+  enableSearch = true
+  primaryColor = "#FF5733"
+
+[[menu.main]]
+  name = "Documentation"
+  url = "/docs/"
+  weight = 1

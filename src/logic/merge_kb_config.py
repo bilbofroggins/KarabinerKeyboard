@@ -7,15 +7,117 @@ from src.logic.key_mappings import modification_keys
 from src.logic.yaml_config import YAML_Config
 
 
-# Function to convert YAML to Karabiner JSON with updated layer handling
+# Constants
+KARABINER_CONFIG_PATH = os.path.expanduser('~/.config/karabiner/karabiner.json')
+RULE_DESCRIPTION = "KBKeyboard"
+OPTIONAL_MODIFIERS = [
+    "left_shift", "left_control", "left_alt", "left_command",
+    "right_shift", "right_control", "right_alt", "right_command"
+]
+
+
+def load_karabiner_config():
+    """Load the Karabiner configuration file."""
+    try:
+        with open(KARABINER_CONFIG_PATH, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Karabiner configuration file not found at {KARABINER_CONFIG_PATH}.")
+        sys.exit(1)
+    except json.JSONDecodeError:
+        print(f"Error decoding JSON from {KARABINER_CONFIG_PATH}.")
+        sys.exit(1)
+
+
+def save_karabiner_config(config_data):
+    """Save the Karabiner configuration file."""
+    try:
+        with open(KARABINER_CONFIG_PATH, 'w') as f:
+            json.dump(config_data, f, indent=4)
+    except Exception as e:
+        print(f"Failed to save Karabiner configuration: {e}")
+        sys.exit(1)
+
+
+def get_selected_profile(config_data):
+    """Retrieve the selected profile from the Karabiner configuration."""
+    for profile in config_data.get('profiles', []):
+        if profile.get('selected', False):
+            return profile
+    print("No selected profile found in Karabiner configuration.")
+    sys.exit(1)
+
+
+def find_rule_by_description(rules, description):
+    """Find a rule within the rules list by its description."""
+    for rule in rules:
+        if rule.get('description') == description:
+            return rule
+    return None
+
+
+def build_conditions(layer_num, max_layer, apps):
+    """Construct the conditions for a manipulator based on the layer and applications."""
+    conditions = []
+    if layer_num == 0:
+        # All higher layer variables must be 0 (no higher layers active)
+        for higher_layer in range(1, max_layer + 1):
+            conditions.append({
+                "type": "variable_if",
+                "name": f"layer{higher_layer}",
+                "value": 0
+            })
+    else:
+        # Current layer variable must be 1
+        conditions.append({
+            "type": "variable_if",
+            "name": f"layer{layer_num}",
+            "value": 1
+        })
+        # All higher layer variables must be 0
+        for higher_layer in range(layer_num + 1, max_layer + 1):
+            conditions.append({
+                "type": "variable_if",
+                "name": f"layer{higher_layer}",
+                "value": 0
+            })
+
+    # Add app conditions if any
+    if apps:
+        conditions.append({
+            "type": "frontmost_application_if",
+            "bundle_identifiers": [f".*{app}.*" for app in apps]
+        })
+    return conditions
+
+
+def build_from_dict(key):
+    """Construct the 'from' dictionary for a manipulator."""
+    if ',' in key:
+        return {
+            "simultaneous": [{"key_code": kc.strip()} for kc in key.split(',')],
+            "modifiers": {
+                "optional": OPTIONAL_MODIFIERS
+            }
+        }
+    else:
+        return {
+            "key_code": key,
+            "modifiers": {
+                "optional": OPTIONAL_MODIFIERS
+            }
+        }
+
+
 def yaml_to_karabiner(yaml_data):
+    """Convert YAML data to Karabiner JSON with updated layer handling."""
     karabiner_rule = {
-        "description": "KBKeyboard",
+        "description": RULE_DESCRIPTION,
         "manipulators": []
     }
 
     if not config.enabled_flag:
-        karabiner_rule["enabled"] = "false"
+        karabiner_rule["enabled"] = False
 
     # Extract layer numbers and determine the maximum layer
     layers = yaml_data['layers']
@@ -30,298 +132,151 @@ def yaml_to_karabiner(yaml_data):
             key_type = details['type']
             apps = details.get('app', None)
 
-            # Determine the 'from' part
-            from_dict = {}
-            if ',' in key:
-                from_dict['simultaneous'] = [{"key_code": kc.strip()} for kc in key.split(',')]
-            else:
-                from_dict['key_code'] = key
+            from_dict = build_from_dict(key)
+            conditions = build_conditions(layer_num, max_layer, apps)
 
-            # Make all modifiers optional
-            from_dict['modifiers'] = {
-                "optional":
-                [
-                    "left_shift",
-                    "left_control",
-                    "left_alt",
-                    "left_command",
-                    "right_shift",
-                    "right_control",
-                    "right_alt",
-                    "right_command"
-                ]
+            manipulator = {
+                "type": "basic",
+                "from": from_dict,
+                "conditions": conditions
             }
-
-            # Build conditions
-            conditions = []
-
-            # For layer 0
-            if layer_num == 0:
-                # All higher layer variables must be 0 (no higher layers active)
-                for higher_layer in range(1, max_layer + 1):
-                    conditions.append({"type": "variable_if", "name": f"layer{higher_layer}", "value": 0})
-            else:
-                # Current layer variable must be 1
-                conditions.append({"type": "variable_if", "name": f"layer{layer_num}", "value": 1})
-                # All higher layer variables must be 0
-                for higher_layer in range(layer_num + 1, max_layer + 1):
-                    conditions.append({"type": "variable_if", "name": f"layer{higher_layer}", "value": 0})
-
-            # Add app conditions if any
-            if apps:
-                conditions.append({
-                    "type": "frontmost_application_if",
-                    "bundle_identifiers": [f".*{app}.*" for app in apps]
-                })
 
             # Handle different key types
             if 'layer|MO' in key_type:  # Momentary layer
                 target_layer = int(key_data)
-                manipulator = {
-                    "type": "basic",
-                    "from": from_dict,
-                    "to": [
-                        {"set_variable": {"name": f"layer{target_layer}", "value": 1}}
-                    ],
-                    "to_after_key_up": [
-                        {"set_variable": {"name": f"layer{target_layer}", "value": 0}}
-                    ],
-                    "conditions": conditions
-                }
-                karabiner_rule['manipulators'].append(manipulator)
+                manipulator.update({
+                    "to": [{"set_variable": {"name": f"layer{target_layer}", "value": 1}}],
+                    "to_after_key_up": [{"set_variable": {"name": f"layer{target_layer}", "value": 0}}]
+                })
 
             elif 'layer|LT' in key_type:  # Momentary layer with tap
                 target_layer = int(key_data)
-                manipulator = {
-                    "type": "basic",
-                    "from": from_dict,
-                    "to": [
-                        {"set_variable": {"name": f"layer{target_layer}", "value": 1}}
-                    ],
-                    "to_after_key_up": [
-                        {"set_variable": {"name": f"layer{target_layer}", "value": 0}}
-                    ],
-                    "to_if_alone": [
-                        {"key_code": key}  # Acts as the normal key if tapped
-                    ],
-                    "conditions": conditions
-                }
-                karabiner_rule['manipulators'].append(manipulator)
+                manipulator.update({
+                    "to": [{"set_variable": {"name": f"layer{target_layer}", "value": 1}}],
+                    "to_after_key_up": [{"set_variable": {"name": f"layer{target_layer}", "value": 0}}],
+                    "to_if_alone": [{"key_code": key}]
+                })
 
             elif 'layer|TO' in key_type:  # Toggle layer
                 target_layer = int(key_data)
-                manipulator = {
-                    "type": "basic",
-                    "from": from_dict,
+                manipulator.update({
                     "to": [
-                        {
-                            "set_variable": {
-                                "name": f"layer{target_layer}",
-                                "value": 1
-                            }
-                        }
-                    ],
-                    "conditions": conditions
-                }
-                karabiner_rule['manipulators'].append(manipulator)
+                        # First, set all other layers to 0
+                        *[{"set_variable": {"name": f"layer{i}", "value": 0}} for i in
+                          range(max_layer) if i != target_layer],
+                        # Then, set the target layer to 1
+                        {"set_variable": {"name": f"layer{target_layer}", "value": 1}}
+                    ]
+                })
 
             elif key_type == 'single':
-                # Split key_data into modifiers and key_code
                 key_parts = key_data.split(' + ')
                 key_code = key_parts[-1]
-                modifiers = key_parts[:-1] if len(key_parts) > 1 else []
+                modifiers = [mod for mod in key_parts[:-1] if mod in modification_keys]
 
-                # Filter out any invalid modifiers
-                modifiers = [mod for mod in modifiers if mod in modification_keys]
-
-                manipulator = {
-                    "type": "basic",
-                    "from": from_dict,
-                    "to": [{"key_code": key_code, "repeat": False, "modifiers": modifiers}],
-                    "conditions": conditions
-                }
-                karabiner_rule['manipulators'].append(manipulator)
+                manipulator.update({
+                    "to": [{
+                        "key_code": key_code,
+                        "repeat": False,
+                        "modifiers": modifiers
+                    }]
+                })
+                if key_code in modification_keys:
+                    manipulator['to'][0]['repeat'] = True
 
             elif key_type == 'multi':
-                # Handle sequence of key presses, potentially with modifiers
                 to_sequence = []
                 for item in key_data:
                     if isinstance(item, str):
-                        # Split into modifiers and key_code
                         key_parts = item.split(' + ')
                         key_code = key_parts[-1]
-                        modifiers = key_parts[:-1] if len(key_parts) > 1 else []
-                        modifiers = [mod for mod in modifiers if mod in modification_keys]
-                        to_sequence.append({"key_code": key_code, "repeat": False, "modifiers": modifiers})
-                    else:
-                        # If item is not a string, ignore or handle as needed
-                        continue
-
-                manipulator = {
-                    "type": "basic",
-                    "from": from_dict,
-                    "to": to_sequence,
-                    "conditions": conditions
-                }
-                karabiner_rule['manipulators'].append(manipulator)
+                        modifiers = [mod for mod in key_parts[:-1] if mod in modification_keys]
+                        to_sequence.append({
+                            "key_code": key_code,
+                            "repeat": False,
+                            "modifiers": modifiers
+                        })
+                manipulator.update({
+                    "to": to_sequence
+                })
 
             elif key_type == 'osm':  # One-shot modifier
-                # For one-shot modifiers, the last key is the key_code, others are modifiers
                 key_code = key_data[-1]
                 modifiers = [mod for mod in key_data[:-1] if mod in modification_keys]
-                manipulator = {
-                    "type": "basic",
-                    "from": from_dict,
+                manipulator.update({
                     "to": [{
                         "key_code": key_code,
                         "modifiers": modifiers,
                         "one_shot": True
-                    }],
-                    "conditions": conditions
-                }
-                karabiner_rule['manipulators'].append(manipulator)
+                    }]
+                })
 
             elif key_type == 'shell':
-                manipulator = {
-                    "type": "basic",
-                    "from": from_dict,
-                    "to": [{"shell_command": key_data}],
-                    "conditions": conditions
-                }
-                karabiner_rule['manipulators'].append(manipulator)
+                manipulator.update({
+                    "to": [{"shell_command": key_data}]
+                })
+
+            karabiner_rule['manipulators'].append(manipulator)
 
     return karabiner_rule
 
+
 def set_enabled_flag():
-    # Path to Karabiner configuration file
-    karabiner_config_path = os.path.expanduser('~/.config/karabiner/karabiner.json')
+    """Set the enabled flag based on the current Karabiner configuration."""
+    config_data = load_karabiner_config()
+    selected_profile = get_selected_profile(config_data)
 
-    # Load existing configuration
-    with open(karabiner_config_path, 'r') as f:
-        config_file = json.load(f)
+    rules = selected_profile.get('complex_modifications', {}).get('rules', [])
+    rule = find_rule_by_description(rules, RULE_DESCRIPTION)
 
-    # Find the selected profile
-    selected_profile = None
-    for profile in config_file.get('profiles', []):
-        if profile.get('selected', False):
-            selected_profile = profile
-            break
-
-    if not selected_profile:
-        print("No selected profile found in Karabiner configuration.")
-        sys.exit(1)
-
-    # Ensure complex_modifications and rules exist
-    complex_mods = selected_profile.get('complex_modifications', {})
-    rules = complex_mods.get('rules', [])
-
-    # The description of your rule
-    rule_description = "KBKeyboard"
-
-    # Find the rule with the matching description
-    rule_found = False
-    for rule_item in rules:
-        if rule_item.get('description') == rule_description:
-            rule_found = True
-            # Get the 'enabled' status
-            enabled = rule_item.get('enabled', True)
-            config.enabled_flag = enabled
-            break
-
-    if not rule_found:
-        print(f"Rule '{rule_description}' not found in the selected profile.")
+    if rule:
+        config.enabled_flag = rule.get('enabled', True)
+    else:
+        print(f"Rule '{RULE_DESCRIPTION}' not found in the selected profile.")
         config.enabled_flag = True
 
+
 def write_enabled_flag():
-    # Path to Karabiner configuration file
-    karabiner_config_path = os.path.expanduser('~/.config/karabiner/karabiner.json')
+    """Write the enabled flag back to the Karabiner configuration."""
+    config_data = load_karabiner_config()
+    selected_profile = get_selected_profile(config_data)
 
-    # Load existing configuration
-    with open(karabiner_config_path, 'r') as f:
-        config_file = json.load(f)
+    complex_mods = selected_profile.setdefault('complex_modifications', {})
+    rules = complex_mods.setdefault('rules', [])
 
-    # Find the selected profile
-    selected_profile = None
-    for profile in config_file.get('profiles', []):
-        if profile.get('selected', False):
-            selected_profile = profile
-            break
+    rule = find_rule_by_description(rules, RULE_DESCRIPTION)
 
-    if not selected_profile:
-        print("No selected profile found in Karabiner configuration.")
-        sys.exit(1)
-
-    # Access complex_modifications and rules
-    complex_mods = selected_profile.get('complex_modifications', {})
-    rules = complex_mods.get('rules', [])
-
-    # The description of your rule
-    rule_description = "KBKeyboard"  # Update this to match your rule's description
-
-    # Find the rule with the matching description
-    rule_found = False
-    for rule_item in rules:
-        if rule_item.get('description') == rule_description:
-            rule_found = True
-            # Update the 'enabled' flag
-            if config.enabled_flag:
-                # Remove 'enabled' key if present, as enabled is default
-                rule_item.pop('enabled', None)
-            else:
-                rule_item['enabled'] = False
-            print(f"'enabled' flag for rule '{rule_description}' has been updated to {config.enabled_flag}.")
-            break
-
-    if not rule_found:
-        print(f"Rule '{rule_description}' not found. No changes were made.")
-
-    # Save the updated configuration back to the file
-    with open(karabiner_config_path, 'w') as f:
-        json.dump(config_file, f, indent=4)
-
-# Function to merge the generated rule into the Karabiner config file
-def merge_into_karabiner_config():
-    yaml_data = YAML_Config().data
-    rule = yaml_to_karabiner(yaml_data)
-    # Path to Karabiner configuration file
-    karabiner_config_path = os.path.expanduser('~/.config/karabiner/karabiner.json')
-
-    # Load existing configuration
-    with open(karabiner_config_path, 'r') as f:
-        config_file = json.load(f)
-
-    # Find the selected profile
-    selected_profile = None
-    for profile in config_file['profiles']:
-        if profile.get('selected', False):
-            selected_profile = profile
-            break
-
-    if not selected_profile:
-        print("No selected profile found in Karabiner configuration.")
-        sys.exit(1)
-
-    # Ensure complex_modifications and rules exist
-    if 'complex_modifications' not in selected_profile:
-        selected_profile['complex_modifications'] = {}
-    if 'rules' not in selected_profile['complex_modifications']:
-        selected_profile['complex_modifications']['rules'] = []
-
-    # Find existing rule with the same description
-    existing_rule_index = None
-    for idx, rule_item in enumerate(selected_profile['complex_modifications']['rules']):
-        if rule_item.get('description') == rule['description']:
-            existing_rule_index = idx
-            break
-
-    # If the rule exists, overwrite it; else, add it
-    if existing_rule_index is not None:
-        selected_profile['complex_modifications']['rules'][existing_rule_index] = rule
-        print(f"Rule '{rule['description']}' has been updated in the selected profile.")
+    if rule:
+        if config.enabled_flag:
+            rule.pop('enabled', None)  # Enabled is default
+        else:
+            rule['enabled'] = False
+        print(f"'enabled' flag for rule '{RULE_DESCRIPTION}' has been updated to {config.enabled_flag}.")
     else:
-        selected_profile['complex_modifications']['rules'].append(rule)
-        print(f"Rule '{rule['description']}' has been added to the selected profile.")
+        print(f"Rule '{RULE_DESCRIPTION}' not found. No changes were made.")
 
-    # Save the updated configuration back to the file
-    with open(karabiner_config_path, 'w') as f:
-        json.dump(config_file, f, indent=4)
+    save_karabiner_config(config_data)
+
+
+def merge_into_karabiner_config():
+    """Merge the generated rule into the Karabiner configuration file."""
+    yaml_data = YAML_Config().data
+    new_rule = yaml_to_karabiner(yaml_data)
+
+    config_data = load_karabiner_config()
+    selected_profile = get_selected_profile(config_data)
+
+    complex_mods = selected_profile.setdefault('complex_modifications', {})
+    rules = complex_mods.setdefault('rules', [])
+
+    existing_rule = find_rule_by_description(rules, new_rule['description'])
+
+    if existing_rule:
+        index = rules.index(existing_rule)
+        rules[index] = new_rule
+        print(f"Rule '{new_rule['description']}' has been updated in the selected profile.")
+    else:
+        rules.append(new_rule)
+        print(f"Rule '{new_rule['description']}' has been added to the selected profile.")
+
+    save_karabiner_config(config_data)
