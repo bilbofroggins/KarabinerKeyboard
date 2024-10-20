@@ -12,9 +12,9 @@ For the latest release, please check the [Releases](https://github.com/bilbofrog
 
 From the Keyboard panel, press the keys you want to change, or click on the key. You can currently either set to Keybinding, which will allow you to override the key with a single sequence or an array of "to" sequences you can type in. You can also pick the layer type, which has a few types to it:
 
-Layer|MO = Momentary (layer will activate upon holding down the key and reset once released)
-Layer|LT = Layer with Tap (similar to momentary except will trigger the key press if no keys within the layer were hit)
-Layer|TO = Toggle (one tap toggles the layer on and you need a seperate key in the next layer to reset back)
+* Layer|MO = Momentary (layer will activate upon holding down the key and reset once released)
+* Layer|LT = Layer with Tap (similar to momentary except will trigger the key press if no keys within the layer were hit)
+* Layer|TO = Toggle (one tap toggles the layer on and you need a seperate key in the next layer to reset back)
 
 Then click "Merge to config" in the top right to merge it to the Karabiner-Elements config file, and you should be good to go!
 
