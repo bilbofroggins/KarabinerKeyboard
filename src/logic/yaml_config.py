@@ -1,3 +1,5 @@
+import os
+
 import yaml
 
 from src.config import config
@@ -27,6 +29,9 @@ class YAML_Config:
             self.save_yaml()
 
     def save_yaml(self):
+        # Ensure the parent directory exists
+        os.makedirs(os.path.dirname(config.yaml_location), exist_ok=True)
+
         with open(config.yaml_location, 'w') as file:
             yaml.safe_dump(self.data, file)
 
