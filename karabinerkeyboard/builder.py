@@ -88,6 +88,7 @@ def bundle_app():
 
     update_version_number()
 
+    # Remove the universal2 target flag to fix the fat binary issue
     subprocess.run([
         "pyinstaller",
         "src/main.py",
@@ -104,7 +105,11 @@ def bundle_app():
     modify_bundle_spec(spec_file, icon_path, bundle_identifier)
 
     # Run PyInstaller
-    subprocess.run(["pyinstaller", spec_file])
-
-    load_env_variables_from_file('.env')
-    notarize_app("pjcfifa@gmail.com", "GD76CFHAZT", "dist/KarabinerKeyboard.app", "KarabinerKeyboard.zip")
+    result = subprocess.run(["pyinstaller", spec_file])
+    
+    # Only proceed with notarization if build was successful
+    if result.returncode == 0 and os.path.exists("dist/KarabinerKeyboard.app"):
+        load_env_variables_from_file('.env')
+        notarize_app("pjcfifa@gmail.com", "GD76CFHAZT", "dist/KarabinerKeyboard.app", "KarabinerKeyboard.zip")
+    else:
+        print("Build failed or app not found. Skipping notarization.")
