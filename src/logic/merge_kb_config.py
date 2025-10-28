@@ -94,12 +94,32 @@ def build_conditions(layer_num, max_layer, apps):
 def build_from_dict(key):
     """Construct the 'from' dictionary for a manipulator."""
     if ',' in key:
-        return {
-            "simultaneous": [{"key_code": kc.strip()} for kc in key.split(',')],
-            "modifiers": {
-                "optional": OPTIONAL_MODIFIERS
-            }
-        }
+        key_parts = [kc.strip() for kc in key.split(',')]
+
+        # Separate modifiers from regular keys
+        modifiers = [kc for kc in key_parts if kc in modification_keys]
+        regular_keys = [kc for kc in key_parts if kc not in modification_keys]
+
+        # Build the result dictionary
+        result = {}
+
+        # Handle regular keys - simultaneous if multiple, key_code if single
+        if len(regular_keys) > 1:
+            result["simultaneous"] = [{"key_code": kc} for kc in regular_keys]
+        elif len(regular_keys) == 1:
+            result["key_code"] = regular_keys[0]
+        else:
+            # All keys were modifiers, which shouldn't happen but handle gracefully
+            # Use the first modifier as the key_code
+            result["key_code"] = modifiers[0]
+            modifiers = modifiers[1:]
+
+        # Add modifiers section
+        result["modifiers"] = {"optional": OPTIONAL_MODIFIERS}
+        if modifiers:
+            result["modifiers"]["mandatory"] = modifiers
+
+        return result
     else:
         return {
             "key_code": key,

@@ -169,7 +169,13 @@ class KeyView():
 
         def click_callback():
             GlobalState().input_focus = 'edit_view'
-            self.current_key[0] = str(self.layer[0]) + ":" + self.kb_key
+            # Use the currently highlighted chord instead of just the single key
+            highlighted_chord = GlobalState().highlighted_chord_to_show()
+            if highlighted_chord:
+                chord_key = ','.join(highlighted_chord)
+            else:
+                chord_key = self.kb_key
+            self.current_key[0] = str(self.layer[0]) + ":" + chord_key
             EventBus().notify('key_click')
 
         DrawingHelper.generic_clickable(self.row, self.col, self.width, self.key_height, draw_callback, hover_callback, click_callback)
