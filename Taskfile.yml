@@ -1,0 +1,13 @@
+version: '3'
+
+env:
+  PYTHONPATH: .
+
+tasks:
+  run:
+    cmds:
+      - uv run python3 src/main.py
+  test:
+    cmds:
+      - pytest
+

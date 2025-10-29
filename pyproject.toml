@@ -1,25 +1,32 @@
-[tool.poetry]
+[project]
 name = "karabinerkeyboard"
 version = "0.1.0"
 description = ""
-authors = ["Patrick Cunniff <pjcfifa@gmail.com>"]
+authors = [{name = "Patrick Cunniff", email = "pjcfifa@gmail.com"}]
 readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "raylib==5.0.0.1",
+  "requests>=2.32.3",
+  "pyyaml>=6.0.2",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.11, <3.13"
-raylib = "=5.0.0.1"
-requests = "^2.32.3"
-pyyaml = "^6.0.2"
+[project.optional-dependencies]
+dev = [
+  "pyinstaller>=6.3.0",
+]
 
-[tool.poetry.dev-dependencies]
-pyinstaller = "^6.3.0"
+[project.scripts]
+bundle-app = "karabinerkeyboard.builder:bundle_app"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[[tool.poetry.packages]]
-include = "karabinerkeyboard"
+[tool.setuptools]
+packages = ["karabinerkeyboard"]  # Must specify packages
+include-package-data = true
 
-[tool.poetry.scripts]
-bundle-app = "karabinerkeyboard.builder:bundle_app"
+[tool.setuptools.package-data]
+karabinerkeyboard = ["*.yaml", "*.json"]  # Must specify data files
+

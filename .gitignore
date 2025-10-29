@@ -6,3 +6,4 @@ dist
 KarabinerKeyboard.spec
 .env
 CLAUDE.md
+*.egg-info
