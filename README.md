@@ -31,17 +31,20 @@ Before using Better Keyboard UI, ensure that [Karabiner-Elements](https://github
 
 ## Contributing
 
-### Development - Running the app
+### Prerequisites for Development
+First, install [uv](https://github.com/astral-sh/uv) if you haven't already:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
-pip3 install poetry
-poetry shell
-python3 src/main.py
+
+### Development - Running the app
+```bash
+uv sync
+uv run python src/main.py
 ```
 
 ### Building for distribution
-```
-pip3 install poetry
-poetry shell
-poetry install
-poetry run bundle-app
+```bash
+uv sync --all-extras  # Installs dev dependencies including pyinstaller
+uv run bundle-app
 ```

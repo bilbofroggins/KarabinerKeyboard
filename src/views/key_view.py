@@ -214,8 +214,11 @@ class KeyView():
                 override_string = override[1].split('|')
                 if len(override_string) > 1:
                     layernum = override_string[0]
-                    key = override_string[1]
-                    key_text = key_type.split('|')[1] + "(" + rl_to_display_key_map[kb_to_rl_key_map[key]] + ")"
+                    tap_key_str = override_string[1]
+                    # Parse tap_key_str which may contain modifiers (e.g., "left_shift + hyphen")
+                    tap_keys = tap_key_str.split(' + ')
+                    tap_display = ''.join([rl_to_display_key_map[kb_to_rl_key_map[k]] for k in tap_keys])
+                    key_text = key_type.split('|')[1] + "(" + tap_display + ")"
             color = layer_color(layernum)
 
             ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(color, self.kb_key in GlobalState().highlighted_chord_to_show()))

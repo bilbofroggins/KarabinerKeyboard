@@ -183,12 +183,32 @@ def yaml_to_karabiner(yaml_data):
                         tap_key_str = None
 
                 target_layer = int(layernum)
-                active_key = key if not tap_key_str else tap_key_str
+
+                # Build the to_if_alone action
+                if tap_key_str:
+                    # Custom tap key specified (e.g., "left_shift + hyphen")
+                    # Split into key_code and modifiers
+                    tap_key_parts = tap_key_str.split(' + ')
+                    tap_key_code = tap_key_parts[-1]
+                    tap_modifiers = [mod for mod in tap_key_parts[:-1] if mod in modification_keys]
+                    to_if_alone = [{"key_code": tap_key_code}]
+                    if tap_modifiers:
+                        to_if_alone[0]["modifiers"] = tap_modifiers
+                else:
+                    # No custom tap key, use original key
+                    # Extract the actual key code from the 'from' key (may include modifiers from chord)
+                    if ',' in key:
+                        # For chords, use the first non-modifier key
+                        key_parts = [k.strip() for k in key.split(',')]
+                        actual_key = next((k for k in key_parts if k not in modification_keys), key_parts[0])
+                    else:
+                        actual_key = key
+                    to_if_alone = [{"key_code": actual_key}]
 
                 manipulator.update({
                     "to": [{"set_variable": {"name": f"layer{target_layer}", "value": 1}}],
                     "to_after_key_up": [{"set_variable": {"name": f"layer{target_layer}", "value": 0}}],
-                    "to_if_alone": [{"key_code": active_key}]
+                    "to_if_alone": to_if_alone
                 })
 
             elif 'layer|TO' in key_type:  # Toggle layer

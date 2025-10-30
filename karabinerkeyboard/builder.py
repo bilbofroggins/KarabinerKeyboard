@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 
 from karabinerkeyboard.notarization import notarize_app
 
@@ -90,7 +91,7 @@ def bundle_app():
 
     # Remove the universal2 target flag to fix the fat binary issue
     subprocess.run([
-        "pyinstaller",
+        sys.executable, "-m", "PyInstaller",
         "src/main.py",
         "--collect-submodules", "application",
         "--windowed",
@@ -105,7 +106,7 @@ def bundle_app():
     modify_bundle_spec(spec_file, icon_path, bundle_identifier)
 
     # Run PyInstaller
-    result = subprocess.run(["pyinstaller", spec_file])
+    result = subprocess.run([sys.executable, "-m", "PyInstaller", spec_file])
     
     # Only proceed with notarization if build was successful
     if result.returncode == 0 and os.path.exists("dist/KarabinerKeyboard.app"):

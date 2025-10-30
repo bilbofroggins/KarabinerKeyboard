@@ -4,7 +4,7 @@ from src.components.drawing_helper import DrawingHelper
 from src.config import config
 from src.devices.keyboard_controller import KeyboardController
 from src.logic.global_state import GlobalState
-from src.logic.key_mappings import kb_to_rl_key_map, rl_to_display_key_map
+from src.logic.key_mappings import kb_to_rl_key_map, rl_to_display_key_map, modification_keys, get_shifted_key
 from src.logic.yaml_config import YAML_Config
 from src.panels.base_panel import BaseView
 
@@ -36,7 +36,8 @@ class LayerSectionView(BaseView):
         else:
             save_type = "layer|" + self.state['layer_type']
             if self.state['layer_type'] == 'LT' and self.state['tap_key'] is not None:
-                save_data = self.state['layer'] + '|' + self.state['tap_key']
+                # Join the array with ' + ' (e.g., ['left_shift', 'hyphen'] -> '1|left_shift + hyphen')
+                save_data = str(self.state['layer']) + '|' + ' + '.join(self.state['tap_key'])
             else:
                 save_data = self.state['layer']
             YAML_Config().save(self.current_key[0].split(':')[0], self.current_key[0].split(':')[1], save_type, save_data)
@@ -66,13 +67,16 @@ class LayerSectionView(BaseView):
         if GlobalState().input_focus == 'edit_view':
             keys = KeyboardController.listen_to_keys()
             if keys:
-                self.state['tap_key'] = keys[0]
+                # Keep the full array (e.g., ['left_shift', 'hyphen'])
+                # Will be split into key_code + modifiers in merge_kb_config.py
+                self.state['tap_key'] = keys
 
     def draw_tap_key_input(self, row, col):
         DrawingHelper.draw_unicode_plus_text("Tap Key:", row, col, config.small_font_size, ray.BLACK)
         col += DrawingHelper.measure_unicode_plus_text("Tap Key:", config.small_font_size) + config.generic_padding * 2
 
         if self.state['tap_key']:
+            # self.state['tap_key'] is an array like ['left_shift', 'hyphen']
             tap_text = ''.join([rl_to_display_key_map[kb_to_rl_key_map[key]] for key in self.state['tap_key']])
             DrawingHelper.draw_unicode_plus_text(tap_text, row, col, config.small_font_size, ray.BLACK)
             col += DrawingHelper.measure_unicode_plus_text(tap_text, config.small_font_size) + config.small_padding * 5
@@ -105,7 +109,7 @@ class LayerSectionView(BaseView):
         layer_data = YAML_Config().key_overriddes(current_key[0].split(':')[0], current_key[0].split(':')[1])[1]
         self.state['layer_type'] = layer_type
 
-        # Handle both old format (int) and new format (dict with layer and tap_key)
+        # Handle both old format (int) and new format (string with layer|tap_key)
         if isinstance(layer_data, str):
             layer_strings = layer_data.split('|')
             if len(layer_strings) > 1:
@@ -117,7 +121,8 @@ class LayerSectionView(BaseView):
 
             self.state['layer'] = layernum
             if tap_key_str:
-                self.state['tap_key'] = tap_key_str
+                # Convert back to array (e.g., 'left_shift + hyphen' -> ['left_shift', 'hyphen'])
+                self.state['tap_key'] = tap_key_str.split(' + ')
         else:
             self.state['layer'] = layer_data
 
