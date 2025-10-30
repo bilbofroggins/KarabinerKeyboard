@@ -170,11 +170,25 @@ def yaml_to_karabiner(yaml_data):
                 })
 
             elif 'layer|LT' in key_type:  # Momentary layer with tap
-                target_layer = int(key_data)
+                layernum = key_data
+                tap_key_str = None
+                # Handle both old format (int) and new format (dict with layer and tap_key)
+                if isinstance(key_data, str):
+                    layer_strings = key_data.split('|')
+                    if len(layer_strings) > 1:
+                        layernum = layer_strings[0]
+                        tap_key_str = layer_strings[1]
+                    else:
+                        layernum = layer_strings[0]
+                        tap_key_str = None
+
+                target_layer = int(layernum)
+                active_key = key if not tap_key_str else tap_key_str
+
                 manipulator.update({
                     "to": [{"set_variable": {"name": f"layer{target_layer}", "value": 1}}],
                     "to_after_key_up": [{"set_variable": {"name": f"layer{target_layer}", "value": 0}}],
-                    "to_if_alone": [{"key_code": key}]
+                    "to_if_alone": [{"key_code": active_key}]
                 })
 
             elif 'layer|TO' in key_type:  # Toggle layer

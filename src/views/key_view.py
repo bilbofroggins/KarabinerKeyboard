@@ -208,7 +208,16 @@ class KeyView():
             key_text = '>_'
         elif key_type.split('|')[0] == 'layer':
             key_text = key_type.split('|')[1]
-            color = layer_color(override[1])
+
+            layernum = override[1]
+            if isinstance(override[1], str):
+                override_string = override[1].split('|')
+                if len(override_string) > 1:
+                    layernum = override_string[0]
+                    key = override_string[1]
+                    key_text = key_type.split('|')[1] + "(" + rl_to_display_key_map[kb_to_rl_key_map[key]] + ")"
+            color = layer_color(layernum)
+
             ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(color, self.kb_key in GlobalState().highlighted_chord_to_show()))
 
         self.draw_sim_outlines()
