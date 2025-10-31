@@ -48,3 +48,13 @@ uv run python src/main.py
 uv sync --all-extras  # Installs dev dependencies including pyinstaller
 uv run bundle-app
 ```
+
+The app will be built to `dist/KarabinerKeyboard.app` and can be run locally.
+
+**For public distribution (optional):** To notarize the app for macOS Gatekeeper, create a `.env` file in the project root with your Apple Developer credentials:
+```
+APPLE_ID=your-apple-id@example.com
+APPLE_TEAM_ID=your-team-id
+KK_APP_SPECIFIC_PASSWORD=your-app-specific-password
+```
+

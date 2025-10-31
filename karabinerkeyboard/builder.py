@@ -108,9 +108,24 @@ def bundle_app():
     # Run PyInstaller
     result = subprocess.run([sys.executable, "-m", "PyInstaller", spec_file])
     
-    # Only proceed with notarization if build was successful
+    # Only proceed with notarization if build was successful and .env exists
     if result.returncode == 0 and os.path.exists("dist/KarabinerKeyboard.app"):
-        load_env_variables_from_file('.env')
-        notarize_app("pjcfifa@gmail.com", "GD76CFHAZT", "dist/KarabinerKeyboard.app", "KarabinerKeyboard.zip")
+        if os.path.exists('.env'):
+            print("\n=== Starting notarization process ===")
+            load_env_variables_from_file('.env')
+
+            # Read credentials from environment variables
+            apple_id = os.getenv('APPLE_ID')
+            team_id = os.getenv('APPLE_TEAM_ID')
+
+            if not apple_id or not team_id:
+                print("Warning: APPLE_ID or APPLE_TEAM_ID not found in .env file")
+                print("Build completed successfully at: dist/KarabinerKeyboard.app")
+            else:
+                notarize_app(apple_id, team_id, "dist/KarabinerKeyboard.app", "KarabinerKeyboard.zip")
+        else:
+            print("\n=== Skipping notarization (no .env file found) ===")
+            print("Build completed successfully at: dist/KarabinerKeyboard.app")
+            print("For distribution, create a .env file with Apple credentials and run again.")
     else:
         print("Build failed or app not found. Skipping notarization.")
