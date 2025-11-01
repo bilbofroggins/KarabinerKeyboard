@@ -2,11 +2,26 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from datetime import datetime
 
 import requests
 
 from src.versions.version_compare import Version
 from src.versions.version import __version__
+
+# Update log file location
+UPDATE_LOG_FILE = os.path.expanduser('~/.config/karabiner_keyboard/update.log')
+
+def log_update(message):
+    """Write update messages to log file."""
+    try:
+        os.makedirs(os.path.dirname(UPDATE_LOG_FILE), exist_ok=True)
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        with open(UPDATE_LOG_FILE, 'a') as f:
+            f.write(f"[{timestamp}] {message}\n")
+    except Exception as e:
+        # Fallback to console if logging fails
+        print(f"[LOG ERROR] {e}: {message}")
 
 repo = 'bilbofroggins/KarabinerKeyboard'
 
@@ -61,22 +76,62 @@ def check_up_to_date():
 def background_updates(new_version, done_flag):
     # Just give up in dev environment
     if not getattr(sys, 'frozen', False):
+        log_update("Skipping update - running in development mode")
         done_flag[0] = True
         return False
+
+    log_update(f"Starting update to version {new_version}")
 
     zip_file_path = '/tmp/KarabinerKeyboard.zip'
     extract_to_path = '/tmp'
 
-    download_update(f"https://github.com/{repo}/releases/download/{new_version}/KarabinerKeyboard.zip", zip_file_path)
-    os.system("unzip -q -o %s -d %s" % (zip_file_path, extract_to_path))
+    try:
+        # Download the update
+        log_update(f"Downloading update from GitHub...")
+        download_update(f"https://github.com/{repo}/releases/download/{new_version}/KarabinerKeyboard.zip", zip_file_path)
+        log_update(f"Download completed: {zip_file_path}")
 
-    # Running in a PyInstaller bundle
-    base_path = Path(sys.executable).parent.parent  # Reach the Contents directory
-    script_path = str(base_path / 'Resources' / 'Scripts' / 'update.sh')
-    app_directory = str(base_path.parent.parent)
+        # Unzip using subprocess for better error handling
+        log_update("Extracting update...")
+        result = subprocess.run(["unzip", "-q", "-o", zip_file_path, "-d", extract_to_path],
+                               capture_output=True, text=True)
+        if result.returncode != 0:
+            log_update(f"ERROR: Unzip failed with code {result.returncode}: {result.stderr}")
+            done_flag[0] = True
+            return False
+        log_update("Extraction completed")
 
-    subprocess.run(["chmod", "+x", script_path])
+        # Verify the app was extracted
+        if not os.path.exists('/tmp/KarabinerKeyboard.app'):
+            log_update("ERROR: Downloaded app not found after extraction at /tmp/KarabinerKeyboard.app")
+            done_flag[0] = True
+            return False
+        log_update("Verified extracted app exists")
 
-    # Execute the script and exit the application
-    subprocess.Popen(["/bin/bash", script_path, app_directory])
-    done_flag[0] = True
+        # Running in a PyInstaller bundle
+        base_path = Path(sys.executable).parent.parent  # Reach the Contents directory
+        script_path = str(base_path / 'Resources' / 'Scripts' / 'update.sh')
+        app_directory = str(base_path.parent.parent)
+
+        # Verify script exists
+        if not os.path.exists(script_path):
+            log_update(f"ERROR: Update script not found at: {script_path}")
+            done_flag[0] = True
+            return False
+        log_update(f"Found update script at: {script_path}")
+
+        # Make script executable
+        subprocess.run(["chmod", "+x", script_path], check=True)
+        log_update("Made update script executable")
+
+        # Execute the script and exit the application
+        log_update(f"Launching update script for app at: {app_directory}")
+        subprocess.Popen(["/bin/bash", script_path, app_directory])
+        log_update("Update script launched successfully - application will restart")
+        done_flag[0] = True
+        return True
+
+    except Exception as e:
+        log_update(f"ERROR: Update failed with exception: {type(e).__name__}: {e}")
+        done_flag[0] = True
+        return False
