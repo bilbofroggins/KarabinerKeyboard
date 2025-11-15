@@ -211,16 +211,52 @@ def yaml_to_karabiner(yaml_data):
                     "to_if_alone": to_if_alone
                 })
 
-            elif 'layer|TO' in key_type:  # Toggle layer
-                target_layer = int(key_data)
+            # TODO: Tap key is not supported in the UI yet but could be similar to LT
+            elif 'layer|TO' in key_type:  # Toggle layer with tap
+                layernum = key_data
+                tap_key_str = None
+
+                # Handle format: "layernum|tap_key" (e.g., "1|left_shift")
+                if isinstance(key_data, str):
+                    layer_strings = key_data.split('|')
+                    if len(layer_strings) > 1:
+                        layernum = layer_strings[0]
+                        tap_key_str = layer_strings[1]
+                    else:
+                        layernum = layer_strings[0]
+                        tap_key_str = None
+
+                target_layer = int(layernum)
+
+                # Build the to action (send the key/modifier while held)
+                if tap_key_str:
+                    # Custom key specified (e.g., "left_shift" or "left_command")
+                    tap_key_parts = tap_key_str.split(' + ')
+                    tap_key_code = tap_key_parts[-1]
+                    tap_modifiers = [mod for mod in tap_key_parts[:-1] if mod in modification_keys]
+                    to_action = [{"key_code": tap_key_code}]
+                    if tap_modifiers:
+                        to_action[0]["modifiers"] = tap_modifiers
+                else:
+                    # No custom key, use original key
+                    if ',' in key:
+                        key_parts = [k.strip() for k in key.split(',')]
+                        actual_key = next((k for k in key_parts if k not in modification_keys), key_parts[0])
+                    else:
+                        actual_key = key
+                    to_action = [{"key_code": actual_key}]
+
+                # Build the to_if_alone action (toggle layer)
+                to_if_alone_action = [
+                    # Set all other layers to 0
+                    *[{"set_variable": {"name": f"layer{i}", "value": 0}} for i in range(1, max_layer + 1) if i != target_layer],
+                    # Set the target layer to 1
+                    {"set_variable": {"name": f"layer{target_layer}", "value": 1}}
+                ]
+
                 manipulator.update({
-                    "to": [
-                        # First, set all other layers to 0
-                        *[{"set_variable": {"name": f"layer{i}", "value": 0}} for i in
-                          range(max_layer) if i != target_layer],
-                        # Then, set the target layer to 1
-                        {"set_variable": {"name": f"layer{target_layer}", "value": 1}}
-                    ]
+                    "to": to_action,
+                    "to_if_alone": to_if_alone_action
                 })
 
             elif key_type == 'single':

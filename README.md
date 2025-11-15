@@ -39,6 +39,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ### Development - Running the app
 ```bash
+export PYTHONPATH=.
 uv sync
 uv run python src/main.py
 ```
