@@ -1,6 +1,8 @@
 import json
 import os
 import sys
+import traceback
+from datetime import datetime
 
 from src.config import config
 from src.logic.key_mappings import modification_keys
@@ -14,6 +16,28 @@ OPTIONAL_MODIFIERS = [
     "left_shift", "left_control", "left_alt", "left_command",
     "right_shift", "right_control", "right_alt", "right_command"
 ]
+ERROR_LOG_FILE = os.path.expanduser('~/.config/karabiner_keyboard/errors.log')
+
+
+def log_error(message, exception=None):
+    """Write error messages to log file.
+
+    Args:
+        message: Error message to log
+        exception: Optional exception object to include traceback
+    """
+    try:
+        os.makedirs(os.path.dirname(ERROR_LOG_FILE), exist_ok=True)
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        with open(ERROR_LOG_FILE, 'a') as f:
+            f.write(f"[{timestamp}] {message}\n")
+            if exception:
+                f.write(f"Exception: {type(exception).__name__}: {exception}\n")
+                f.write(f"Traceback:\n{traceback.format_exc()}\n")
+            f.write("-" * 80 + "\n")
+    except Exception as e:
+        # Fallback to console if logging fails
+        print(f"[LOG ERROR] {e}: {message}")
 
 
 def load_karabiner_config():
@@ -22,11 +46,13 @@ def load_karabiner_config():
         with open(KARABINER_CONFIG_PATH, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Karabiner configuration file not found at {KARABINER_CONFIG_PATH}.")
-        sys.exit(1)
-    except json.JSONDecodeError:
-        print(f"Error decoding JSON from {KARABINER_CONFIG_PATH}.")
-        sys.exit(1)
+        error_msg = f"Karabiner configuration file not found at {KARABINER_CONFIG_PATH}."
+        print(error_msg)
+        raise FileNotFoundError(error_msg)
+    except json.JSONDecodeError as e:
+        error_msg = f"Error decoding JSON from {KARABINER_CONFIG_PATH}."
+        print(error_msg)
+        raise json.JSONDecodeError(error_msg, e.doc, e.pos)
 
 
 def save_karabiner_config(config_data):
@@ -35,8 +61,9 @@ def save_karabiner_config(config_data):
         with open(KARABINER_CONFIG_PATH, 'w') as f:
             json.dump(config_data, f, indent=4)
     except Exception as e:
-        print(f"Failed to save Karabiner configuration: {e}")
-        sys.exit(1)
+        error_msg = f"Failed to save Karabiner configuration: {e}"
+        print(error_msg)
+        raise Exception(error_msg)
 
 
 def get_selected_profile(config_data):
@@ -44,8 +71,9 @@ def get_selected_profile(config_data):
     for profile in config_data.get('profiles', []):
         if profile.get('selected', False):
             return profile
-    print("No selected profile found in Karabiner configuration.")
-    sys.exit(1)
+    error_msg = "No selected profile found in Karabiner configuration."
+    print(error_msg)
+    raise ValueError(error_msg)
 
 
 def find_rule_by_description(rules, description):
@@ -313,60 +341,89 @@ def yaml_to_karabiner(yaml_data):
 
 def set_enabled_flag():
     """Set the enabled flag based on the current Karabiner configuration."""
-    config_data = load_karabiner_config()
-    selected_profile = get_selected_profile(config_data)
+    try:
+        config_data = load_karabiner_config()
+        selected_profile = get_selected_profile(config_data)
 
-    rules = selected_profile.get('complex_modifications', {}).get('rules', [])
-    rule = find_rule_by_description(rules, RULE_DESCRIPTION)
+        rules = selected_profile.get('complex_modifications', {}).get('rules', [])
+        rule = find_rule_by_description(rules, RULE_DESCRIPTION)
 
-    if rule:
-        config.enabled_flag = rule.get('enabled', True)
-    else:
-        print(f"Rule '{RULE_DESCRIPTION}' not found in the selected profile.")
+        if rule:
+            config.enabled_flag = rule.get('enabled', True)
+        else:
+            print(f"Rule '{RULE_DESCRIPTION}' not found in the selected profile.")
+            config.enabled_flag = True
+    except Exception as e:
+        error_msg = f"Error reading enabled flag: {e}"
+        print(error_msg)
+        log_error("Failed to read enabled flag from Karabiner configuration", e)
+        # Default to True if we can't read the config
         config.enabled_flag = True
 
 
 def write_enabled_flag():
-    """Write the enabled flag back to the Karabiner configuration."""
-    config_data = load_karabiner_config()
-    selected_profile = get_selected_profile(config_data)
+    """Write the enabled flag back to the Karabiner configuration.
 
-    complex_mods = selected_profile.setdefault('complex_modifications', {})
-    rules = complex_mods.setdefault('rules', [])
+    Returns:
+        bool: True if write was successful, False otherwise.
+    """
+    try:
+        config_data = load_karabiner_config()
+        selected_profile = get_selected_profile(config_data)
 
-    rule = find_rule_by_description(rules, RULE_DESCRIPTION)
+        complex_mods = selected_profile.setdefault('complex_modifications', {})
+        rules = complex_mods.setdefault('rules', [])
 
-    if rule:
-        if config.enabled_flag:
-            rule.pop('enabled', None)  # Enabled is default
+        rule = find_rule_by_description(rules, RULE_DESCRIPTION)
+
+        if rule:
+            if config.enabled_flag:
+                rule.pop('enabled', None)  # Enabled is default
+            else:
+                rule['enabled'] = False
+            print(f"'enabled' flag for rule '{RULE_DESCRIPTION}' has been updated to {config.enabled_flag}.")
         else:
-            rule['enabled'] = False
-        print(f"'enabled' flag for rule '{RULE_DESCRIPTION}' has been updated to {config.enabled_flag}.")
-    else:
-        print(f"Rule '{RULE_DESCRIPTION}' not found. No changes were made.")
+            print(f"Rule '{RULE_DESCRIPTION}' not found. No changes were made.")
 
-    save_karabiner_config(config_data)
+        save_karabiner_config(config_data)
+        return True
+    except Exception as e:
+        error_msg = f"Error writing enabled flag: {e}"
+        print(error_msg)
+        log_error("Failed to write enabled flag to Karabiner configuration", e)
+        return False
 
 
 def merge_into_karabiner_config():
-    """Merge the generated rule into the Karabiner configuration file."""
-    yaml_data = YAML_Config().data
-    new_rule = yaml_to_karabiner(yaml_data)
+    """Merge the generated rule into the Karabiner configuration file.
 
-    config_data = load_karabiner_config()
-    selected_profile = get_selected_profile(config_data)
+    Returns:
+        bool: True if merge was successful, False otherwise.
+    """
+    try:
+        yaml_data = YAML_Config().data
+        new_rule = yaml_to_karabiner(yaml_data)
 
-    complex_mods = selected_profile.setdefault('complex_modifications', {})
-    rules = complex_mods.setdefault('rules', [])
+        config_data = load_karabiner_config()
+        selected_profile = get_selected_profile(config_data)
 
-    existing_rule = find_rule_by_description(rules, new_rule['description'])
+        complex_mods = selected_profile.setdefault('complex_modifications', {})
+        rules = complex_mods.setdefault('rules', [])
 
-    if existing_rule:
-        index = rules.index(existing_rule)
-        rules[index] = new_rule
-        print(f"Rule '{new_rule['description']}' has been updated in the selected profile.")
-    else:
-        rules.append(new_rule)
-        print(f"Rule '{new_rule['description']}' has been added to the selected profile.")
+        existing_rule = find_rule_by_description(rules, new_rule['description'])
 
-    save_karabiner_config(config_data)
+        if existing_rule:
+            index = rules.index(existing_rule)
+            rules[index] = new_rule
+            print(f"Rule '{new_rule['description']}' has been updated in the selected profile.")
+        else:
+            rules.append(new_rule)
+            print(f"Rule '{new_rule['description']}' has been added to the selected profile.")
+
+        save_karabiner_config(config_data)
+        return True
+    except Exception as e:
+        error_msg = f"Error merging to Karabiner config: {e}"
+        print(error_msg)
+        log_error("Failed to merge YAML config to Karabiner configuration", e)
+        return False

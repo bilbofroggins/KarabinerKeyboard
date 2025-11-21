@@ -2,6 +2,7 @@ import pyray as ray
 
 from src.components.drawing_helper import DrawingHelper
 from src.config import config
+from src.logic.global_state import GlobalState
 from src.logic.layer_colors import layer_color
 from src.logic.merge_kb_config import merge_into_karabiner_config, write_enabled_flag
 from src.logic.yaml_config import YAML_Config
@@ -12,6 +13,8 @@ class LayerTabsView(BaseView):
     def __init__(self, layer):
         super().__init__()
         self.current_layer = layer
+        self.merge_feedback_frame = 0
+        self.merge_feedback_state = None  # None, 'success', or 'failure'
 
     def draw_layer_text(self, row, col):
         text = "Layers:"
@@ -115,7 +118,71 @@ class LayerTabsView(BaseView):
 
         self.draw_on_off_toggle(row - config.small_padding, config.window_width - 300)
 
-        width = ray.measure_text("Merge to Config ->", config.small_font_size) + config.generic_padding*2
-        DrawingHelper.button("Merge to Config ->", False, row - config.small_padding, config.window_width - width, config.small_font_size, merge_into_karabiner_config, [])
+        # Merge button with success feedback
+        self.draw_merge_button(row - config.small_padding, config.window_width)
 
         return last_row
+
+    def merge_button_callback(self):
+        """Wrapper for merge that tracks success/failure state."""
+        success = merge_into_karabiner_config()
+        self.merge_feedback_frame = GlobalState().frame
+        self.merge_feedback_state = 'success' if success else 'failure'
+
+    def get_merge_feedback_state(self):
+        """Check if merge button should still show feedback state.
+
+        Returns 'success', 'failure', or None based on feedback state.
+        Feedback displays for 2 seconds (120 frames at 60fps).
+        """
+        if self.merge_feedback_state is None:
+            return None
+        frames_to_show_feedback = 120  # 2 seconds at 60fps
+        if GlobalState().frame - self.merge_feedback_frame > frames_to_show_feedback:
+            self.merge_feedback_state = None
+            return None
+        return self.merge_feedback_state
+
+    def draw_merge_button(self, row, right_edge):
+        """Draw merge button with success/failure feedback."""
+        feedback_state = self.get_merge_feedback_state()
+
+        # Set text and color based on state
+        if feedback_state == 'success':
+            text = "Merged Successfully!"
+            bg_color = ray.GREEN
+            hover_bg_color = DrawingHelper.brighten(ray.GREEN)
+        elif feedback_state == 'failure':
+            text = "Err: check logs"
+            bg_color = ray.RED
+            hover_bg_color = DrawingHelper.brighten(ray.RED)
+        else:
+            text = "Merge to Config ->"
+            bg_color = config.button_color
+            hover_bg_color = DrawingHelper.brighten(config.button_color)
+
+        text_width = ray.measure_text(text, config.small_font_size)
+        button_width = text_width + config.small_padding * 2
+        col = right_edge - button_width
+
+        def draw_callback(row, col):
+            ray.draw_rectangle(col, row,
+                               button_width,
+                               config.small_font_size + config.small_padding * 2,
+                               bg_color)
+            ray.draw_text(text, col + config.small_padding, row + config.small_padding,
+                          config.small_font_size, config.default_text_color)
+
+        def hover_callback(row, col):
+            ray.draw_rectangle(col, row,
+                               button_width,
+                               config.small_font_size + config.small_padding * 2,
+                               hover_bg_color)
+            ray.draw_text(text, col + config.small_padding, row + config.small_padding,
+                          config.small_font_size, DrawingHelper.brighten(config.default_text_color))
+
+        DrawingHelper.generic_clickable(
+            row, col,
+            button_width, config.small_font_size + config.small_padding * 2,
+            draw_callback, hover_callback, self.merge_button_callback, []
+        )
