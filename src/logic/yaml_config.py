@@ -87,6 +87,10 @@ class YAML_Config:
                 return_data = ('single', value['data'])
                 self.overrides[cache_key] = return_data
                 return return_data
+            elif value['type'] == 'shell':
+                return_data = ('shell', value['data'])
+                self.overrides[cache_key] = return_data
+                return return_data
             else:
                 return_data = ('complex', value['data'])
                 self.overrides[cache_key] = return_data
