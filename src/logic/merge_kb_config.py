@@ -179,9 +179,18 @@ def yaml_to_karabiner(yaml_data):
             key_data = details['data']
             key_type = details['type']
             apps = details.get('app', None)
+            if_variable = details.get('if', None)
 
             from_dict = build_from_dict(key)
             conditions = build_conditions(layer_num, max_layer, apps)
+
+            # Add custom 'if' variable condition if present
+            if if_variable:
+                conditions.append({
+                    "type": "variable_if",
+                    "name": if_variable,
+                    "value": 1
+                })
 
             manipulator = {
                 "type": "basic",
@@ -333,6 +342,36 @@ def yaml_to_karabiner(yaml_data):
                 manipulator.update({
                     "to": [{"shell_command": key_data}]
                 })
+
+            elif key_type == 'conditional':
+                # Toggle variable between 0 and 1
+                var_name = key_data
+
+                # Create two manipulators for toggle behavior
+                # Manipulator 1: When var=0, set to 1
+                manipulator_on = manipulator.copy()
+                manipulator_on['conditions'] = list(manipulator_on['conditions'])
+                manipulator_on['conditions'].append({
+                    "type": "variable_if",
+                    "name": var_name,
+                    "value": 0
+                })
+                manipulator_on['to'] = [{"set_variable": {"name": var_name, "value": 1}}]
+                karabiner_rule['manipulators'].append(manipulator_on)
+
+                # Manipulator 2: When var=1, set to 0
+                manipulator_off = manipulator.copy()
+                manipulator_off['conditions'] = list(manipulator_off['conditions'])
+                manipulator_off['conditions'].append({
+                    "type": "variable_if",
+                    "name": var_name,
+                    "value": 1
+                })
+                manipulator_off['to'] = [{"set_variable": {"name": var_name, "value": 0}}]
+                karabiner_rule['manipulators'].append(manipulator_off)
+
+                # Skip the default append since we created our own manipulators
+                continue
 
             karabiner_rule['manipulators'].append(manipulator)
 

@@ -9,6 +9,7 @@ from src.panels.base_panel import BaseView
 from src.views.section_types.keybind_section_view import KeybindSectionView
 from src.views.section_types.layer_section_view import LayerSectionView
 from src.views.section_types.shell_section_view import ShellSectionView
+from src.views.section_types.conditional_section_view import ConditionalSectionView
 
 
 class EditView(BaseView):
@@ -17,8 +18,10 @@ class EditView(BaseView):
         EventBus().register('key_click', self)
         self.current_key = current_key
         self.sections = {
-            "Keybind": KeybindSectionView(current_key, self.reset_current_key), "Layer": LayerSectionView(current_key, self.reset_current_key),
-            "Shell": ShellSectionView(current_key, self.reset_current_key)
+            "Keybind": KeybindSectionView(current_key, self.reset_current_key),
+            "Layer": LayerSectionView(current_key, self.reset_current_key),
+            "Shell": ShellSectionView(current_key, self.reset_current_key),
+            "Conditional": ConditionalSectionView(current_key, self.reset_current_key)
         }
         self.section_shown = self.sections["Keybind"]
 
@@ -44,6 +47,8 @@ class EditView(BaseView):
             self.section_shown = self.sections["Keybind"]
         elif key_type == 'shell':
             self.section_shown = self.sections["Shell"]
+        elif key_type == 'conditional':
+            self.section_shown = self.sections["Conditional"]
         elif key_type.split('|')[0] == 'layer':
             self.section_shown = self.sections["Layer"]
         else:
@@ -51,13 +56,27 @@ class EditView(BaseView):
 
         if key_type:
             self.section_shown.set_values(self.current_key)
+            # Always load conditional section data (if it exists) regardless of which section is shown
+            if self.section_shown != self.sections["Conditional"]:
+                self.sections["Conditional"].set_values(self.current_key)
 
     def draw_section_titles(self, row, col):
         def click_callback(section_name):
             self.section_shown = self.sections[section_name]
 
+        # Check if current key has an 'if' variable for conditional indicator
+        has_if_condition = False
+        if self.current_key[0]:
+            layer, key = self.current_key[0].split(':')
+            has_if_condition = YAML_Config().get_if_variable(layer, key) is not None
+
         for section_name, section_view in self.sections.items():
-            width = DrawingHelper.button(section_name, type(self.section_shown) == type(section_view), row, col, config.font_size, click_callback, [section_name])
+            # Draw Conditional button with special color if it has an 'if' condition
+            if section_name == "Conditional" and has_if_condition:
+                width = DrawingHelper.button_with_color(section_name, type(self.section_shown) == type(section_view), row, col, config.font_size, click_callback, [section_name], ray.ORANGE)
+            else:
+                width = DrawingHelper.button(section_name, type(self.section_shown) == type(section_view), row, col, config.font_size, click_callback, [section_name])
+
             col += width + config.small_padding
 
         DrawingHelper.clickable_link("Clear Key", row + config.small_padding, col + config.generic_padding, config.font_size, ray.MAROON, self.clear_key, [])

@@ -146,6 +146,7 @@ class KeyView():
 
         override = YAML_Config().key_overriddes(self.layer[0], self.kb_key)
         key_type = YAML_Config().key_type(self.layer[0], self.kb_key)
+        if_variable = YAML_Config().get_if_variable(self.layer[0], self.kb_key)
 
         key_text = rl_to_display_key_map[self.key_id]
 
@@ -206,6 +207,9 @@ class KeyView():
         elif key_type == 'shell':
             ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.MAGENTA, self.kb_key in GlobalState().highlighted_chord_to_show()))
             key_text = '>_'
+        elif key_type == 'conditional':
+            ray.draw_rectangle(self.col, self.row, self.width, self.key_height, self.adjust_key_color(ray.ORANGE, self.kb_key in GlobalState().highlighted_chord_to_show()))
+            key_text = 'IF'
         elif key_type.split('|')[0] == 'layer':
             key_text = key_type.split('|')[1]
 
@@ -230,5 +234,14 @@ class KeyView():
         text_col = int(self.col + self.width / 2 - font_width / 2)
         text_row = int(self.row + self.key_height / 2 - 10)
         DrawingHelper.draw_unicode_plus_text(key_text, text_row, text_col, config.font_size, config.default_text_color)
+
+        # Draw indicator if key has an 'if' condition
+        if if_variable:
+            badge_size = 8
+            badge_x = self.col + self.width - badge_size - 2
+            badge_y = self.row + 2
+            ray.draw_circle(badge_x + badge_size // 2, badge_y + badge_size // 2, badge_size // 2, ray.ORANGE)
+            # Draw small "?" or "if" text in badge
+            ray.draw_text("?", badge_x, badge_y - 1, 10, ray.WHITE)
 
         return self.col + self.width + self.key_padding

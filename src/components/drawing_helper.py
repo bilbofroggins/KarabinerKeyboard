@@ -137,3 +137,12 @@ class DrawingHelper:
             hover_callback if pressed else draw_callback, hover_callback, click_callback, click_args
         )
         return text_width + config.small_padding*2
+
+    @staticmethod
+    def button_with_color(text, pressed, row, col, font_size, click_callback, click_args, color):
+        """Draw a button with a custom color."""
+        original_color = config.button_color
+        config.button_color = color
+        width = DrawingHelper.button(text, pressed, row, col, font_size, click_callback, click_args)
+        config.button_color = original_color
+        return width

@@ -42,13 +42,15 @@ class YAML_Config:
         del self.data['layers'][int(layer)]
         self.save_yaml()
 
-    def save(self, layer, key, type, data):
+    def save(self, layer, key, type, data, if_variable=None):
         cache_key = str(layer) + ':' + key
         if type is None:
             if key in self.data['layers'][int(layer)]:
                 del self.data['layers'][int(layer)][key]
         else:
             self.data['layers'][int(layer)][key] = {'type': type, 'data': data}
+            if if_variable:
+                self.data['layers'][int(layer)][key]['if'] = if_variable
 
         if cache_key in self.overrides:
             del self.overrides[cache_key]
@@ -56,6 +58,36 @@ class YAML_Config:
             del self.types[cache_key]
         if int(layer) in self.simultaneous_overrides:
             del self.simultaneous_overrides[int(layer)]
+        self.save_yaml()
+
+    def get_if_variable(self, layer, key):
+        """Get the 'if' variable for a key, if it exists."""
+        layer = int(layer)
+        layers = self.data.get('layers', {})
+        if layer in layers and key in layers[layer]:
+            return layers[layer][key].get('if', None)
+        return None
+
+    def set_if_variable(self, layer, key, if_variable):
+        """Set or remove the 'if' variable for a key without changing its type/data."""
+        layer = int(layer)
+        cache_key = str(layer) + ':' + key
+
+        if key not in self.data['layers'][layer]:
+            # Key doesn't exist, can't set condition
+            return
+
+        if if_variable:
+            self.data['layers'][layer][key]['if'] = if_variable
+        else:
+            # Remove the if condition
+            if 'if' in self.data['layers'][layer][key]:
+                del self.data['layers'][layer][key]['if']
+
+        # Clear cache
+        if cache_key in self.overrides:
+            del self.overrides[cache_key]
+
         self.save_yaml()
 
     def key_type(self, layer, key_to_check):
