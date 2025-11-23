@@ -10,17 +10,29 @@ Karabiner Keyboard is a user interface designed to simplify the customization of
 ## Instructions
 For the latest release, please check the [Releases](https://github.com/bilbofroggins/KarabinerKeyboard/releases) section of this repository. Download & extract the zip file. The app stores a yaml file behind the scenes within ~/.config/karabiner_keyboard that gets translated into a karabiner config rule called "KBKeyboard" underneath complex modifications.
 
-From the Keyboard panel, press the keys you want to change, or click on the key. You can currently either set to Keybinding, which will allow you to override the key with a single sequence or an array of "to" sequences you can type in. You can also pick the layer type, which has a few types to it:
+From the Keyboard panel, press the keys you want to change, or click on the key. You can configure keys using several types:
 
-* Layer|MO = Momentary (layer will activate upon holding down the key and reset once released)
-* Layer|LT = Layer with Tap (similar to momentary except will trigger the key press if no keys within the layer were hit)
-* Layer|TO = Toggle (one tap toggles the layer on and you need a seperate key in the next layer to reset back)
+**Keybinding**: Override the key with a single sequence or an array of "to" sequences.
+
+**Layer**: Create keyboard layers with different activation modes:
+* Layer|MO = Momentary (layer activates while holding the key, resets when released)
+* Layer|LT = Layer with Tap (momentary layer, but taps the key if no layer keys were pressed)
+* Layer|TO = Toggle (one tap toggles the layer on; use another key to toggle back)
+
+**Shell**: Execute shell commands when a key is pressed.
+
+**Conditional**: Use variables to create dynamic behavior:
+* **Get mode**: Make a key only activate when a variable is true (adds an `if` condition)
+* **Toggle mode**: Make a key toggle a variable between true/false
+
+Variables allow you to create modes (like vim mode, gaming mode, etc.) where certain keys only work when that mode is active, and other keys toggle the modes on/off.
 
 Then click "Merge to config" in the top right to merge it to the Karabiner-Elements config file, and you should be good to go!
 
+**Note**: Configuration and logs are stored in `~/.config/karabiner_keyboard/` (including `errors.log` and `update.log`).
+
 ### Limitations
 English only hardcoded default keyboard at the moment
-Shell commands not added yet
 Some assumptions are made
 * Most key overrides are set to "repeat": false
 * Most key overrides have all mod keys as optional
