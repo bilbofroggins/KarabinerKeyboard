@@ -10,4 +10,29 @@ tasks:
   test:
     cmds:
       - pytest
+  
+  # Build for current architecture (native)
+  build:
+    desc: Build for current architecture
+    cmds:
+      - uv run bundle-app
+
+  # Build for Intel Macs (x86_64)
+  build-intel:
+    desc: Build for Intel Macs (x86_64)
+    cmds:
+      - uv run bundle-app --arch x86_64
+
+  # Build for Apple Silicon (arm64)  
+  build-arm:
+    desc: Build for Apple Silicon Macs (arm64)
+    cmds:
+      - uv run bundle-app --arch arm64
+
+  # Build for both architectures
+  build-all:
+    desc: Build for both Intel and Apple Silicon
+    cmds:
+      - uv run bundle-app --arch arm64
+      - uv run bundle-app --arch x86_64 --skip-version-bump
 

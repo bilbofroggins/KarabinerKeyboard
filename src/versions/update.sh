@@ -9,7 +9,7 @@ while ps aux | grep '[K]arabinerKeyboard' | grep -v 'update.sh' | grep -v grep >
 rm -rf "$app_directory/KarabinerKeyboard.app"
 
 # Move the new version into place
-mv /tmp/KarabinerKeyboard.app "$app_directory"
+mv /tmp/KarabinerKeyboard.app "$app_directory/KarabinerKeyboard.app"
 
 # Restart the application
 open "$app_directory/KarabinerKeyboard.app"
