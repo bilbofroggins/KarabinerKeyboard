@@ -24,11 +24,6 @@ class MyApp:
         # Prevent escape key from quitting app
         ray.set_exit_key(ray.KEY_NULL)
 
-        unicode_chars = {'?', '⌫', '⇥', '⇪', '↵', '⇧', '␣', '⌘', '⌥', '⌃', '←', '↑', '↓',
-                         '→', '⇱', '⇞', '⌦', '⇲', '⇟', '⇭', '·', '⚙'}
-
-        font_chars = [ord(char) for char in unicode_chars]
-
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
             base_path = sys._MEIPASS
         else:
@@ -36,7 +31,15 @@ class MyApp:
             base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
         font_path = os.path.join(base_path, 'resources', 'DejaVuSans.ttf')
-        g.special_font.append(ray.load_font_ex(font_path, 48, font_chars, len(font_chars)))
+        
+        # Unicode characters needed for keyboard display
+        unicode_chars = {'?', '⌫', '⇥', '⇪', '↵', '⇧', '␣', '⌘', '⌥', '⌃', '←', '↑', '↓',
+                         '→', '⇱', '⇞', '⌦', '⇲', '⇟', '⇭', '·', '⚙'}
+        font_chars = [ord(char) for char in unicode_chars]
+        
+        # Create proper C pointer for raylib 5.5+ API
+        font_chars_ptr = ray.ffi.new('int[]', font_chars)
+        g.special_font.append(ray.load_font_ex(font_path, 48, ray.ffi.cast('int *', font_chars_ptr), len(font_chars)))
         trash_path = os.path.join(base_path, 'resources', 'trash.png')
         image = ray.load_image(trash_path)
         g.textures['trash'] = ray.load_texture_from_image(image)

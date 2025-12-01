@@ -5,5 +5,7 @@ build
 dist
 KarabinerKeyboard.spec
 .env
+.venv*
 CLAUDE.md
 *.egg-info
+KarabinerKeyboard-*.zip

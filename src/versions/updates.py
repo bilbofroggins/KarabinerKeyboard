@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -11,6 +12,16 @@ from src.versions.version import __version__
 
 # Update log file location
 UPDATE_LOG_FILE = os.path.expanduser('~/.config/karabiner_keyboard/update.log')
+
+
+def get_arch_suffix():
+    """Get the architecture suffix for downloads (intel or arm)."""
+    machine = platform.machine()
+    if machine == 'x86_64':
+        return 'intel'
+    elif machine in ('arm64', 'aarch64'):
+        return 'arm'
+    return 'arm'  # Default to arm for unknown architectures on Mac
 
 def log_update(message):
     """Write update messages to log file."""
@@ -80,15 +91,38 @@ def background_updates(new_version, done_flag):
         done_flag[0] = True
         return False
 
-    log_update(f"Starting update to version {new_version}")
+    arch_suffix = get_arch_suffix()
+    log_update(f"Starting update to version {new_version} for architecture: {arch_suffix}")
 
     zip_file_path = '/tmp/KarabinerKeyboard.zip'
     extract_to_path = '/tmp'
+    
+    # Architecture-specific zip file name
+    arch_zip_name = f"KarabinerKeyboard-{arch_suffix}.zip"
+    # Fallback to generic name for older releases
+    generic_zip_name = "KarabinerKeyboard.zip"
 
     try:
-        # Download the update
-        log_update(f"Downloading update from GitHub...")
-        download_update(f"https://github.com/{repo}/releases/download/{new_version}/KarabinerKeyboard.zip", zip_file_path)
+        # Try architecture-specific download first, fall back to generic
+        arch_url = f"https://github.com/{repo}/releases/download/{new_version}/{arch_zip_name}"
+        generic_url = f"https://github.com/{repo}/releases/download/{new_version}/{generic_zip_name}"
+        
+        log_update(f"Attempting to download architecture-specific update: {arch_zip_name}")
+        try:
+            # Check if arch-specific file exists
+            response = requests.head(arch_url, allow_redirects=True)
+            if response.status_code == 200:
+                download_url = arch_url
+                log_update(f"Found architecture-specific release")
+            else:
+                log_update(f"Architecture-specific release not found, falling back to generic")
+                download_url = generic_url
+        except Exception:
+            log_update(f"Error checking for arch-specific release, falling back to generic")
+            download_url = generic_url
+        
+        log_update(f"Downloading update from: {download_url}")
+        download_update(download_url, zip_file_path)
         log_update(f"Download completed: {zip_file_path}")
 
         # Unzip using subprocess for better error handling
@@ -101,12 +135,14 @@ def background_updates(new_version, done_flag):
             return False
         log_update("Extraction completed")
 
-        # Verify the app was extracted
-        if not os.path.exists('/tmp/KarabinerKeyboard.app'):
-            log_update("ERROR: Downloaded app not found after extraction at /tmp/KarabinerKeyboard.app")
+        # The app inside the zip is always named KarabinerKeyboard.app
+        final_app_path = '/tmp/KarabinerKeyboard.app'
+        
+        if not os.path.exists(final_app_path):
+            log_update(f"ERROR: Downloaded app not found after extraction at {final_app_path}")
             done_flag[0] = True
             return False
-        log_update("Verified extracted app exists")
+        log_update(f"Verified extracted app exists at: {final_app_path}")
 
         # Running in a PyInstaller bundle
         base_path = Path(sys.executable).parent.parent  # Reach the Contents directory
