@@ -33,3 +33,6 @@ class config:
     ask_highlight_color = (180, 151, 186, 255)
     scroll_speed = 4
     enabled_flag = None
+    
+    # Telemetry URL for anonymous analytics (set to None to disable)
+    telemetry_url = "https://script.google.com/macros/s/AKfycbwaMq_tnol-HsYO8jShhHbgP50dd5Q6t-xHvS5b0s-Loh74QCiHU7TcAJJ1AkXIC5VjfA/exec"

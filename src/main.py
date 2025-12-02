@@ -42,6 +42,11 @@ def main():
         from window import MyApp
         app = MyApp()
         
+        # Track app launch (non-blocking, runs in background)
+        logger.info("Sending analytics...")
+        from src.analytics import track_event
+        track_event("app_launch")
+        
         logger.info("Starting main loop...")
         app.run()
         
