@@ -9,6 +9,7 @@ import requests
 
 from src.versions.version_compare import Version
 from src.versions.version import __version__
+from src.analytics import track_event
 
 # Update log file location
 UPDATE_LOG_FILE = os.path.expanduser('~/.config/karabiner_keyboard/update.log')
@@ -64,7 +65,9 @@ def get_releases_since_version(repo, since_version):
     return newer_releases
 
 def download_update(download_url, save_path):
-    with requests.get(download_url, stream=True) as r:
+    """Download a file, raising an exception if the download fails."""
+    with requests.get(download_url, stream=True, allow_redirects=True) as r:
+        r.raise_for_status()  # Raise exception for 4xx/5xx errors
         with open(save_path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
@@ -107,23 +110,45 @@ def background_updates(new_version, done_flag):
         arch_url = f"https://github.com/{repo}/releases/download/{new_version}/{arch_zip_name}"
         generic_url = f"https://github.com/{repo}/releases/download/{new_version}/{generic_zip_name}"
         
-        log_update(f"Attempting to download architecture-specific update: {arch_zip_name}")
+        download_url = None
+        
+        # Try architecture-specific first
+        log_update(f"Checking for architecture-specific release: {arch_zip_name}")
         try:
-            # Check if arch-specific file exists
-            response = requests.head(arch_url, allow_redirects=True)
+            response = requests.head(arch_url, allow_redirects=True, timeout=10)
             if response.status_code == 200:
                 download_url = arch_url
-                log_update(f"Found architecture-specific release")
-            else:
-                log_update(f"Architecture-specific release not found, falling back to generic")
-                download_url = generic_url
-        except Exception:
-            log_update(f"Error checking for arch-specific release, falling back to generic")
-            download_url = generic_url
+                log_update(f"Found architecture-specific release at: {arch_url}")
+        except Exception as e:
+            log_update(f"Error checking arch-specific URL: {e}")
+        
+        # Fall back to generic if arch-specific not found
+        if download_url is None:
+            log_update(f"Checking for generic release: {generic_zip_name}")
+            try:
+                response = requests.head(generic_url, allow_redirects=True, timeout=10)
+                if response.status_code == 200:
+                    download_url = generic_url
+                    log_update(f"Found generic release at: {generic_url}")
+            except Exception as e:
+                log_update(f"Error checking generic URL: {e}")
+        
+        if download_url is None:
+            log_update(f"ERROR: No download found for version {new_version}")
+            log_update(f"Tried: {arch_url}")
+            log_update(f"Tried: {generic_url}")
+            done_flag[0] = True
+            return False
         
         log_update(f"Downloading update from: {download_url}")
-        download_update(download_url, zip_file_path)
-        log_update(f"Download completed: {zip_file_path}")
+        track_event("update_started")
+        try:
+            download_update(download_url, zip_file_path)
+            log_update(f"Download completed: {zip_file_path}")
+        except requests.exceptions.HTTPError as e:
+            log_update(f"ERROR: Download failed with HTTP error: {e}")
+            done_flag[0] = True
+            return False
 
         # Unzip using subprocess for better error handling
         log_update("Extracting update...")
@@ -162,6 +187,7 @@ def background_updates(new_version, done_flag):
 
         # Execute the script and exit the application
         log_update(f"Launching update script for app at: {app_directory}")
+        track_event("update_completed")
         subprocess.Popen(["/bin/bash", script_path, app_directory])
         log_update("Update script launched successfully - application will restart")
         done_flag[0] = True

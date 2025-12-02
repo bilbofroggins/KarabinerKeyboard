@@ -8,4 +8,4 @@ KarabinerKeyboard.spec
 .venv*
 CLAUDE.md
 *.egg-info
-KarabinerKeyboard-*.zip
+KarabinerKeyboard*.zip
